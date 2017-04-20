@@ -15,7 +15,7 @@ let renderer;
 let scoreSum = 0;
 let gameCount = 0;
 let lastGameScore = 0;
-let speed = 200;
+let speed = 100;
 let intervalReference = null;
 let agentState = {};
 let currentAgentName;
@@ -40,7 +40,7 @@ function clearHistory() {
 }
 
 function newGame() {
-    environmentState = generateInitialState({size: 32});
+    environmentState = generateInitialState({size: 64});
     agentState = null;
 
     agent = agents[currentAgentName];
@@ -83,9 +83,9 @@ document.body.innerHTML =
     '<div id="info">Agent: <select id="agentSelector"></select>' +
     '<br>Speed Interval: <select id="interval">' +
     '<option value="no-render" selected>0ms with no rendering</option>' +
-    '<option value="0" selected>0ms</option>' +
-    '<option value="100">100ms</option>' +
-    '<option value="200" selected>200ms</option>' +
+    '<option value="0">0ms</option>' +
+    '<option value="100" selected>100ms</option>' +
+    '<option value="200">200ms</option>' +
     '<option value="500">500ms</option>' +
     '<option value="1000">1000ms</option>' +
     '<option value="paused">Paused</option>' +
@@ -95,7 +95,7 @@ document.body.innerHTML =
     '\nGame Rules:' +
     '\n- Gain 4 points for every row lower you go' +
     '\n- Loose 4 points for every row higher you go' +
-    '\n- Loose 9 points any time you move into a red square' +
+    '\n- Loose 9 points any time you move in red square' +
     '\n- Get to the bottom row to complete the game' +
     '</pre>' +
     '</div>' +

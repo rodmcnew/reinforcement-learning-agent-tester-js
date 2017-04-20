@@ -151,8 +151,7 @@ function generateRandomCosts(size) {
         for (let yi = 0; yi < size; yi++) {
             let cost = Math.floor(Math.random() * (max - min + 1)) + min;
 
-            //Leave more empty space to make the game more interesting
-            if (cost < 6) {
+            if (cost < 7) {
                 cost = 0;
             } else{
                 cost = 9;
