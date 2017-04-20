@@ -71,6 +71,55 @@
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__environment__ = __webpack_require__(1);
+
+
+/**
+ * An agent that looks ahead one square below, and to both sides. It then chooses the least costly.
+ *
+ * @constructor
+ */
+/* harmony default export */ __webpack_exports__["a"] = ((observation, actionPathsToCheck)=> {
+    function modelActionPathCost(actions, observation) {
+        let environmentState = new __WEBPACK_IMPORTED_MODULE_0__environment__["b" /* State */](
+            observation.size,
+            observation.costs,
+            {x: observation.position.x, y: observation.position.y},
+            observation.score,
+            false
+        );
+        let startingScore = observation.score;
+        for (let i = 0; i < actions.length; i++) {
+            environmentState = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__environment__["c" /* applyAction */])(environmentState, actions[i]);
+        }
+        return startingScore - environmentState.score;
+    }
+
+    function pathAIsBetter(pathA, pathB) {
+        return pathA.cost < pathB.cost
+            || (
+                pathA.cost == pathB.cost
+                && pathA.path.length < pathB.path.length
+            )
+    }
+
+    let lowestCostPathIndex = 0;
+    for (let i = 0; i < actionPathsToCheck.length; i++) {
+        actionPathsToCheck[i].cost = modelActionPathCost(actionPathsToCheck[i].path, observation);
+        if (pathAIsBetter(actionPathsToCheck[i], actionPathsToCheck[lowestCostPathIndex])) {
+            lowestCostPathIndex = i;
+        }
+    }
+
+    return actionPathsToCheck[lowestCostPathIndex].path[0];
+});
+
+
+/***/ }),
+/* 1 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
 /**
  * The main environment class for this game. This is the public interface for the game.
  */
@@ -270,55 +319,6 @@ function generateRandomCosts(size) {
     }
     return costs;
 }
-
-
-/***/ }),
-/* 1 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__environment__ = __webpack_require__(0);
-
-
-/**
- * An agent that looks ahead one square below, and to both sides. It then chooses the least costly.
- *
- * @constructor
- */
-/* harmony default export */ __webpack_exports__["a"] = ((observation, actionPathsToCheck)=> {
-    function modelActionPathCost(actions, observation) {
-        let environmentState = new __WEBPACK_IMPORTED_MODULE_0__environment__["b" /* State */](
-            observation.size,
-            observation.costs,
-            {x: observation.position.x, y: observation.position.y},
-            observation.score,
-            false
-        );
-        let startingScore = observation.score;
-        for (let i = 0; i < actions.length; i++) {
-            environmentState = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__environment__["c" /* applyAction */])(environmentState, actions[i]);
-        }
-        return startingScore - environmentState.score;
-    }
-
-    function pathAIsBetter(pathA, pathB) {
-        return pathA.cost < pathB.cost
-            || (
-                pathA.cost == pathB.cost
-                && pathA.path.length < pathB.path.length
-            )
-    }
-
-    let lowestCostPathIndex = 0;
-    for (let i = 0; i < actionPathsToCheck.length; i++) {
-        actionPathsToCheck[i].cost = modelActionPathCost(actionPathsToCheck[i].path, observation);
-        if (pathAIsBetter(actionPathsToCheck[i], actionPathsToCheck[lowestCostPathIndex])) {
-            lowestCostPathIndex = i;
-        }
-    }
-
-    return actionPathsToCheck[lowestCostPathIndex].path[0];
-});
 
 
 /***/ }),
@@ -816,7 +816,7 @@ function getImmediateCosts(observation) {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__helper_lookAhead__ = __webpack_require__(1);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__helper_lookAhead__ = __webpack_require__(0);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__helper_generatePaths__ = __webpack_require__(20);
 
 
@@ -877,7 +877,7 @@ const fallBackActionPathsToCheck = [
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__helper_lookAhead__ = __webpack_require__(1);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__helper_lookAhead__ = __webpack_require__(0);
 
 
 const actionPathsToCheck = [
@@ -903,7 +903,7 @@ const actionPathsToCheck = [
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__helper_lookAhead__ = __webpack_require__(1);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__helper_lookAhead__ = __webpack_require__(0);
 
 
 const actionPathsToCheck = [
@@ -948,10 +948,8 @@ const actionPathsToCheck = [
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__environment__ = __webpack_require__(0);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__HtmlTableRenderer_css__ = __webpack_require__(18);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__HtmlTableRenderer_css___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1__HtmlTableRenderer_css__);
-
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__HtmlTableRenderer_css__ = __webpack_require__(18);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__HtmlTableRenderer_css___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__HtmlTableRenderer_css__);
 
 
 class HtmlTableRenderer {
@@ -983,9 +981,7 @@ class HtmlTableRenderer {
      * @param {Observation} observation
      */
     render(observation) {
-        let html = '';
         for (let yi = 0; yi < observation.size; yi++) {
-            html += '<tr>';
             for (let xi = 0; xi < observation.size; xi++) {
                 let backColorRed = observation.costs[xi][yi] === 0 ? 0 : 230;
                 let backColorGreen = 0;
@@ -999,7 +995,6 @@ class HtmlTableRenderer {
                 document.getElementById(xi + '-' + yi).style
                     .backgroundColor = 'rgb(' + backColorRed + ',' + backColorGreen + ',0)';
             }
-            html += '</tr>';
         }
         this._previousPositions[observation.position.x + ',' + observation.position.y] = true;
     };
@@ -3257,7 +3252,7 @@ module.exports = g;
 
 "use strict";
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__environment__ = __webpack_require__(0);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__environment__ = __webpack_require__(1);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__renderer_HtmlTableRenderer__ = __webpack_require__(10);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__agent_lookAheadFiveActions__ = __webpack_require__(7);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__agent_alwaysDown__ = __webpack_require__(5);
@@ -3359,15 +3354,15 @@ function takeAction(actionCode) {
         renderer.render(observation);
     }
     if (observation.isComplete) {//@Find better way to communicate "isComplete"
-        lastGameScore = environment.score;
-        scoreSum += environment.score;
+        lastGameScore = observation.score;
+        scoreSum += observation.score;
         gameCount += 1;
         newGame();
     }
 
     document.getElementById('score').innerHTML =
         'Agent: ' + currentAgentName +
-        '\nCurrent Score: ' + environment.score +
+        '\nCurrent Score: ' + observation.score +
         '\nLast Game Final Score: ' + lastGameScore +
         '\nAvg Final Score: ' + (Math.round(scoreSum / gameCount) || 0) +
         '\nGame Count: ' + gameCount;
@@ -3393,7 +3388,7 @@ document.getElementById('interval').addEventListener('change', (event)=> {
     if (value === 'no-render') {
         enableRendering = false;
         speed = 0;
-        document.getElementById('rendererContainer').innerHTML = '';
+        renderer.clear();
     } else if (value === 'paused') {
         autoPlay = false;
     } else {
