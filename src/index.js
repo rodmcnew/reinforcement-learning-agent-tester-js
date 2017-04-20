@@ -7,11 +7,33 @@ import lookAheadOneRowOneAdjacent from './agent/lookAheadOneRowOneAdjacent'
 import lookAheadOneRowTenAdjacent from './agent/lookAheadOneRowTenAdjacent'
 import './style.css'
 
+document.body.innerHTML =
+    '<div id="info">Agent: <select id="agentSelector"></select>' +
+    '<br>Speed Interval: <select id="interval">' +
+    '<option value="no-render" selected>0ms with no rendering</option>' +
+    '<option value="0">0ms</option>' +
+    '<option value="100" selected>100ms</option>' +
+    '<option value="200">200ms</option>' +
+    '<option value="500">500ms</option>' +
+    '<option value="1000">1000ms</option>' +
+    '<option value="paused">Paused</option>' +
+    '</select>' +
+    '<pre id="score"></pre>' +
+    '<pre>' +
+    '\nGame Rules:' +
+    '\n- Gain 4 points for every row lower you go' +
+    '\n- Loose 4 points for every row higher you go' +
+    '\n- Loose 9 points any time you move in a red square' +
+    '\n- Get to the bottom row to complete the game' +
+    '</pre>' +
+    '</div>' +
+    '<div id="rendererContainer"></div>';
+
 let enableRendering = true;
 let autoPlay = true;
 let environmentState;
 let agent;
-let renderer;
+// let renderer;
 let scoreSum = 0;
 let gameCount = 0;
 let lastGameScore = 0;
@@ -20,6 +42,8 @@ let intervalReference = null;
 let agentState = {};
 let currentAgentName;
 let environmentConfig = {size: 64};
+let renderer = new HtmlTable(document.getElementById('rendererContainer'), environmentConfig);
+
 
 let agents = {
     'lookAheadFiveActions - 91': lookAheadFiveActions,
@@ -48,7 +72,7 @@ function newGame() {
 
     if (enableRendering) {
         //@TODO have this render make the table its self inside a given div
-        renderer = new HtmlTable(document.getElementById('rendererContainer'), environmentConfig);
+        renderer.clear();
         renderer.render(environmentState);
     }
 }
@@ -79,28 +103,6 @@ function takeAction(actionCode) {
         '\nAvg Final Score: ' + (Math.round(scoreSum / gameCount) || 0) +
         '\nGame Count: ' + gameCount;
 }
-
-document.body.innerHTML =
-    '<div id="info">Agent: <select id="agentSelector"></select>' +
-    '<br>Speed Interval: <select id="interval">' +
-    '<option value="no-render" selected>0ms with no rendering</option>' +
-    '<option value="0">0ms</option>' +
-    '<option value="100" selected>100ms</option>' +
-    '<option value="200">200ms</option>' +
-    '<option value="500">500ms</option>' +
-    '<option value="1000">1000ms</option>' +
-    '<option value="paused">Paused</option>' +
-    '</select>' +
-    '<pre id="score"></pre>' +
-    '<pre>' +
-    '\nGame Rules:' +
-    '\n- Gain 4 points for every row lower you go' +
-    '\n- Loose 4 points for every row higher you go' +
-    '\n- Loose 9 points any time you move in a red square' +
-    '\n- Get to the bottom row to complete the game' +
-    '</pre>' +
-    '</div>' +
-    '<div id="rendererContainer"></div>';
 
 let agentSelectorElement = document.getElementById('agentSelector');
 for (agent in agents) {
