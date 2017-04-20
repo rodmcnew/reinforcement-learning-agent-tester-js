@@ -91,15 +91,15 @@ function takeAction(actionCode) {
         renderer.render(observation);
     }
     if (observation.isComplete) {//@Find better way to communicate "isComplete"
-        lastGameScore = environment.score;
-        scoreSum += environment.score;
+        lastGameScore = observation.score;
+        scoreSum += observation.score;
         gameCount += 1;
         newGame();
     }
 
     document.getElementById('score').innerHTML =
         'Agent: ' + currentAgentName +
-        '\nCurrent Score: ' + environment.score +
+        '\nCurrent Score: ' + observation.score +
         '\nLast Game Final Score: ' + lastGameScore +
         '\nAvg Final Score: ' + (Math.round(scoreSum / gameCount) || 0) +
         '\nGame Count: ' + gameCount;
@@ -125,7 +125,7 @@ document.getElementById('interval').addEventListener('change', (event)=> {
     if (value === 'no-render') {
         enableRendering = false;
         speed = 0;
-        document.getElementById('rendererContainer').innerHTML = '';
+        renderer.clear();
     } else if (value === 'paused') {
         autoPlay = false;
     } else {

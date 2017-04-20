@@ -1,4 +1,3 @@
-import {State} from '../environment'
 import './HtmlTableRenderer.css'
 
 export default class HtmlTableRenderer {
@@ -30,9 +29,7 @@ export default class HtmlTableRenderer {
      * @param {Observation} observation
      */
     render(observation) {
-        let html = '';
         for (let yi = 0; yi < observation.size; yi++) {
-            html += '<tr>';
             for (let xi = 0; xi < observation.size; xi++) {
                 let backColorRed = observation.costs[xi][yi] === 0 ? 0 : 230;
                 let backColorGreen = 0;
@@ -46,7 +43,6 @@ export default class HtmlTableRenderer {
                 document.getElementById(xi + '-' + yi).style
                     .backgroundColor = 'rgb(' + backColorRed + ',' + backColorGreen + ',0)';
             }
-            html += '</tr>';
         }
         this._previousPositions[observation.position.x + ',' + observation.position.y] = true;
     };
