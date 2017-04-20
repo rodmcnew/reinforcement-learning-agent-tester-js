@@ -1,9 +1,9 @@
 import {State} from '../environment'
-import './HtmlTable.css'
+import './HtmlTableRenderer.css'
 
-export default class HtmlTable {
+export default class HtmlTableRenderer {
     constructor(containerElement, environmentConfig) {
-        this.clear();//Call clear to init internal state properties
+        this.clear();//Call clear to init internal observation properties
 
         let html = '';
         for (let yi = 0; yi < environmentConfig.size; yi++) {
@@ -18,28 +18,28 @@ export default class HtmlTable {
     }
 
     /**
-     * Clears the state of the renderer causing it to forget any stored state.
+     * Clears the observation of the renderer causing it to forget any stored observation.
      */
     clear() {
         this._previousPositions = [];
     }
 
     /**
-     * Render the current state of the environment in HTML
+     * Render the current observation of the environment in HTML
      *
-     * @param {State} state
+     * @param {Observation} observation
      */
-    render(state) {
+    render(observation) {
         let html = '';
-        for (let yi = 0; yi < state.size; yi++) {
+        for (let yi = 0; yi < observation.size; yi++) {
             html += '<tr>';
-            for (let xi = 0; xi < state.size; xi++) {
-                let backColorRed = state.costs[xi][yi] === 0 ? 0 : 230;
+            for (let xi = 0; xi < observation.size; xi++) {
+                let backColorRed = observation.costs[xi][yi] === 0 ? 0 : 230;
                 let backColorGreen = 0;
                 if (this._previousPositions[xi + ',' + yi]) {
                     backColorGreen = 128;
                 }
-                if (xi == state.position.x && yi == state.position.y) {
+                if (xi == observation.position.x && yi == observation.position.y) {
                     backColorGreen = 255;
                     backColorRed = 0;
                 }
@@ -48,6 +48,6 @@ export default class HtmlTable {
             }
             html += '</tr>';
         }
-        this._previousPositions[state.position.x + ',' + state.position.y] = true;
+        this._previousPositions[observation.position.x + ',' + observation.position.y] = true;
     };
 }

@@ -1,3 +1,17 @@
+export class Environment {
+    constructor(environmentConfig) {
+        this._environmentState = generateInitialState(environmentConfig);
+    }
+
+    applyAction(actionCode) {
+        this._environmentState = applyAction(this._environmentState, actionCode);
+    }
+
+    getObservation() {
+        return getObservation(this._environmentState);
+    }
+}
+
 /**
  * Data model that holds the environment's full internal state
  */
@@ -42,8 +56,9 @@ export class Observation {
      * @param {Array} costs
      * @param {{x: Number, y: Number}} position
      * @param {Number} score
+     * @param {Boolean} isComplete
      */
-    constructor(size, costs, position, score) {
+    constructor(size, costs, position, score, isComplete) {
         /**
          * @type {Number}
          */
@@ -60,6 +75,10 @@ export class Observation {
          * @type {Number}
          */
         this.score = score;
+        /**
+         * @type {Boolean}
+         */
+        this.isComplete = isComplete;
     }
 }
 
@@ -87,7 +106,7 @@ export const generateInitialState = (options) => {
  * @returns {State}
  */
 export const applyAction = (state, actionCode) => {
-    state = Object.assign({},state);//State is immutable so make clone
+    state = Object.assign({}, state);//State is immutable so make clone
     let downOneRowReward = 4;
     switch (actionCode) {
         case "w":
@@ -132,7 +151,8 @@ export const getObservation = (state) => {
         state.size,
         state.costs,
         state.position,
-        state.score
+        state.score,
+        state.isComplete
     );
 };
 
@@ -153,7 +173,7 @@ function generateRandomCosts(size) {
 
             if (cost < 7) {
                 cost = 0;
-            } else{
+            } else {
                 cost = 9;
             }
 

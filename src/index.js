@@ -1,5 +1,5 @@
-import {generateInitialState, applyAction, getObservation} from './environment'
-import HtmlTable from './renderer/HtmlTable'
+import {Environment} from './environment'
+import HtmlTableRenderer from './renderer/HtmlTableRenderer'
 import lookAheadFiveActions from './agent/lookAheadFiveActions'
 import alwaysDown from './agent/alwaysDown'
 import lateralWallBouncer from './agent/lateralWallBouncer'
@@ -31,7 +31,7 @@ document.body.innerHTML =
 
 let enableRendering = true;
 let autoPlay = true;
-let environmentState;
+let environment;
 let agent;
 // let renderer;
 let scoreSum = 0;
@@ -42,7 +42,7 @@ let intervalReference = null;
 let agentState = {};
 let currentAgentName;
 let environmentConfig = {size: 64};
-let renderer = new HtmlTable(document.getElementById('rendererContainer'), environmentConfig);
+let renderer = new HtmlTableRenderer(document.getElementById('rendererContainer'), environmentConfig);
 
 
 let agents = {
@@ -65,7 +65,7 @@ function clearHistory() {
 }
 
 function newGame() {
-    environmentState = generateInitialState(environmentConfig);
+    environment = new Environment(environmentConfig);
     agentState = null;
 
     agent = agents[currentAgentName];
@@ -73,32 +73,33 @@ function newGame() {
     if (enableRendering) {
         //@TODO have this render make the table its self inside a given div
         renderer.clear();
-        renderer.render(environmentState);
+        renderer.render(environment.getObservation());
     }
 }
 
 function getAgentAction() {
-    const observation = getObservation(environmentState);
+    const observation = environment.getObservation(environment);
     const agentResponse = agent(observation, agentState);
     agentState = agentResponse.state;
     return agentResponse.action;
 }
 
 function takeAction(actionCode) {
-    environmentState = applyAction(environmentState, actionCode);
+    environment.applyAction(actionCode);
+    let observation = environment.getObservation();
     if (enableRendering) {
-        renderer.render(environmentState);
+        renderer.render(observation);
     }
-    if (environmentState.isComplete) {//@Find better way to communicate "isComplete"
-        lastGameScore = environmentState.score;
-        scoreSum += environmentState.score;
+    if (observation.isComplete) {//@Find better way to communicate "isComplete"
+        lastGameScore = environment.score;
+        scoreSum += environment.score;
         gameCount += 1;
         newGame();
     }
 
     document.getElementById('score').innerHTML =
         'Agent: ' + currentAgentName +
-        '\nCurrent Score: ' + environmentState.score +
+        '\nCurrent Score: ' + environment.score +
         '\nLast Game Final Score: ' + lastGameScore +
         '\nAvg Final Score: ' + (Math.round(scoreSum / gameCount) || 0) +
         '\nGame Count: ' + gameCount;
