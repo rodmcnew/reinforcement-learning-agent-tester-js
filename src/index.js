@@ -19,6 +19,7 @@ let speed = 100;
 let intervalReference = null;
 let agentState = {};
 let currentAgentName;
+let environmentConfig = {size: 64};
 
 let agents = {
     'lookAheadFiveActions - 91': lookAheadFiveActions,
@@ -40,14 +41,14 @@ function clearHistory() {
 }
 
 function newGame() {
-    environmentState = generateInitialState({size: 64});
+    environmentState = generateInitialState(environmentConfig);
     agentState = null;
 
     agent = agents[currentAgentName];
 
     if (enableRendering) {
         //@TODO have this render make the table its self inside a given div
-        renderer = new HtmlTable(document.getElementById('rendererContainer'));
+        renderer = new HtmlTable(document.getElementById('rendererContainer'), environmentConfig);
         renderer.render(environmentState);
     }
 }

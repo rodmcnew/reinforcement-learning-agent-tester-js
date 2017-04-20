@@ -1,7 +1,7 @@
 import {State} from '../environment'
 import './HtmlTable.css'
 
-export default function HtmlTable(containerElement) {
+export default function HtmlTable(containerElement, environmentConfig) {
     let previousPositions = [];
     /**
      * Render the current state of the environment in HTML
@@ -31,12 +31,10 @@ export default function HtmlTable(containerElement) {
     };
 
     this.init = function () {
-        let state = {size: 64};//@TODO get this passed in instead of hard coding
-
         let html = '';
-        for (let yi = 0; yi < state.size; yi++) {
+        for (let yi = 0; yi < environmentConfig.size; yi++) {
             html += '<tr>';
-            for (let xi = 0; xi < state.size; xi++) {
+            for (let xi = 0; xi < environmentConfig.size; xi++) {
                 html += '<td id="' + xi + '-' + yi + '"></td>';
             }
             html += '</tr>';

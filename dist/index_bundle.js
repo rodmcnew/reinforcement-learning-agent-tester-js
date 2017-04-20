@@ -842,7 +842,7 @@ const actionPathsToCheck = [{ path: ['s'] }, { path: ['a', 's'] }, { path: ['a',
 
 
 
-function HtmlTable(containerElement) {
+function HtmlTable(containerElement, environmentConfig) {
     let previousPositions = [];
     /**
      * Render the current state of the environment in HTML
@@ -871,12 +871,10 @@ function HtmlTable(containerElement) {
     };
 
     this.init = function () {
-        let state = { size: 64 };
-
         let html = '';
-        for (let yi = 0; yi < state.size; yi++) {
+        for (let yi = 0; yi < environmentConfig.size; yi++) {
             html += '<tr>';
-            for (let xi = 0; xi < state.size; xi++) {
+            for (let xi = 0; xi < environmentConfig.size; xi++) {
                 html += '<td id="' + xi + '-' + yi + '"></td>';
             }
             html += '</tr>';
@@ -996,6 +994,7 @@ let speed = 100;
 let intervalReference = null;
 let agentState = {};
 let currentAgentName;
+let environmentConfig = { size: 64 };
 
 let agents = {
     'lookAheadFiveActions - 91': __WEBPACK_IMPORTED_MODULE_2__agent_lookAheadFiveActions__["a" /* default */],
@@ -1017,14 +1016,14 @@ function clearHistory() {
 }
 
 function newGame() {
-    environmentState = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__environment__["a" /* generateInitialState */])({ size: 64 });
+    environmentState = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__environment__["a" /* generateInitialState */])(environmentConfig);
     agentState = null;
 
     agent = agents[currentAgentName];
 
     if (enableRendering) {
         //@TODO have this render make the table its self inside a given div
-        renderer = new __WEBPACK_IMPORTED_MODULE_1__renderer_HtmlTable__["a" /* default */](document.getElementById('rendererContainer'));
+        renderer = new __WEBPACK_IMPORTED_MODULE_1__renderer_HtmlTable__["a" /* default */](document.getElementById('rendererContainer'), environmentConfig);
         renderer.render(environmentState);
     }
 }
