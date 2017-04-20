@@ -154,6 +154,8 @@ function generateRandomCosts(size) {
             //Leave more empty space to make the game more interesting
             if (cost < 6) {
                 cost = 0;
+            } else{
+                cost = 9;
             }
 
             costs[xi][yi] = cost;

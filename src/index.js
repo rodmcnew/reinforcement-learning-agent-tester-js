@@ -94,7 +94,8 @@ document.body.innerHTML =
     '<pre>' +
     '\nGame Rules:' +
     '\n- Gain 4 points for every row lower you go' +
-    '\n- The number on a square is how many points\n  will be lost by moving into it' +
+    '\n- Loose 4 points for every row higher you go' +
+    '\n- Loose 9 points any time you move into a red square' +
     '\n- Get to the bottom row to complete the game' +
     '</pre>' +
     '</div>' +
