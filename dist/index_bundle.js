@@ -223,9 +223,10 @@ function generateRandomCosts(size) {
         for (let yi = 0; yi < size; yi++) {
             let cost = Math.floor(Math.random() * (max - min + 1)) + min;
 
-            //Leave more empty space to make the game more interesting
-            if (cost < 6) {
+            if (cost < 7) {
                 cost = 0;
+            } else {
+                cost = 9;
             }
 
             costs[xi][yi] = cost;
@@ -845,7 +846,7 @@ function HtmlTable(containerElement) {
     let previousPositions = [];
     /**
      * Render the current state of the environment in HTML
-     * 
+     *
      * @param {State} state
      */
     this.render = function (state) {
@@ -853,24 +854,16 @@ function HtmlTable(containerElement) {
         for (let yi = 0; yi < state.size; yi++) {
             html += '<tr>';
             for (let xi = 0; xi < state.size; xi++) {
-                let height = state.costs[xi][yi];
-                let backColorRed = Math.round(height * 255 / 10);
-                // let colorRed = backColorRed;
-                let colorRed = backColorRed < 128 ? 255 : 0;
-                let colorGreen = 0;
+                let backColorRed = state.costs[xi][yi] === 0 ? 0 : 230;
                 let backColorGreen = 0;
                 if (previousPositions[xi + ',' + yi]) {
                     backColorGreen = 128;
-                    colorRed = 0;
-                    colorGreen = 255;
                 }
                 if (xi == state.position.x && yi == state.position.y) {
-                    colorGreen = 0;
                     backColorGreen = 255;
-                    colorRed = 0;
                     backColorRed = 0;
                 }
-                html += '<td ' + 'style="background-color: rgb(' + backColorRed + ',' + backColorGreen + ',0);' + 'color: rgb(' + colorRed + ',' + colorGreen + ',0)">' + (height ? height : '') + '</td>';
+                html += '<td style="background-color: rgb(' + backColorRed + ',' + backColorGreen + ',0);"></td>';
             }
             html += '</tr>';
         }
@@ -984,7 +977,7 @@ let renderer;
 let scoreSum = 0;
 let gameCount = 0;
 let lastGameScore = 0;
-let speed = 200;
+let speed = 100;
 let intervalReference = null;
 let agentState = {};
 let currentAgentName;
@@ -1009,7 +1002,7 @@ function clearHistory() {
 }
 
 function newGame() {
-    environmentState = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__environment__["a" /* generateInitialState */])({ size: 32 });
+    environmentState = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__environment__["a" /* generateInitialState */])({ size: 64 });
     agentState = null;
 
     agent = agents[currentAgentName];
@@ -1044,7 +1037,7 @@ function takeAction(actionCode) {
     document.getElementById('score').innerHTML = 'Agent: ' + currentAgentName + '\nCurrent Score: ' + environmentState.score + '\nLast Game Final Score: ' + lastGameScore + '\nAvg Final Score: ' + (Math.round(scoreSum / gameCount) || 0) + '\nGame Count: ' + gameCount;
 }
 
-document.body.innerHTML = '<div id="info">Agent: <select id="agentSelector"></select>' + '<br>Speed Interval: <select id="interval">' + '<option value="no-render" selected>0ms with no rendering</option>' + '<option value="0" selected>0ms</option>' + '<option value="100">100ms</option>' + '<option value="200" selected>200ms</option>' + '<option value="500">500ms</option>' + '<option value="1000">1000ms</option>' + '<option value="paused">Paused</option>' + '</select>' + '<pre id="score"></pre>' + '<pre>' + '\nGame Rules:' + '\n- Gain 4 points for every row lower you go' + '\n- The number on a square is how many points\n  will be lost by moving into it' + '\n- Get to the bottom row to complete the game' + '</pre>' + '</div>' + '<div id="rendererContainer"></div>';
+document.body.innerHTML = '<div id="info">Agent: <select id="agentSelector"></select>' + '<br>Speed Interval: <select id="interval">' + '<option value="no-render" selected>0ms with no rendering</option>' + '<option value="0">0ms</option>' + '<option value="100" selected>100ms</option>' + '<option value="200">200ms</option>' + '<option value="500">500ms</option>' + '<option value="1000">1000ms</option>' + '<option value="paused">Paused</option>' + '</select>' + '<pre id="score"></pre>' + '<pre>' + '\nGame Rules:' + '\n- Gain 4 points for every row lower you go' + '\n- Loose 4 points for every row higher you go' + '\n- Loose 9 points any time you move in red square' + '\n- Get to the bottom row to complete the game' + '</pre>' + '</div>' + '<div id="rendererContainer"></div>';
 
 let agentSelectorElement = document.getElementById('agentSelector');
 for (agent in agents) {
@@ -3018,7 +3011,7 @@ exports = module.exports = __webpack_require__(2)(undefined);
 
 
 // module
-exports.push([module.i, ".InfectionGameHtmlTableRender {\n    float: left;\n    border-spacing: 0\n}\n\n.InfectionGameHtmlTableRender td {\n    height: 20px;\n    width: 20px;\n    font-size: 10px;\n    text-align: center;\n}\n", ""]);
+exports.push([module.i, ".InfectionGameHtmlTableRender {\n    float: left;\n    border-spacing: 0\n}\n\n.InfectionGameHtmlTableRender td {\n    height: 10px;\n    width: 10px;\n    font-size: 10px;\n    text-align: center;\n}\n", ""]);
 
 // exports
 
