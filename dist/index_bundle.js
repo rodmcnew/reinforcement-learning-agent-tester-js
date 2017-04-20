@@ -863,14 +863,29 @@ function HtmlTable(containerElement) {
                     backColorGreen = 255;
                     backColorRed = 0;
                 }
-                html += '<td style="background-color: rgb(' + backColorRed + ',' + backColorGreen + ',0);"></td>';
+                document.getElementById(xi + '-' + yi).style.backgroundColor = 'rgb(' + backColorRed + ',' + backColorGreen + ',0)';
             }
             html += '</tr>';
         }
         previousPositions[state.position.x + ',' + state.position.y] = true;
+    };
+
+    this.init = function () {
+        let state = { size: 64 };
+
+        let html = '';
+        for (let yi = 0; yi < state.size; yi++) {
+            html += '<tr>';
+            for (let xi = 0; xi < state.size; xi++) {
+                html += '<td id="' + xi + '-' + yi + '"></td>';
+            }
+            html += '</tr>';
+        }
 
         containerElement.innerHTML = '<table class="InfectionGameHtmlTableRender">' + html + '</table>';
     };
+
+    this.init();
 }
 
 /***/ }),
