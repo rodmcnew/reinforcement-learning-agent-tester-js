@@ -31,7 +31,7 @@ export default function HtmlTable(containerElement) {
     };
 
     this.init = function () {
-        let state = {size: 64};
+        let state = {size: 64};//@TODO get this passed in instead of hard coding
 
         let html = '';
         for (let yi = 0; yi < state.size; yi++) {
