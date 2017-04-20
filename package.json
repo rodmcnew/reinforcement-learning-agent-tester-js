@@ -1,5 +1,5 @@
 {
-  "name": "ig",
+  "name": "easy-way-game-for-intelligent-agents",
   "version": "1.0.0",
   "description": "",
   "main": "webpack.config.js",
@@ -19,12 +19,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/rodmcnew/infection-game-for-intelligent-agents.git"
+    "url": "git+https://github.com/rodmcnew/easy-way-game-for-intelligent-agents.git"
   },
   "author": "Rod McNew",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/rodmcnew/infection-game-for-intelligent-agents/issues"
+    "url": "https://github.com/rodmcnew/easy-way-game-for-intelligent-agents/issues"
   },
-  "homepage": "https://github.com/rodmcnew/infection-game-for-intelligent-agents#readme"
+  "homepage": "https://github.com/rodmcnew/easy-way-game-for-intelligent-agents#readme"
 }
