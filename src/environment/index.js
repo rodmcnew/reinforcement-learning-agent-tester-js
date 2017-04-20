@@ -1,4 +1,7 @@
-export class Environment {
+/**
+ * The main environment class for this game. This is the public interface for the game.
+ */
+export default class Environment {
     constructor(environmentConfig) {
         this._environmentState = generateInitialState(environmentConfig);
     }

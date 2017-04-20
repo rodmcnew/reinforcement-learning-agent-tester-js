@@ -1,4 +1,4 @@
-import {Environment} from './environment'
+import Environment from './environment'
 import HtmlTableRenderer from './renderer/HtmlTableRenderer'
 import lookAheadFiveActions from './agent/lookAheadFiveActions'
 import alwaysDown from './agent/alwaysDown'
