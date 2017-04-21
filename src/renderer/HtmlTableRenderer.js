@@ -42,7 +42,7 @@ export default class HtmlTableRenderer {
                 if (xi == observation.position.x && yi == observation.position.y) {
                     color={r:0,g:255, b:0};
                 }
-                // if (observation.visibles[xi][yi] === 0) {
+                // if (observation.visibles[xi][yi] === 0) { //UNCOMMENT TO SEE VISION, MOVE TO BOTTOM TO LIMIT VISION
                 //     color={r:0,g:0, b:0};
                 // }
                 if(observation.costs[xi][yi]!==0){
