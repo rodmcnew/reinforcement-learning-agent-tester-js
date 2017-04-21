@@ -154,6 +154,9 @@ function getVisibleCosts(state) {
             lastWasWall = state.costs[x][y] !== 0;
             x = x + direction.x;
             y = y + direction.y;
+            if (lastWasWall) {
+                continue; //Don't look adjacent if we are already in a wall.
+            }
             adjacentDirections.forEach((subDirection)=> { //@TODO this processes the same squares many times
                 let xAdj = x + subDirection.x;
                 let yAdj = y + subDirection.y;
