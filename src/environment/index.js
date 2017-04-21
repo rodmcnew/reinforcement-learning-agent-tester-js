@@ -19,21 +19,23 @@ function getVisibleCosts(state) {
     ];
     const adjacentDirections = [{x: 1, y: 0}, {x: -1, y: 0}, {x: 0, y: 1}, {x: 0, y: -1}];
 
-    function hasNoCostAndIsNotWall(x, y) {
-        return typeof state.costs[x] !== 'undefined' && typeof state.costs[x][y] !== 'undefined' && state.costs[x][y] === 0;
+    function positionExists(x, y) {
+        return typeof state.costs[x] !== 'undefined' && typeof state.costs[x][y] !== 'undefined';
     }
 
     directions.forEach((direction)=> {
         let x = state.position.x;
         let y = state.position.y;
-        while (hasNoCostAndIsNotWall(x, y)) {
+        let lastWasWall = false;
+        while (positionExists(x, y) && !lastWasWall) {
             visibles[x][y] = 1;
+            lastWasWall = state.costs[x][y] !== 0;
             x = x + direction.x;
             y = y + direction.y;
             adjacentDirections.forEach((subDirection)=> { //@TODO this processes the same squares many times
                 let xAdj = x + subDirection.x;
                 let yAdj = y + subDirection.y;
-                if (hasNoCostAndIsNotWall(xAdj, yAdj)) {
+                if (positionExists(xAdj, yAdj)) {
                     visibles[xAdj][yAdj] = 1;
                 }
             });
