@@ -1032,7 +1032,7 @@ class HtmlTableRenderer {
     render(observation) {
         for (let yi = 0; yi < observation.size; yi++) {
             for (let xi = 0; xi < observation.size; xi++) {
-                let color = {r: 220, g: 220, b: 220};
+                let color = {r: 50, g: 50, b: 50};
                 // color.r = observation.costs[xi][yi] === 0 ? 0 : 230;
                 // color.g = 0;
                 // else if (observation.visibles[xi][yi] !== 0) {
@@ -1043,9 +1043,9 @@ class HtmlTableRenderer {
                 if (xi == observation.position.x && yi == observation.position.y) {
                     color={r:0,g:255, b:0};
                 }
-                // if (observation.visibles[xi][yi] === 0) { //UNCOMMENT TO SEE VISION, MOVE TO BOTTOM TO LIMIT VISION
-                //     color={r:0,g:0, b:0};
-                // }
+                if (observation.visibles[xi][yi] === 0) { //UNCOMMENT TO SEE VISION, MOVE TO BOTTOM TO LIMIT VISION
+                    color={r:0,g:0, b:0};
+                }
                 if(observation.costs[xi][yi]!==0){
                     color={r:230,g:0, b:0};
                 }
