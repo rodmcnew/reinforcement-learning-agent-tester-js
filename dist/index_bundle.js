@@ -1043,9 +1043,6 @@ class HtmlTableRenderer {
                 //     // color.g = 50;
                 //     // color.r = 50;
                 // }
-                if (xi == observation.position.x && yi == observation.position.y) {
-                    color={r:0,g:255, b:0};
-                }
                 if (observation.visibles[xi][yi] === 0) { //UNCOMMENT TO SEE VISION, MOVE TO BOTTOM TO LIMIT VISION
                     color={r:0,g:0, b:0};
                 }
@@ -1057,6 +1054,9 @@ class HtmlTableRenderer {
                 }
                 if (this._previousPositions[xi + ',' + yi] && observation.costs[xi][yi]!==0) {
                     color={r:255,g:255, b:0}
+                }
+                if (xi == observation.position.x && yi == observation.position.y) {
+                    color={r:0,g:255, b:0};
                 }
                 document.getElementById(xi + '-' + yi).style
                     .backgroundColor = 'rgb(' + color.r + ',' + color.g + ',' + color.b + ')';
