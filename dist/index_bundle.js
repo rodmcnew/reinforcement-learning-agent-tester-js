@@ -120,6 +120,51 @@
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
+function createMatrix(size) {
+    var matrix = [];
+
+    for (let yi = 0; yi < size; yi++) {
+        matrix[yi] = [];
+        for (let xi = 0; xi < size; xi++) {
+            matrix[yi][xi] = 0;
+        }
+    }
+
+    return matrix;
+}
+
+function getVisibleCosts(state) {
+    const visibles = createMatrix(state.size);
+    const directions = [
+        {x: 1, y: 0}, {x: -1, y: 0}, {x: 0, y: 1}, {x: 0, y: -1},
+        {x: 1, y: 1}, {x: 1, y: -1}, {x: -1, y: 1}, {x: -1, y: -1},
+    ];
+    const adjacentDirections = [{x: 1, y: 0}, {x: -1, y: 0}, {x: 0, y: 1}, {x: 0, y: -1}];
+
+    function hasNoCostAndIsNotWall(x, y) {
+        return typeof state.costs[x] !== 'undefined' && typeof state.costs[x][y] !== 'undefined' && state.costs[x][y] === 0;
+    }
+
+    directions.forEach((direction)=> {
+        let x = state.position.x;
+        let y = state.position.y;
+        while (hasNoCostAndIsNotWall(x, y)) {
+            visibles[x][y] = 1;
+            x = x + direction.x;
+            y = y + direction.y;
+            adjacentDirections.forEach((subDirection)=> { //@TODO this processes the same squares many times
+                let xAdj = x + subDirection.x;
+                let yAdj = y + subDirection.y;
+                if (hasNoCostAndIsNotWall(xAdj, yAdj)) {
+                    visibles[xAdj][yAdj] = 1;
+                }
+            });
+        }
+    });
+
+    return visibles;
+}
+
 /**
  * The main environment class for this game. This is the public interface for the game.
  */
@@ -187,7 +232,7 @@ class Observation {
      * @param {Number} score
      * @param {Boolean} isComplete
      */
-    constructor(size, costs, position, score, isComplete) {
+    constructor(size, costs, visibles, position, score, isComplete) {
         /**
          * @type {Number}
          */
@@ -196,6 +241,7 @@ class Observation {
          * @type {Array}
          */
         this.costs = costs;
+        this.visibles = visibles;
         /**
          * @type {{x: Number, y: Number}}
          */
@@ -285,6 +331,7 @@ const getObservation = (state) => {
     return new Observation(
         state.size,
         state.costs,
+        getVisibleCosts(state),
         state.position,
         state.score,
         state.isComplete
@@ -983,17 +1030,28 @@ class HtmlTableRenderer {
     render(observation) {
         for (let yi = 0; yi < observation.size; yi++) {
             for (let xi = 0; xi < observation.size; xi++) {
-                let backColorRed = observation.costs[xi][yi] === 0 ? 0 : 230;
-                let backColorGreen = 0;
+                let color = {r: 0, g: 0, b: 0};
+                color.r = observation.costs[xi][yi] === 0 ? 0 : 230;
+                color.g = 0;
                 if (this._previousPositions[xi + ',' + yi]) {
-                    backColorGreen = 128;
+                    color.g = 128;
+                } else if (observation.visibles[xi][yi] !== 0) {
+                    color.b = 50;
+                    color.g = 50;
+                    color.r = 50;
                 }
                 if (xi == observation.position.x && yi == observation.position.y) {
-                    backColorGreen = 255;
-                    backColorRed = 0;
+                    color.g = 255;
+                    color.r = 0;
+                    color.b = 0;
                 }
+                // if (observation.visibles[xi][yi] === 0) {
+                //     color.r = 255;
+                //     color.g = 255;
+                //     color.b = 255;
+                // }
                 document.getElementById(xi + '-' + yi).style
-                    .backgroundColor = 'rgb(' + backColorRed + ',' + backColorGreen + ',0)';
+                    .backgroundColor = 'rgb(' + color.r + ',' + color.g + ',' + color.b + ')';
             }
         }
         this._previousPositions[observation.position.x + ',' + observation.position.y] = true;
@@ -3304,7 +3362,7 @@ let speed = 100;
 let intervalReference = null;
 let agentState = {};
 let currentAgentName;
-let environmentConfig = {size: 64};
+let environmentConfig = {size: 32};
 let renderer = new __WEBPACK_IMPORTED_MODULE_1__renderer_HtmlTableRenderer__["a" /* default */](document.getElementById('rendererContainer'), environmentConfig);
 
 
