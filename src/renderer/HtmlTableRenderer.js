@@ -31,17 +31,27 @@ export default class HtmlTableRenderer {
     render(observation) {
         for (let yi = 0; yi < observation.size; yi++) {
             for (let xi = 0; xi < observation.size; xi++) {
-                let backColorRed = observation.costs[xi][yi] === 0 ? 0 : 230;
-                let backColorGreen = 0;
+                let color = {r: 0, g: 0, b: 0};
+                if (observation.visibles[xi][yi] !== 0) {
+                    color.b = 200;
+                }
+                color.r = observation.costs[xi][yi] === 0 ? 0 : 230;
+                color.g = 0;
                 if (this._previousPositions[xi + ',' + yi]) {
-                    backColorGreen = 128;
+                    color.g = 128;
                 }
                 if (xi == observation.position.x && yi == observation.position.y) {
-                    backColorGreen = 255;
-                    backColorRed = 0;
+                    color.g = 255;
+                    color.r = 0;
+                    color.b = 0;
                 }
+                // if (observation.visibles[xi][yi] === 0) {
+                //     color.r = 255;
+                //     color.g = 255;
+                //     color.b = 255;
+                // }
                 document.getElementById(xi + '-' + yi).style
-                    .backgroundColor = 'rgb(' + backColorRed + ',' + backColorGreen + ',0)';
+                    .backgroundColor = 'rgb(' + color.r + ',' + color.g + ',' + color.b + ')';
             }
         }
         this._previousPositions[observation.position.x + ',' + observation.position.y] = true;

@@ -1,3 +1,48 @@
+function createMatrix(size) {
+    var matrix = [];
+
+    for (let yi = 0; yi < size; yi++) {
+        matrix[yi] = [];
+        for (let xi = 0; xi < size; xi++) {
+            matrix[yi][xi] = 0;
+        }
+    }
+
+    return matrix;
+}
+
+function getVisibleCosts(state) {
+    const visibles = createMatrix(state.size);
+    const directions = [
+        {x: 1, y: 0}, {x: -1, y: 0}, {x: 0, y: 1}, {x: 0, y: -1},
+        {x: 1, y: 1}, {x: 1, y: -1}, {x: -1, y: 1}, {x: -1, y: -1},
+    ];
+    const adjacentDirections = [{x: 1, y: 0}, {x: -1, y: 0}, {x: 0, y: 1}, {x: 0, y: -1}];
+
+    function hasNoCostAndIsNotWall(x, y) {
+        return typeof state.costs[x] !== 'undefined' && typeof state.costs[x][y] !== 'undefined' && state.costs[x][y] === 0;
+    }
+
+    directions.forEach((direction)=> {
+        let x = state.position.x;
+        let y = state.position.y;
+        while (hasNoCostAndIsNotWall(x, y)) {
+            visibles[x][y] = 1;
+            x = x + direction.x;
+            y = y + direction.y;
+            adjacentDirections.forEach((subDirection)=> { //@TODO this processes the same squares many times
+                let xAdj = x + subDirection.x;
+                let yAdj = y + subDirection.y;
+                if (hasNoCostAndIsNotWall(xAdj, yAdj)) {
+                    visibles[xAdj][yAdj] = 1;
+                }
+            });
+        }
+    });
+
+    return visibles;
+}
+
 /**
  * The main environment class for this game. This is the public interface for the game.
  */
@@ -61,7 +106,7 @@ export class Observation {
      * @param {Number} score
      * @param {Boolean} isComplete
      */
-    constructor(size, costs, position, score, isComplete) {
+    constructor(size, costs, visibles, position, score, isComplete) {
         /**
          * @type {Number}
          */
@@ -70,6 +115,7 @@ export class Observation {
          * @type {Array}
          */
         this.costs = costs;
+        this.visibles = visibles;
         /**
          * @type {{x: Number, y: Number}}
          */
@@ -153,6 +199,7 @@ export const getObservation = (state) => {
     return new Observation(
         state.size,
         state.costs,
+        getVisibleCosts(state),
         state.position,
         state.score,
         state.isComplete

@@ -41,7 +41,7 @@ let speed = 100;
 let intervalReference = null;
 let agentState = {};
 let currentAgentName;
-let environmentConfig = {size: 64};
+let environmentConfig = {size: 32};
 let renderer = new HtmlTableRenderer(document.getElementById('rendererContainer'), environmentConfig);
 
 
