@@ -15,5 +15,5 @@ module.exports = {
             },
         ]
     },
-    plugins: [new HtmlWebpackPlugin({title: 'Game'})]
+    plugins: [new HtmlWebpackPlugin({title: 'Experiment'})]
 };

@@ -1,19 +1,47 @@
 import './HtmlTableRenderer.css'
+import {getMatrixDimensions} from '../tensorTools'
+import {config as environmentConfig} from '../environment'
+
+function generateTableHtml(size, tableClassName) {
+    let html = '';
+    for (let y = 0; y < size[0]; y++) {
+        html += '<tr>';
+        for (let x = 0; x < size[1]; x++) {
+            html += '<td class="tile-' + x + '-' + y + '"></td>';
+        }
+        html += '</tr>';
+    }
+    return '<table class="' + tableClassName + '">' + html + '</table>';
+}
+
+function getTdElements(size, tableClassName) {
+    let tdElements = [];
+    for (let x = 0; x < size[0]; x++) {
+        tdElements[x] = [];
+        for (let y = 0; y < size[1]; y++) {
+            tdElements[x][y] = document.querySelector('table.' + tableClassName + ' td.tile-' + x + '-' + y);
+        }
+    }
+    return tdElements;
+}
 
 export default class HtmlTableRenderer {
-    constructor(containerElement, environmentConfig) {
+    constructor(containerElement) {
         this.clear();//Call clear to init internal observation properties
 
-        let html = '';
-        for (let yi = 0; yi < environmentConfig.size; yi++) {
-            html += '<tr>';
-            for (let xi = 0; xi < environmentConfig.size; xi++) {
-                html += '<td id="' + xi + '-' + yi + '"></td>';
-            }
-            html += '</tr>';
-        }
+        containerElement.innerHTML = '<div class="InfectionGameHtmlTableRender">' +
+            '<div>' +
+            'Agent View' +
+            generateTableHtml(environmentConfig.viewPortSize, 'renderer-table-canvas-agent') +
+            '</div>' +
+            '<div>' +
+            'Environment View' +
+            generateTableHtml(environmentConfig.size, 'renderer-table-canvas-god') +
+            '</div>' +
+            '</div>';
 
-        containerElement.innerHTML = '<table class="InfectionGameHtmlTableRender">' + html + '</table>';
+        this._agentTds = getTdElements(environmentConfig.viewPortSize, 'renderer-table-canvas-agent');
+        this._godTds = getTdElements(environmentConfig.size, 'renderer-table-canvas-god')
     }
 
     /**
@@ -26,39 +54,54 @@ export default class HtmlTableRenderer {
     /**
      * Render the current observation of the environment in HTML
      *
-     * @param {Observation} observation
+     * @param {AgentObservation} agentObservation
+     * @param {State} godObservation
      */
-    render(observation) {
-        for (let yi = 0; yi < observation.size; yi++) {
-            for (let xi = 0; xi < observation.size; xi++) {
+    render(agentObservation, godObservation) {
+        //Render the agent view
+        const agentDimensions = getMatrixDimensions(agentObservation.costs);
+        for (let x = 0; x < agentDimensions[0]; x++) {
+            for (let y = 0; y < agentDimensions[1]; y++) {
                 let color = {r: 50, g: 50, b: 50};
-                // color.r = observation.costs[xi][yi] === 0 ? 0 : 230;
-                // color.g = 0;
-                // else if (observation.visibles[xi][yi] !== 0) {
-                //     color.b = 50;
-                //     // color.g = 50;
-                //     // color.r = 50;
-                // }
-                if (observation.visibles[xi][yi] === 0) { //UNCOMMENT TO SEE VISION, MOVE TO BOTTOM TO LIMIT VISION
-                    color={r:0,g:0, b:0};
+                // if (agentObservation.visibles[x][y] === 0) {
+                //     color = {r: 0, g: 0, b: 0};
+                // } else
+                if (x == agentObservation.position[0] && y == agentObservation.position[1] && agentObservation.costs[x][y] !== 0) {
+                    color = {r: 255, g: 255, b: 0};
+                } else if (x == agentObservation.position[0] && y == agentObservation.position[1]) {
+                    color = {r: 0, g: 255, b: 0};
+                } else if (agentObservation.costs[x][y] !== 0) {
+                    color = {r: 230, g: 0, b: 0};
                 }
-                if(observation.costs[xi][yi]!==0){
-                    color={r:230,g:0, b:0};
-                }
-                if (this._previousPositions[xi + ',' + yi]) {
-                    color={r:0,g:128, b:0}
-                }
-                if (this._previousPositions[xi + ',' + yi] && observation.costs[xi][yi]!==0) {
-                    color={r:255,g:255, b:0}
-                }
-                if (xi == observation.position.x && yi == observation.position.y) {
-                    color={r:0,g:255, b:0};
-                }
-                document.getElementById(xi + '-' + yi).style
+                this._agentTds[x][y].style
                     .backgroundColor = 'rgb(' + color.r + ',' + color.g + ',' + color.b + ')';
             }
         }
-        // this._previousPositions.splice(2);//@TODO could be more performant
-        this._previousPositions[observation.position.x + ',' + observation.position.y] = true;
+
+        //Render the god view
+        const godDimensions = getMatrixDimensions(godObservation.costs);
+        for (let y = 0; y < godDimensions[0]; y++) {
+            for (let x = 0; x < godDimensions[1]; x++) {
+                let color = {r: 50, g: 50, b: 50};
+                if (x == godObservation.position[0] && y == godObservation.position[1] && godObservation.costs[x][y] !== 0) {
+                    color = {r: 255, g: 255, b: 0};
+                } else if (x == godObservation.position[0] && y == godObservation.position[1]) {
+                    color = {r: 0, g: 255, b: 0};
+                } else if (this._previousPositions[x + ',' + y] && godObservation.costs[x][y] !== 0) {
+                    color = {r: 255, g: 255, b: 128}
+                } else if (this._previousPositions[x + ',' + y]) {
+                    color = {r: 0, g: 128, b: 0}
+                } else if (godObservation.costs[x][y] !== 0) {
+                    color = {r: 230, g: 0, b: 0};
+                }
+                // } else if (godObservation.visibles[x][y] === 0) {
+                //     color = {r: 0, g: 0, b: 0};
+                // }
+                this._godTds[x][y].style
+                    .backgroundColor = 'rgb(' + color.r + ',' + color.g + ',' + color.b + ')';
+            }
+        }
+
+        this._previousPositions[godObservation.position[0] + ',' + godObservation.position[1]] = true;
     };
 }

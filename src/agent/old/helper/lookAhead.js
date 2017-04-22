@@ -10,7 +10,7 @@ export default (observation, actionPathsToCheck)=> {
         let environmentState = new EnvironmentState(
             observation.size,
             observation.costs,
-            {x: observation.position.x, y: observation.position.y},
+            [observation.position[0], observation.position[1]],
             observation.score,
             false
         );
