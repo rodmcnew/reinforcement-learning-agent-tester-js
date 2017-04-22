@@ -39,9 +39,9 @@ export default class QLearnerPreTrained {
     getAction(observation) {
         const state = matrixToVector(observation.costs);
 
-        if (this._lastScore !== null) {
-            agent.learn(observation.score - this._lastScore);
-        }
+        // if (this._lastScore !== null) {
+        //     agent.learn(observation.score - this._lastScore);
+        // }
 
         // if(Math.random() < .001){
         //     cxonsole.lxog('q-learning-agent-save-data',JSON.stringify(agent.toJSON()));
