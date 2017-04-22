@@ -1,14 +1,15 @@
 import HtmlTableRenderer from './renderer/HtmlTableRenderer'
-import LookAheadWideAndShallow from './agent/LookAheadWideAndShallow'
+import ColumnCompare from './agent/ColumnCompare'
 import LookAheadWide from './agent/LookAheadWide'
 import LookThreeAdjacentThreeDown from './agent/LookThreeAdjacentThreeDown'
 // import LateralWallBouncer from './agent/LateralWallBouncer'
 import AlwaysDown from './agent/AlwaysDown'
-import QLearner from './agent/QLearner'
+import RL_DQN_5X5 from './agent/RL_DQN_5X5'
+import RL_DQN_5X5Viewport_PreTrained from './agent/RL_DQN_5X5Viewport_PreTrained'
 import {config as environmentConfig} from './environment'
 import GameRunner from './GameRunner'
 
-// import QLearnerPreTrained from './agent/QLearnerPreTrained'
+// import ReinforcementLearnerDeepQNetworkPreTrained from './agent/ReinforcementLearnerDeepQNetworkPreTrained'
 import './style.css'
 
 document.body.innerHTML =
@@ -26,7 +27,7 @@ document.body.innerHTML =
     '<pre id="score"></pre>' +
     '<pre>' +
     '\nGame Rules:' +
-    '\n- Get to the bottom row to complete the game' +
+    '\n- Gain ' + environmentConfig.pointsForCompletion + ' points for making it to the bottom row' +
     '\n- Gain ' + environmentConfig.verticalDeltaScore + ' points for every row lower you go' +
     '\n- Loose ' + environmentConfig.verticalDeltaScore + ' points for every row higher you go' +
     '\n- Loose ' + -environmentConfig.tileValueMap[1] + ' points when moving into a red square' +
@@ -48,11 +49,11 @@ let renderer = new HtmlTableRenderer(document.getElementById('rendererContainer'
 let gameRunner = new GameRunner(renderer, handleGameRunnerStatusChange);
 
 let agents = {
-    // 'QLearnerPreTrainedOn3000Games - ranked 83': QLearnerPreTrained,
-    'QLearner': QLearner,
-    'LookThreeAdjacentThreeDown - ranked 198': LookThreeAdjacentThreeDown,
-    'LookAheadWide - ranked 192': LookAheadWide,
-    'LookAheadWideAndShallow - ranked 157': LookAheadWideAndShallow,
+    'RL_DQN_5X5Viewport_PreTrained - ranked 201': RL_DQN_5X5Viewport_PreTrained,
+    'RL_DQN_5X5': RL_DQN_5X5,
+    'LookThreeAdjacentThreeDown - ranked 334': LookThreeAdjacentThreeDown,
+    'LookAheadWide - ranked 330': LookAheadWide,
+    'ColumnCompare - ranked 308': ColumnCompare,
     // 'LateralWallBouncer - ranked 78': LateralWallBouncer,
     'AlwaysDown - ranked negative 116': AlwaysDown,
 };
@@ -97,8 +98,8 @@ document.getElementById('interval').addEventListener('change', (event) => {
     } else {
         speed = value;
     }
-    if(newEnableRenderingValue != enableRendering){
-        enableRendering=newEnableRenderingValue;
+    if (newEnableRenderingValue != enableRendering) {
+        enableRendering = newEnableRenderingValue;
         newGame();
     }
     setupInterval();

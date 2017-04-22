@@ -951,7 +951,7 @@ const feelerPaths = [
     ['d', 'd', 'd', 'd', 's'],
 ];
 
-class LookAheadWideAndShallow {
+class ColumnCompare {
     /**
      * An agent that looks far to the sides but one tile downward
      *
@@ -962,7 +962,7 @@ class LookAheadWideAndShallow {
         return __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__helper_feeler__["a" /* getActionViaFeelers */])(observation, feelerPaths, null);
     }
 }
-/* harmony export (immutable) */ __webpack_exports__["a"] = LookAheadWideAndShallow;
+/* harmony export (immutable) */ __webpack_exports__["a"] = ColumnCompare;
 
 
 
@@ -1109,7 +1109,7 @@ env.getMaxNumActions = function () {
 var spec = {alpha: 0.01}; // see full options on DQN page
 let agent = new __WEBPACK_IMPORTED_MODULE_1__helper_rl__["a" /* rl */].DQNAgent(env, spec);
 
-class QLearner {
+class ReinforcementLearnerDeepQNetwork {
     constructor() {
         this._lastScore = null;
     }
@@ -1150,7 +1150,7 @@ class QLearner {
         return action;
     }
 }
-/* harmony export (immutable) */ __webpack_exports__["a"] = QLearner;
+/* harmony export (immutable) */ __webpack_exports__["a"] = ReinforcementLearnerDeepQNetwork;
 
 
 
@@ -5143,11 +5143,11 @@ function generateRandomTileTypes(size) {
 "use strict";
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__renderer_HtmlTableRenderer__ = __webpack_require__(12);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__agent_LookAheadWideAndShallow__ = __webpack_require__(9);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__agent_ColumnCompare__ = __webpack_require__(9);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__agent_LookAheadWide__ = __webpack_require__(8);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__agent_LookThreeAdjacentThreeDown__ = __webpack_require__(10);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__agent_AlwaysDown__ = __webpack_require__(7);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__agent_QLearner__ = __webpack_require__(11);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__agent_ReinforcementLearnerDeepQNetwork__ = __webpack_require__(11);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__environment__ = __webpack_require__(0);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__GameRunner__ = __webpack_require__(6);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__style_css__ = __webpack_require__(5);
@@ -5162,7 +5162,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
 
 
-// import QLearnerPreTrained from './agent/QLearnerPreTrained'
+// import ReinforcementLearnerDeepQNetworkPreTrained from './agent/ReinforcementLearnerDeepQNetworkPreTrained'
 
 
 document.body.innerHTML =
@@ -5202,11 +5202,11 @@ let renderer = new __WEBPACK_IMPORTED_MODULE_0__renderer_HtmlTableRenderer__["a"
 let gameRunner = new __WEBPACK_IMPORTED_MODULE_7__GameRunner__["a" /* default */](renderer, handleGameRunnerStatusChange);
 
 let agents = {
-    // 'QLearnerPreTrainedOn3000Games - ranked 83': QLearnerPreTrained,
-    'QLearner': __WEBPACK_IMPORTED_MODULE_5__agent_QLearner__["a" /* default */],
+    // 'ReinforcementLearnerDeepQNetworkPreTrainedOn3000Games - ranked 83': ReinforcementLearnerDeepQNetworkPreTrained,
+    'ReinforcementLearnerDeepQNetwork': __WEBPACK_IMPORTED_MODULE_5__agent_ReinforcementLearnerDeepQNetwork__["a" /* default */],
     'LookThreeAdjacentThreeDown - ranked 198': __WEBPACK_IMPORTED_MODULE_3__agent_LookThreeAdjacentThreeDown__["a" /* default */],
     'LookAheadWide - ranked 192': __WEBPACK_IMPORTED_MODULE_2__agent_LookAheadWide__["a" /* default */],
-    'LookAheadWideAndShallow - ranked 157': __WEBPACK_IMPORTED_MODULE_1__agent_LookAheadWideAndShallow__["a" /* default */],
+    'ColumnCompare - ranked 157': __WEBPACK_IMPORTED_MODULE_1__agent_ColumnCompare__["a" /* default */],
     // 'LateralWallBouncer - ranked 78': LateralWallBouncer,
     'AlwaysDown - ranked negative 116': __WEBPACK_IMPORTED_MODULE_4__agent_AlwaysDown__["a" /* default */],
 };

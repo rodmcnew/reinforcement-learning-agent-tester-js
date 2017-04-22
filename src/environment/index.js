@@ -5,13 +5,23 @@ import {generateInitialState} from './generateInitialState'
 
 export const config = {
     size: [31, 31],
-    // viewPortSize: [7, 5],
+
+    //TINY VIEWPORT
+    // viewPortSize: [5, 5],
     // viewPortOffset: [0, 1],
+
+    //SMALL VIEWPORT
+    // viewPortSize: [7, 7],
+    // viewPortOffset: [0, 1],
+
+    //NORMAL VIEWPORT
     viewPortSize: [9, 9],
     viewPortOffset: [0, 2],
+
     verticalDeltaScore: 10,
-    minTileValue: -40,
-    tileValueMap: [-1, -40]
+    minTileValue: -20,
+    tileValueMap: [-1, -20],
+    pointsForCompletion: 100
 };
 
 /**
@@ -57,11 +67,13 @@ export default class Environment {
                 }
                 break;
         }
+        this._state.isComplete = this._state.position[1] == config.size[1] - 1;// || this._state.score < -100;
 
         this._state.score = this._state.score + config.tileValueMap[this._state.tileTypes[this._state.position[0]][this._state.position[1]]];
 
-        this._state.isComplete = this._state.position[1] == config.size[1] - 1;// || this._state.score < -100;
-
+        if (this._state.isComplete) {
+            this._state.score += config.pointsForCompletion;
+        }
     }
 
     /**

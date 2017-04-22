@@ -47,6 +47,7 @@ export default class GameRunner {
         this._updateObservations();
 
         if (this._godObservation.isComplete) {//@Find better way to communicate "isComplete"
+            this._agent.getAction(this._agentObservation);//Ask for one more action so the agent can see the observation after its last action
             this._stats.lastGameScore = this._agentObservation.score;
             this._stats.scoreSum += this._agentObservation.score;
             this._stats.gameCount += 1;

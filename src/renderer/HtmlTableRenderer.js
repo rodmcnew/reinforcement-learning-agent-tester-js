@@ -59,8 +59,12 @@ export default class HtmlTableRenderer {
      */
     render(agentObservation, godObservation) {
         //Render the agent view
-        for (let x = 0; x < environmentConfig.viewPortSize[0]; x++) {
-            for (let y = 0; y < environmentConfig.viewPortSize[1]; y++) {
+        let agentViewPortSize = [
+            agentObservation.tileTypes.length,
+            agentObservation.tileTypes[0].length
+        ];
+        for (let x = 0; x < agentViewPortSize[0]; x++) {
+            for (let y = 0; y < agentViewPortSize[1]; y++) {
                 let color = {r: 50, g: 50, b: 50};
                 // if (agentObservation.visibles[x][y] === 0) {
                 //     color = {r: 0, g: 0, b: 0};
