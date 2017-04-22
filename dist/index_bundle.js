@@ -85,10 +85,11 @@ const config = {
     // viewPortOffset: [0, 1],
     viewPortSize: [9, 9],
     viewPortOffset: [0, 2],
-    verticalDeltaScore: 4,
-    maxTileCost: 9
+    verticalDeltaScore: 10,
+    minTileValue: -40,
+    tileValueMap: [-1, -40]
 };
-/* harmony export (immutable) */ __webpack_exports__["b"] = config;
+/* harmony export (immutable) */ __webpack_exports__["a"] = config;
 
 
 /**
@@ -135,7 +136,7 @@ class Environment {
                 break;
         }
 
-        this._state.score = this._state.score - this._state.costs[this._state.position[0]][this._state.position[1]];
+        this._state.score = this._state.score + config.tileValueMap[this._state.tileTypes[this._state.position[0]][this._state.position[1]]];
 
         this._state.isComplete = this._state.position[1] == config.size[1] - 1;// || this._state.score < -100;
 
@@ -156,9 +157,23 @@ class Environment {
             Math.ceil(this._state.position[1] - config.size[0] / 2) + config.viewPortOffset[1]
         ];
         const trimVector = [trimAmount[0], trimAmount[1]];
+
+        let tileTypes = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__tensorTools__["b" /* shiftAndTrimMatrix */])(this._state.tileTypes, shiftVector, 1, trimVector);
+
+
+        //Make the bottom exit row look safe by making its tile not red
+        const limit = config.size[1] - trimAmount[1] - shiftVector[1];
+        if (limit < config.viewPortSize[1]) {
+            for (let x = 0; x < config.viewPortSize[0]; x++) {
+                for (let y = limit; y < config.viewPortSize[1]; y++) {
+                    tileTypes[x][y] = 0;
+                }
+            }
+        }
+
         return new __WEBPACK_IMPORTED_MODULE_1__AgentObservation__["a" /* default */](
             // shiftAndTrimMatrix(getVisibleTiles(this._state), shiftVector, 1, trimVector),
-            __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__tensorTools__["a" /* shiftAndTrimMatrix */])(this._state.costs, shiftVector, 9, trimVector),
+            tileTypes,
             this._state.score,
             [
                 Math.floor(config.size[0] / 2) - trimAmount[0],
@@ -171,7 +186,7 @@ class Environment {
         return this._state
     }
 }
-/* harmony export (immutable) */ __webpack_exports__["a"] = Environment;
+/* harmony export (immutable) */ __webpack_exports__["b"] = Environment;
 
 
 
@@ -199,9 +214,9 @@ const oppositeActions = {
 
 const actionVectors = {
     //[dX, dY, dScore]
-    w: [0, -1, -__WEBPACK_IMPORTED_MODULE_0__environment__["b" /* config */].verticalDeltaScore],
+    w: [0, -1, -__WEBPACK_IMPORTED_MODULE_0__environment__["a" /* config */].verticalDeltaScore],
     a: [-1, 0, 0],
-    s: [0, 1, __WEBPACK_IMPORTED_MODULE_0__environment__["b" /* config */].verticalDeltaScore],
+    s: [0, 1, __WEBPACK_IMPORTED_MODULE_0__environment__["a" /* config */].verticalDeltaScore],
     d: [1, 0, 0],
 };
 
@@ -212,15 +227,15 @@ function getFeelerValue(observation, feelerSteps) {
         const vector = actionVectors[step];
         position = [position[0] + vector[0], position[1] + vector[1]];
         let cost;
-        if (typeof observation.costs[position[0]] === 'undefined' || typeof observation.costs[position[0]][position[1]] === 'undefined') {
-            cost = __WEBPACK_IMPORTED_MODULE_0__environment__["b" /* config */].maxTileCost * 2; //If going off map, make look very expensive
+        if (typeof observation.tileTypes[position[0]] === 'undefined' || typeof observation.tileTypes[position[0]][position[1]] === 'undefined') {
+            cost = __WEBPACK_IMPORTED_MODULE_0__environment__["a" /* config */].minTileValue * 2; //If going off map, make look very expensive
             // } else
             //     if (observation.visibles[position[0]][position[1]] === 0) {
             //     cost = 1;//config.maxTileCost / 2; //@TODO there must be a better way to deal with unknown tiles
         } else {
-            cost = observation.costs[position[0]][position[1]]
+            cost = __WEBPACK_IMPORTED_MODULE_0__environment__["a" /* config */].tileValueMap[observation.tileTypes[position[0]][position[1]]]
         }
-        value = value + vector[2] - cost;
+        value = value + vector[2] + cost;
     });
     return value;
 }
@@ -272,8 +287,8 @@ function getActionViaFeelers(observation, feelerPaths, lastAction) {
 /* unused harmony export matrixPositionExists */
 /* unused harmony export forEachValueInMatrix */
 /* unused harmony export shiftMatrix */
-/* harmony export (immutable) */ __webpack_exports__["a"] = shiftAndTrimMatrix;
-/* harmony export (immutable) */ __webpack_exports__["b"] = matrixToVector;
+/* harmony export (immutable) */ __webpack_exports__["b"] = shiftAndTrimMatrix;
+/* harmony export (immutable) */ __webpack_exports__["a"] = matrixToVector;
 function createMatrix(dimensions, defaultValue) {//@TODO take dimensions instead of size
     let matrix = [];
 
@@ -758,6 +773,91 @@ if(false) {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__environment__ = __webpack_require__(0);
+
+
+const defaultStats = {
+    currentScore: 0,
+    lastGameScore: 0,
+    scoreSum: 0,
+    gameCount: 0
+};
+
+class GameRunner {
+    constructor(renderer, onStatusChange) {
+        this._enableRendering = false;
+        this._renderer = renderer;
+        this._stats = Object.assign({}, defaultStats);
+        this._onStatusChange = onStatusChange;
+        this._agentObservation = null;
+        this._godObservation = null;
+
+        this.newGame = this.newGame.bind(this);
+        this.takeAction = this.takeAction.bind(this);
+        this.tick = this.tick.bind(this);
+        this.clearStats = this.clearStats.bind(this);
+    }
+
+    newGame(agent, enableRendering) {
+        this._agent = agent;
+        this._enableRendering = enableRendering;
+        this._environment = new __WEBPACK_IMPORTED_MODULE_0__environment__["b" /* default */]();
+        this._stats.currentScore = 0;//@TODO get from environment?
+        if (this._enableRendering) {
+            //@TODO have this render make the table its self inside a given div
+            this._renderer.clear();
+            this._renderer.render(this._environment.getAgentObservation(), this._environment.getGodObservation());
+        } else {
+            this._onStatusChange(this._stats);
+        }
+        this._updateObservations();
+    }
+
+    /**
+     *
+     * @param actionCode
+     */
+    takeAction(actionCode) {
+        //Apply the action and get the next observation
+        this._environment.applyAction(actionCode);
+        this._updateObservations();
+
+        if (this._godObservation.isComplete) {//@Find better way to communicate "isComplete"
+            this._stats.lastGameScore = this._agentObservation.score;
+            this._stats.scoreSum += this._agentObservation.score;
+            this._stats.gameCount += 1;
+            this.newGame(this._agent, this._enableRendering);
+        }
+
+        if (this._enableRendering) {
+            this._renderer.render(this._agentObservation, this._godObservation);
+            this._stats.currentScore = this._agentObservation.score;
+            this._onStatusChange(this._stats);
+        }
+    }
+
+    tick() {
+        const action = this._agent.getAction(this._agentObservation);
+        this.takeAction(action);
+    }
+
+    clearStats() {
+        this._stats = Object.assign({}, defaultStats);
+    }
+
+    _updateObservations(){
+        this._agentObservation = this._environment.getAgentObservation();
+        this._godObservation = this._environment.getGodObservation();
+    }
+}
+/* harmony export (immutable) */ __webpack_exports__["a"] = GameRunner;
+
+
+/***/ }),
+/* 7 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
 /**
  * An agent that just always moves downwards no matter what
  *
@@ -778,34 +878,40 @@ class AlwaysDown {
 
 
 /***/ }),
-/* 7 */
+/* 8 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__environment__ = __webpack_require__(0);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__helper_feeler__ = __webpack_require__(1);
 
 
-function getImmediateCosts(observation) {
-    const costOneBelow = observation.costs[observation.position[0]][observation.position[1] + 1];
-    const costOneToRight = observation.costs[observation.position[0] + 1][observation.position[1]];
-    const costOneToLeft = observation.costs[observation.position[0] - 1][observation.position[1]];
-    return {
-        'a': costOneToLeft,
-        's': costOneBelow - __WEBPACK_IMPORTED_MODULE_0__environment__["b" /* config */].verticalDeltaScore,
-        'd': costOneToRight
-    };
-}
+const feelerPaths = [
+    ['s', 's'],
 
-/**
- * An Agent that has a preferred lateral direction and moves that way if its less costly than moving down.
- *
- * @constructor
- */
-class LateralWallBouncer {
+    ['a', 's', 's'],
+    ['s', 'a', 's'],
+    ['a', 'a', 's', 's'],
+    ['s', 'a', 'a', 's'],
+    ['s', 'a', 'a', 'a', 's'],
+    ['a', 's', 'a', 'a', 's'],
+    ['a', 'a', 's', 'a', 's'],
+    ['a', 'a', 'a', 's', 's'],
+    ['a', 'a', 'a', 'a', 's', 's'],
+
+    ['d', 's', 's'],
+    ['s', 'd', 's'],
+    ['d', 'd', 's', 's'],
+    ['s', 'd', 'd', 's'],
+    ['s', 'd', 'd', 'd', 's'],
+    ['d', 's', 'd', 'd', 's'],
+    ['d', 'd', 's', 'd', 's'],
+    ['d', 'd', 'd', 's', 's'],
+    ['d', 'd', 'd', 'd', 's', 's'],
+];
+
+class LookAheadWide {
     constructor() {
-        this._state = {
-            lateralAvoidanceDirection: 'd'
-        }
+        this._state = {lastAction: null};
     }
 
     /**
@@ -814,32 +920,19 @@ class LateralWallBouncer {
      * @return {string} action code
      */
     getAction(observation) {
-        let immediateCosts = getImmediateCosts(observation);
+        let action = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__helper_feeler__["a" /* getActionViaFeelers */])(observation, feelerPaths, this._state.lastAction);
 
-        //If we are on the edge of the game, reverse the lateral avoidance direction
-        if (observation.position[0] == __WEBPACK_IMPORTED_MODULE_0__environment__["b" /* config */].size[0] - 1) {
-            this._state.lateralAvoidanceDirection = 'a';
-        } else if (observation.position[0] == 0) {
-            this._state.lateralAvoidanceDirection = 'd';
-        }
-
-        let costToSide = this._state.lateralAvoidanceDirection == 'd' ? immediateCosts.d : immediateCosts.a;
-
-        let action = 's';
-
-        if (immediateCosts.s > costToSide) {
-            action = this._state.lateralAvoidanceDirection;
-        }
+        this._state.lastAction = action;
 
         return action;
     }
 }
-/* harmony export (immutable) */ __webpack_exports__["a"] = LateralWallBouncer;
+/* harmony export (immutable) */ __webpack_exports__["a"] = LookAheadWide;
 
 
 
 /***/ }),
-/* 8 */
+/* 9 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -860,6 +953,7 @@ const feelerPaths = [
 
 class LookAheadWideAndShallow {
     /**
+     * An agent that looks far to the sides but one tile downward
      *
      * @param {AgentObservation} observation
      * @return {string} action code
@@ -873,7 +967,7 @@ class LookAheadWideAndShallow {
 
 
 /***/ }),
-/* 9 */
+/* 10 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -982,58 +1076,6 @@ class LookAheadWide {
 
 
 /***/ }),
-/* 10 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__helper_feeler__ = __webpack_require__(1);
-
-
-const feelerPaths = [
-    ['s', 's'],
-
-    ['a', 's', 's'],
-    ['s', 'a', 's'],
-    ['a', 'a', 's', 's'],
-    ['s', 'a', 'a', 's'],
-    ['s', 'a', 'a', 'a', 's'],
-    ['a', 's', 'a', 'a', 's'],
-    ['a', 'a', 's', 'a', 's'],
-    ['a', 'a', 'a', 's', 's'],
-
-    ['d', 's', 's'],
-    ['s', 'd', 's'],
-    ['d', 'd', 's', 's'],
-    ['s', 'd', 'd', 's'],
-    ['s', 'd', 'd', 'd', 's'],
-    ['d', 's', 'd', 'd', 's'],
-    ['d', 'd', 's', 'd', 's'],
-    ['d', 'd', 'd', 's', 's'],
-];
-
-class LookAheadWide {
-    constructor() {
-        this._state = {lastAction: null};
-    }
-
-    /**
-     *
-     * @param {AgentObservation} observation
-     * @return {string} action code
-     */
-    getAction(observation) {
-        let action = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__helper_feeler__["a" /* getActionViaFeelers */])(observation, feelerPaths, this._state.lastAction);
-
-        this._state.lastAction = action;
-
-        return action;
-    }
-}
-/* harmony export (immutable) */ __webpack_exports__["a"] = LookAheadWide;
-
-
-
-/***/ }),
 /* 11 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -1053,7 +1095,7 @@ const actions = [
 ];
 
 
-const numberOfStates = __WEBPACK_IMPORTED_MODULE_2__environment__["b" /* config */].viewPortSize[0] * __WEBPACK_IMPORTED_MODULE_2__environment__["b" /* config */].viewPortSize[1];
+const numberOfStates = __WEBPACK_IMPORTED_MODULE_2__environment__["a" /* config */].viewPortSize[0] * __WEBPACK_IMPORTED_MODULE_2__environment__["a" /* config */].viewPortSize[1];
 // create an environment object
 var env = {};
 env.getNumStates = function () {
@@ -1078,7 +1120,7 @@ class QLearner {
      * @return {string} action code
      */
     getAction(observation) {
-        const state = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__tensorTools__["b" /* matrixToVector */])(observation.costs);
+        const state = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__tensorTools__["a" /* matrixToVector */])(observation.tileTypes);
 
         if (this._lastScore !== null) {
             agent.learn(observation.score - this._lastScore);
@@ -1086,9 +1128,16 @@ class QLearner {
 
         if (Math.random() < .001) {
             if (!document.getElementById('q-learning-data')) {
-                let element = document.createElement("TEXTAREA");
-                element.setAttribute('id','q-learning-data');
-                document.body.appendChild(element);
+                let div = document.createElement('div');
+                let label = document.createElement('div');
+                label.innerHTML='<br/>Q Learner Internal State Dump';
+                let textArea = document.createElement("TEXTAREA");
+                textArea.style.width='100%';
+                textArea.style.height='10em';
+                textArea.setAttribute('id','q-learning-data');
+                div.appendChild(label);
+                div.appendChild(textArea);
+                document.body.appendChild(div);
             }
             document.getElementById('q-learning-data').innerHTML = JSON.stringify(agent.toJSON());
         }
@@ -1148,16 +1197,16 @@ class HtmlTableRenderer {
         containerElement.innerHTML = '<div class="InfectionGameHtmlTableRender">' +
             '<div>' +
             'Agent View' +
-            generateTableHtml(__WEBPACK_IMPORTED_MODULE_2__environment__["b" /* config */].viewPortSize, 'renderer-table-canvas-agent') +
+            generateTableHtml(__WEBPACK_IMPORTED_MODULE_2__environment__["a" /* config */].viewPortSize, 'renderer-table-canvas-agent') +
             '</div>' +
             '<div>' +
             'Environment View' +
-            generateTableHtml(__WEBPACK_IMPORTED_MODULE_2__environment__["b" /* config */].size, 'renderer-table-canvas-god') +
+            generateTableHtml(__WEBPACK_IMPORTED_MODULE_2__environment__["a" /* config */].size, 'renderer-table-canvas-god') +
             '</div>' +
             '</div>';
 
-        this._agentTds = getTdElements(__WEBPACK_IMPORTED_MODULE_2__environment__["b" /* config */].viewPortSize, 'renderer-table-canvas-agent');
-        this._godTds = getTdElements(__WEBPACK_IMPORTED_MODULE_2__environment__["b" /* config */].size, 'renderer-table-canvas-god')
+        this._agentTds = getTdElements(__WEBPACK_IMPORTED_MODULE_2__environment__["a" /* config */].viewPortSize, 'renderer-table-canvas-agent');
+        this._godTds = getTdElements(__WEBPACK_IMPORTED_MODULE_2__environment__["a" /* config */].size, 'renderer-table-canvas-god')
     }
 
     /**
@@ -1175,17 +1224,17 @@ class HtmlTableRenderer {
      */
     render(agentObservation, godObservation) {
         //Render the agent view
-        for (let x = 0; x < __WEBPACK_IMPORTED_MODULE_2__environment__["b" /* config */].viewPortSize[0]; x++) {
-            for (let y = 0; y < __WEBPACK_IMPORTED_MODULE_2__environment__["b" /* config */].viewPortSize[1]; y++) {
+        for (let x = 0; x < __WEBPACK_IMPORTED_MODULE_2__environment__["a" /* config */].viewPortSize[0]; x++) {
+            for (let y = 0; y < __WEBPACK_IMPORTED_MODULE_2__environment__["a" /* config */].viewPortSize[1]; y++) {
                 let color = {r: 50, g: 50, b: 50};
                 // if (agentObservation.visibles[x][y] === 0) {
                 //     color = {r: 0, g: 0, b: 0};
                 // } else
-                if (x == agentObservation.position[0] && y == agentObservation.position[1] && agentObservation.costs[x][y] !== 0) {
+                if (x == agentObservation.position[0] && y == agentObservation.position[1] && agentObservation.tileTypes[x][y] !== 0) {
                     color = {r: 255, g: 255, b: 0};
                 } else if (x == agentObservation.position[0] && y == agentObservation.position[1]) {
                     color = {r: 0, g: 255, b: 0};
-                } else if (agentObservation.costs[x][y] !== 0) {
+                } else if (agentObservation.tileTypes[x][y] !== 0) {
                     color = {r: 230, g: 0, b: 0};
                 }
                 this._agentTds[x][y].style
@@ -1194,18 +1243,18 @@ class HtmlTableRenderer {
         }
 
         //Render the god view
-        for (let y = 0; y < __WEBPACK_IMPORTED_MODULE_2__environment__["b" /* config */].size[0]; y++) {
-            for (let x = 0; x < __WEBPACK_IMPORTED_MODULE_2__environment__["b" /* config */].size[1]; x++) {
+        for (let y = 0; y < __WEBPACK_IMPORTED_MODULE_2__environment__["a" /* config */].size[0]; y++) {
+            for (let x = 0; x < __WEBPACK_IMPORTED_MODULE_2__environment__["a" /* config */].size[1]; x++) {
                 let color = {r: 50, g: 50, b: 50};
-                if (x == godObservation.position[0] && y == godObservation.position[1] && godObservation.costs[x][y] !== 0) {
+                if (x == godObservation.position[0] && y == godObservation.position[1] && godObservation.tileTypes[x][y] !== 0) {
                     color = {r: 255, g: 255, b: 0};
                 } else if (x == godObservation.position[0] && y == godObservation.position[1]) {
                     color = {r: 0, g: 255, b: 0};
-                } else if (this._previousPositions[x + ',' + y] && godObservation.costs[x][y] !== 0) {
+                } else if (this._previousPositions[x + ',' + y] && godObservation.tileTypes[x][y] !== 0) {
                     color = {r: 255, g: 255, b: 128}
                 } else if (this._previousPositions[x + ',' + y]) {
                     color = {r: 0, g: 128, b: 0}
-                } else if (godObservation.costs[x][y] !== 0) {
+                } else if (godObservation.tileTypes[x][y] !== 0) {
                     color = {r: 230, g: 0, b: 0};
                 }
                 // } else if (godObservation.visibles[x][y] === 0) {
@@ -3175,7 +3224,7 @@ exports = module.exports = __webpack_require__(3)(undefined);
 
 
 // module
-exports.push([module.i, "#info {\n    margin-right: 2em;\n    /*float: left*/\n}\n\n.InfectionGameHtmlTableRender {\n    /*float: left;*/\n}\n\n.InfectionGameHtmlTableRender table {\n    padding-right: 2em;\n    border-spacing: 0;\n}\n\n.InfectionGameHtmlTableRender > div {\n    float: left;\n    border-spacing: 0;\n    margin-right: 2em;\n}\n\n.InfectionGameHtmlTableRender table.renderer-table-canvas-agent {\n    padding: 10px;\n    background-color: black;\n}\n\n.InfectionGameHtmlTableRender .renderer-table-canvas-god td {\n    height: 5px;\n    width: 5px;\n}\n.InfectionGameHtmlTableRender .renderer-table-canvas-agent td {\n    height: 20px;\n    width: 20px;\n}\n", ""]);
+exports.push([module.i, "#info {\n    margin-right: 2em;\n    /*float: left*/\n}\n\n.InfectionGameHtmlTableRender {\n    /*float: left;*/\n    overflow: auto;\n}\n\n.InfectionGameHtmlTableRender table {\n    padding-right: 2em;\n    border-spacing: 0;\n}\n\n.InfectionGameHtmlTableRender > div {\n    float: left;\n    border-spacing: 0;\n    margin-right: 2em;\n}\n\n.InfectionGameHtmlTableRender table.renderer-table-canvas-agent {\n    padding: 10px;\n    background-color: black;\n}\n\n.InfectionGameHtmlTableRender .renderer-table-canvas-god td {\n    height: 5px;\n    width: 5px;\n}\n.InfectionGameHtmlTableRender .renderer-table-canvas-agent td {\n    height: 20px;\n    width: 20px;\n}\n", ""]);
 
 // exports
 
@@ -4972,15 +5021,15 @@ class AgentObservation {
     /**
      *
     // * @param {Array} visibles
-     * @param {Array} costs
+     * @param {Array} tileTypes
      * @param {int} score
      * @param {Array} position
      */
-    constructor(/*visibles,*/ costs, score, position) {
+    constructor(/*visibles,*/ tileTypes, score, position) {
         /**
          * @type {Array}
          */
-        this.costs = costs;
+        this.tileTypes = tileTypes;
         // this.visibles = visibles;
         /**
          * @type {Number}
@@ -5003,16 +5052,16 @@ class AgentObservation {
  */
 class State {
     /**
-     * @param {Array} costs
+     * @param {Array} tileTypes
      * @param {Array} position [x,y]
      * @param {Number} score
      * @param {Boolean} isComplete
      */
-    constructor(costs, position, score, isComplete) {
+    constructor(tileTypes, position, score, isComplete) {
         /**
          * @type {Array}
          */
-        this.costs = costs;
+        this.tileTypes = tileTypes;
         /**
          * @type {Array} position [x,y]
          */
@@ -5048,8 +5097,8 @@ class State {
  */
 const generateInitialState = () => {
     return new __WEBPACK_IMPORTED_MODULE_0__State__["a" /* default */](
-        generateRandomCosts(__WEBPACK_IMPORTED_MODULE_1__index__["b" /* config */].size),
-        [Math.floor(__WEBPACK_IMPORTED_MODULE_1__index__["b" /* config */].size[0] / 2), 0],
+        generateRandomTileTypes(__WEBPACK_IMPORTED_MODULE_1__index__["a" /* config */].size),
+        [Math.floor(__WEBPACK_IMPORTED_MODULE_1__index__["a" /* config */].size[0] / 2), 0],
         0,
         false
     );
@@ -5058,30 +5107,32 @@ const generateInitialState = () => {
 
 
 /**
- * Generates a random set of costs for generated random environment states
+ * Generates a random set of tileTypes for generated random environment states
  *
  * @param {Array} size
  * @returns {Array}
  */
-function generateRandomCosts(size) {
-    const costs = [];
+function generateRandomTileTypes(size) {
+    const tileTypes = [];
     const min = 1;
     const max = 9;
     for (let xi = 0; xi < size[0]; xi++) {
-        costs[xi] = [];
+        tileTypes[xi] = [];
         for (let yi = 0; yi < size[1]; yi++) {
-            let cost = Math.floor(Math.random() * (max - min + 1)) + min;
+            let randomValue = Math.floor(Math.random() * (max - min + 1)) + min;
 
-            if (cost < 7) {
-                cost = 0;
+            let tileType;
+
+            if (randomValue < 7) {
+                tileType = 0;
             } else {
-                cost = 9;
+                tileType = 1;
             }
 
-            costs[xi][yi] = cost;
+            tileTypes[xi][yi] = tileType;
         }
     }
-    return costs;
+    return tileTypes;
 }
 
 
@@ -5091,19 +5142,21 @@ function generateRandomCosts(size) {
 
 "use strict";
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__environment__ = __webpack_require__(0);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__renderer_HtmlTableRenderer__ = __webpack_require__(12);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__agent_LookAheadWideAndShallow__ = __webpack_require__(8);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__agent_LookAheadWide__ = __webpack_require__(10);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__agent_LookThreeAdjacentThreeDown__ = __webpack_require__(9);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__agent_LateralWallBouncer__ = __webpack_require__(7);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__agent_AlwaysDown__ = __webpack_require__(6);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__agent_QLearner__ = __webpack_require__(11);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__renderer_HtmlTableRenderer__ = __webpack_require__(12);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__agent_LookAheadWideAndShallow__ = __webpack_require__(9);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__agent_LookAheadWide__ = __webpack_require__(8);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__agent_LookThreeAdjacentThreeDown__ = __webpack_require__(10);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__agent_AlwaysDown__ = __webpack_require__(7);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__agent_QLearner__ = __webpack_require__(11);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__environment__ = __webpack_require__(0);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__GameRunner__ = __webpack_require__(6);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__style_css__ = __webpack_require__(5);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__style_css___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_8__style_css__);
 
 
 
+
+// import LateralWallBouncer from './agent/LateralWallBouncer'
 
 
 
@@ -5127,10 +5180,11 @@ document.body.innerHTML =
     '<pre id="score"></pre>' +
     '<pre>' +
     '\nGame Rules:' +
-    '\n- Gain 4 points for every row lower you go' +
-    '\n- Loose 4 points for every row higher you go' +
-    '\n- Loose 9 points any time you move in a red square' +
     '\n- Get to the bottom row to complete the game' +
+    '\n- Gain ' + __WEBPACK_IMPORTED_MODULE_6__environment__["a" /* config */].verticalDeltaScore + ' points for every row lower you go' +
+    '\n- Loose ' + __WEBPACK_IMPORTED_MODULE_6__environment__["a" /* config */].verticalDeltaScore + ' points for every row higher you go' +
+    '\n- Loose ' + -__WEBPACK_IMPORTED_MODULE_6__environment__["a" /* config */].tileValueMap[1] + ' points when moving into a red square' +
+    '\n- Loose ' + -__WEBPACK_IMPORTED_MODULE_6__environment__["a" /* config */].tileValueMap[0] + ' points when moving into a grey square' +
     '</pre>' +
     '</div>' +
     '<div id="rendererContainer"></div>';
@@ -5139,24 +5193,22 @@ const scoreElement = document.getElementById('score');
 let enableRendering = true;
 let autoPlay = true;
 let environment;
-let scoreSum = 0;
-let gameCount = 0;
-let lastGameScore = 0;
 let speed = 250;
 let intervalReference = null;
 let agent;
 let currentAgentName;
-let renderer = new __WEBPACK_IMPORTED_MODULE_1__renderer_HtmlTableRenderer__["a" /* default */](document.getElementById('rendererContainer'));
+let renderer = new __WEBPACK_IMPORTED_MODULE_0__renderer_HtmlTableRenderer__["a" /* default */](document.getElementById('rendererContainer'));
 
+let gameRunner = new __WEBPACK_IMPORTED_MODULE_7__GameRunner__["a" /* default */](renderer, handleGameRunnerStatusChange);
 
 let agents = {
     // 'QLearnerPreTrainedOn3000Games - ranked 83': QLearnerPreTrained,
-    'QLearner': __WEBPACK_IMPORTED_MODULE_7__agent_QLearner__["a" /* default */],
-    'LookThreeAdjacentThreeDown - ranked 103': __WEBPACK_IMPORTED_MODULE_4__agent_LookThreeAdjacentThreeDown__["a" /* default */],
-    'LookAheadWide - ranked 101': __WEBPACK_IMPORTED_MODULE_3__agent_LookAheadWide__["a" /* default */],
-    'LookAheadWideAndShallow - ranked 94': __WEBPACK_IMPORTED_MODULE_2__agent_LookAheadWideAndShallow__["a" /* default */],
-    'LateralWallBouncer - ranked 78': __WEBPACK_IMPORTED_MODULE_5__agent_LateralWallBouncer__["a" /* default */],
-    'AlwaysDown - ranked 29': __WEBPACK_IMPORTED_MODULE_6__agent_AlwaysDown__["a" /* default */],
+    'QLearner': __WEBPACK_IMPORTED_MODULE_5__agent_QLearner__["a" /* default */],
+    'LookThreeAdjacentThreeDown - ranked 198': __WEBPACK_IMPORTED_MODULE_3__agent_LookThreeAdjacentThreeDown__["a" /* default */],
+    'LookAheadWide - ranked 192': __WEBPACK_IMPORTED_MODULE_2__agent_LookAheadWide__["a" /* default */],
+    'LookAheadWideAndShallow - ranked 157': __WEBPACK_IMPORTED_MODULE_1__agent_LookAheadWideAndShallow__["a" /* default */],
+    // 'LateralWallBouncer - ranked 78': LateralWallBouncer,
+    'AlwaysDown - ranked negative 116': __WEBPACK_IMPORTED_MODULE_4__agent_AlwaysDown__["a" /* default */],
 };
 for (agent in agents) {
     //Select the first agent in the list
@@ -5164,50 +5216,13 @@ for (agent in agents) {
     break;
 }
 
-function clearHistory() {
-    gameCount = 0;
-    lastGameScore = 0;
-    scoreSum = 0;
-}
-
-function renderScore(score) {
+function handleGameRunnerStatusChange(stats) {
     scoreElement.innerHTML =
         'Agent: ' + currentAgentName +
-        '\nCurrent Score: ' + score +
-        '\nLast Game Final Score: ' + lastGameScore +
-        '\nAvg Final Score: ' + (Math.round(scoreSum / gameCount) || 0) +
-        '\nGame Count: ' + gameCount;
-}
-
-function newGame() {
-    environment = new __WEBPACK_IMPORTED_MODULE_0__environment__["a" /* default */]();
-
-    agent = new agents[currentAgentName];
-
-    if (enableRendering) {
-        //@TODO have this render make the table its self inside a given div
-        renderer.clear();
-        renderer.render(environment.getAgentObservation(), environment.getGodObservation());
-    } else {
-        renderScore(0);//Makes score show up between games when rendering is disabled
-    }
-}
-
-function takeAction(actionCode, agentObservation) {
-    environment.applyAction(actionCode);
-    let godObservation = environment.getGodObservation();
-
-    if (godObservation.isComplete) {//@Find better way to communicate "isComplete"
-        lastGameScore = agentObservation.score;
-        scoreSum += agentObservation.score;
-        gameCount += 1;
-        newGame();
-    }
-
-    if (enableRendering) {
-        renderer.render(agentObservation, godObservation);
-        renderScore(agentObservation.score);
-    }
+        '\nCurrent Score: ' + stats.currentScore +
+        '\nLast Game Final Score: ' + stats.lastGameScore +
+        '\nAvg Final Score: ' + (Math.round(stats.scoreSum / stats.gameCount) || 0) +
+        '\nGame Count: ' + stats.gameCount;
 }
 
 let agentSelectorElement = document.getElementById('agentSelector');
@@ -5219,16 +5234,16 @@ for (agent in agents) {
 }
 agentSelectorElement.addEventListener('change', (event) => {
     currentAgentName = agentSelectorElement.value;
-    clearHistory();
-    newGame();
+    gameRunner.clearStats();
+    newGame()
 });
 
 document.getElementById('interval').addEventListener('change', (event) => {
     const value = event.target.value;
-    enableRendering = true;
+    let newEnableRenderingValue = true;
     autoPlay = true;
     if (value === 'no-render') {
-        enableRendering = false;
+        newEnableRenderingValue = false;
         speed = 0;
         renderer.clear();
     } else if (value === 'paused') {
@@ -5236,25 +5251,23 @@ document.getElementById('interval').addEventListener('change', (event) => {
     } else {
         speed = value;
     }
+    if(newEnableRenderingValue != enableRendering){
+        enableRendering=newEnableRenderingValue;
+        newGame();
+    }
     setupInterval();
 });
-
-function tick() {
-    const agentObservation = environment.getAgentObservation();
-    const action = agent.getAction(agentObservation);
-    takeAction(action, agentObservation);
-}
 
 function setupInterval() {
     clearInterval(intervalReference);
     if (autoPlay) {
         if (enableRendering) {
-            intervalReference = setInterval(tick, speed);
+            intervalReference = setInterval(gameRunner.tick, speed);
         } else {
             //Normal ticking takes 3ms between ticks which is not fast enough, so tick 100 times
             intervalReference = setInterval(function () {
                 for (let i = 0; i < 100; i++) {
-                    tick();
+                    gameRunner.tick();
                 }
             }, 0);
         }
@@ -5262,13 +5275,16 @@ function setupInterval() {
 }
 
 document.body.addEventListener('keydown', function (event) {
-    takeAction(event.key, environment.getAgentObservation());
-    if (enableRendering) {
-        const agentObservation = environment.getAgentObservation();
-        renderer.render(agentObservation, environment.getGodObservation());
-        renderScore(agentObservation.score);
-    }
+    gameRunner.takeAction(event.key);
+    // if (enableRendering) {
+    //     const agentObservation = environment.getAgentObservation();
+    //     renderer.render(agentObservation, environment.getGodObservation());
+    // }
 });
+
+function newGame() {
+    gameRunner.newGame(new agents[currentAgentName], enableRendering);
+}
 
 newGame();
 setupInterval();
