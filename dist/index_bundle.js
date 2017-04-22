@@ -63,7 +63,7 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 21);
+/******/ 	return __webpack_require__(__webpack_require__.s = 24);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -71,48 +71,106 @@
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__environment__ = __webpack_require__(1);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__tensorTools__ = __webpack_require__(4);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__AgentObservation__ = __webpack_require__(21);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__generateInitialState__ = __webpack_require__(23);
+
+
+
+// import {getVisibleTiles} from './getVisibleTiles'
+
+const config = {
+    size: [31, 31],
+    viewPortSize: [9, 9],
+    verticalDeltaScore: 4,
+    maxTileCost: 9
+};
+/* harmony export (immutable) */ __webpack_exports__["b"] = config;
 
 
 /**
- * An agent that looks ahead one square below, and to both sides. It then chooses the least costly.
- *
- * @constructor
+ * The main environment class for this game. This is the public interface for the game.
  */
-/* harmony default export */ __webpack_exports__["a"] = ((observation, actionPathsToCheck)=> {
-    function modelActionPathCost(actions, observation) {
-        let environmentState = new __WEBPACK_IMPORTED_MODULE_0__environment__["b" /* State */](
-            observation.size,
-            observation.costs,
-            {x: observation.position.x, y: observation.position.y},
-            observation.score,
-            false
+class Environment {
+    constructor() {
+        this._state = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2__generateInitialState__["a" /* generateInitialState */])();
+
+        //Bind these to create proper JavaScript "this" context
+        this.applyAction = this.applyAction.bind(this);
+        this.getAgentObservation = this.getAgentObservation.bind(this);
+        this.getGodObservation = this.getGodObservation.bind(this);
+    }
+
+    /**
+     * Mutates the environment's internal state by processing the given action
+     *
+     * @param actionCode
+     */
+    applyAction(actionCode) {
+        switch (actionCode) {
+            case "w":
+                if (this._state.position[1] > 0) {
+                    this._state.position[1]--;
+                }
+                this._state.score = this._state.score - config.verticalDeltaScore;
+                break;
+            case "a":
+                if (this._state.position[0] > 0) {
+                    this._state.position[0]--;
+                }
+                break;
+            case "s":
+                if (this._state.position[1] < config.size[1] - 1) {
+                    this._state.position[1]++;
+                }
+                this._state.score = this._state.score + config.verticalDeltaScore;
+                break;
+            case "d":
+                if (this._state.position[0] < config.size[0] - 1) {
+                    this._state.position[0]++;
+                }
+                break;
+        }
+
+        this._state.score = this._state.score - this._state.costs[this._state.position[0]][this._state.position[1]];
+
+        this._state.isComplete = this._state.position[1] == config.size[1] - 1 || this._state.score < -100;
+
+    }
+
+    /**
+     * Returns what the agent can see about the current environment state
+     *
+     * @returns {AgentObservation}
+     */
+    getAgentObservation() {
+        const positionOffset = [0, 2];
+        const trimAmount = [
+            Math.floor((config.size[0] - config.viewPortSize[0]) / 2),
+            Math.floor((config.size[1] - config.viewPortSize[1]) / 2)
+        ];
+        const shiftVector = [
+            Math.ceil(this._state.position[0] - config.size[0] / 2),
+            Math.ceil(this._state.position[1] - config.size[0] / 2) + positionOffset[1]
+        ];
+        const trimVector = [trimAmount[0], trimAmount[1]];
+        return new __WEBPACK_IMPORTED_MODULE_1__AgentObservation__["a" /* default */](
+            // shiftAndTrimMatrix(getVisibleTiles(this._state), shiftVector, 1, trimVector),
+            __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__tensorTools__["a" /* shiftAndTrimMatrix */])(this._state.costs, shiftVector, 9, trimVector),
+            this._state.score,
+            [
+                Math.floor(config.size[0] / 2) - trimAmount[0],
+                Math.floor(config.size[1] / 2) - trimAmount[1] - positionOffset[1]
+            ]
         );
-        let startingScore = observation.score;
-        for (let i = 0; i < actions.length; i++) {
-            environmentState = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__environment__["c" /* applyAction */])(environmentState, actions[i]);
-        }
-        return startingScore - environmentState.score;
     }
 
-    function pathAIsBetter(pathA, pathB) {
-        return pathA.cost < pathB.cost
-            || (
-                pathA.cost == pathB.cost
-                && pathA.path.length < pathB.path.length
-            )
+    getGodObservation() {
+        return this._state
     }
+}
+/* harmony export (immutable) */ __webpack_exports__["a"] = Environment;
 
-    let lowestCostPathIndex = 0;
-    for (let i = 0; i < actionPathsToCheck.length; i++) {
-        actionPathsToCheck[i].cost = modelActionPathCost(actionPathsToCheck[i].path, observation);
-        if (pathAIsBetter(actionPathsToCheck[i], actionPathsToCheck[lowestCostPathIndex])) {
-            lowestCostPathIndex = i;
-        }
-    }
-
-    return actionPathsToCheck[lowestCostPathIndex].path[0];
-});
 
 
 /***/ }),
@@ -120,256 +178,85 @@
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-function createMatrix(size) {
-    var matrix = [];
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__environment__ = __webpack_require__(0);
+/* unused harmony export getFeelerValue */
+/* unused harmony export getFeelerValues */
+/* unused harmony export filterPathsWithFirstAction */
+/* unused harmony export getBestFeeler */
+/* harmony export (immutable) */ __webpack_exports__["a"] = getActionViaFeelers;
 
-    for (let yi = 0; yi < size; yi++) {
-        matrix[yi] = [];
-        for (let xi = 0; xi < size; xi++) {
-            matrix[yi][xi] = 0;
+
+const oppositeActions = {
+    w: 's',
+    a: 'd',
+    s: 'w',
+    d: 'a'
+};
+/* unused harmony export oppositeActions */
+
+
+const actionVectors = {
+    //[dX, dY, dScore]
+    w: [0, -1, -__WEBPACK_IMPORTED_MODULE_0__environment__["b" /* config */].verticalDeltaScore],
+    a: [-1, 0, 0],
+    s: [0, 1, __WEBPACK_IMPORTED_MODULE_0__environment__["b" /* config */].verticalDeltaScore],
+    d: [1, 0, 0],
+};
+
+function getFeelerValue(observation, feelerSteps) {
+    let position = [observation.position[0], observation.position[1]];
+    let value = 0;
+    feelerSteps.forEach((step) => {
+        const vector = actionVectors[step];
+        position = [position[0] + vector[0], position[1] + vector[1]];
+        let cost;
+        if (typeof observation.costs[position[0]] === 'undefined' || typeof observation.costs[position[0]][position[1]] === 'undefined') {
+            cost = __WEBPACK_IMPORTED_MODULE_0__environment__["b" /* config */].maxTileCost * 2; //If going off map, make look very expensive
+            // } else
+            //     if (observation.visibles[position[0]][position[1]] === 0) {
+            //     cost = 1;//config.maxTileCost / 2; //@TODO there must be a better way to deal with unknown tiles
+        } else {
+            cost = observation.costs[position[0]][position[1]]
         }
-    }
-
-    return matrix;
+        value = value + vector[2] - cost;
+    });
+    return value;
 }
 
-function getVisibleCosts(state) {
-    const visibles = createMatrix(state.size);
-    const directions = [
-        {x: 1, y: 0}, {x: -1, y: 0}, {x: 0, y: 1}, {x: 0, y: -1},
-        {x: 1, y: 1}, {x: 1, y: -1}, {x: -1, y: 1}, {x: -1, y: -1},
-    ];
-    const adjacentDirections = [{x: 1, y: 0}, {x: -1, y: 0}, {x: 0, y: 1}, {x: 0, y: -1}];
-
-    function positionExists(x, y) {
-        return typeof state.costs[x] !== 'undefined' && typeof state.costs[x][y] !== 'undefined';
-    }
-
-    directions.forEach((direction)=> {
-        let x = state.position.x;
-        let y = state.position.y;
-        let lastWasWall = false;
-        while (positionExists(x, y) && !lastWasWall) {
-            visibles[x][y] = 1;
-            lastWasWall = state.costs[x][y] !== 0;
-            x = x + direction.x;
-            y = y + direction.y;
-            if (lastWasWall) {
-                continue; //Don't look adjacent if we are already in a wall.
-            }
-            adjacentDirections.forEach((subDirection)=> { //@TODO this processes the same squares many times
-                let xAdj = x + subDirection.x;
-                let yAdj = y + subDirection.y;
-                if (positionExists(xAdj, yAdj)) {
-                    visibles[xAdj][yAdj] = 1;
-                }
-            });
+function getFeelerValues(observation, feelerPaths) {
+    return feelerPaths.map((feelerPath) => {
+        return {
+            path: feelerPath,
+            value: getFeelerValue(observation, feelerPath)
         }
     });
-
-    return visibles;
 }
 
-/**
- * The main environment class for this game. This is the public interface for the game.
- */
-class Environment {
-    constructor(environmentConfig) {
-        this._environmentState = generateInitialState(environmentConfig);
-    }
-
-    applyAction(actionCode) {
-        this._environmentState = applyAction(this._environmentState, actionCode);
-    }
-
-    getObservation() {
-        return getObservation(this._environmentState);
-    }
+function filterPathsWithFirstAction(paths, blacklistedFirstAction) {
+    return paths.filter((path) => path[0] !== blacklistedFirstAction);
 }
-/* harmony export (immutable) */ __webpack_exports__["a"] = Environment;
 
-
-/**
- * Data model that holds the environment's full internal state
- */
-class State {
-    /**
-     * @param {Number} size
-     * @param {Array} costs
-     * @param {{x: Number, y: Number}} position
-     * @param {Number} score
-     * @param {Boolean} isComplete
-     */
-    constructor(size, costs, position, score, isComplete) {
-        /**
-         * @type {Number}
-         */
-        this.size = size;
-        /**
-         * @type {Array}
-         */
-        this.costs = costs;
-        /**
-         * @type {{x: Number, y: Number}}
-         */
-        this.position = position;
-        /**
-         * @type {Number}
-         */
-        this.score = score;
-        /**
-         * @type {Boolean}
-         */
-        this.isComplete = isComplete;
-    }
-}
-/* harmony export (immutable) */ __webpack_exports__["b"] = State;
-
-
-/**
- * Data model that holds what the agent gets to see about the environment
- */
-class Observation {
-    /**
-     * @param {Number} size
-     * @param {Array} costs
-     * @param {{x: Number, y: Number}} position
-     * @param {Number} score
-     * @param {Boolean} isComplete
-     */
-    constructor(size, costs, visibles, position, score, isComplete) {
-        /**
-         * @type {Number}
-         */
-        this.size = size;
-        /**
-         * @type {Array}
-         */
-        this.costs = costs;
-        this.visibles = visibles;
-        /**
-         * @type {{x: Number, y: Number}}
-         */
-        this.position = position;
-        /**
-         * @type {Number}
-         */
-        this.score = score;
-        /**
-         * @type {Boolean}
-         */
-        this.isComplete = isComplete;
-    }
-}
-/* unused harmony export Observation */
-
-
-/**
- * Returns a random initial starting state
- *
- * @param options
- * @returns {State}
- */
-const generateInitialState = (options) => {
-    return new State(
-        options.size,
-        generateRandomCosts(options.size),
-        {x: Math.round(options.size / 2), y: 0},
-        0,
-        false
-    );
-};
-/* unused harmony export generateInitialState */
-
-
-/**
- * Returns a new state where the given action has been applied to the given state
- *
- * @param {State} state
- * @param {String} actionCode
- * @returns {State}
- */
-const applyAction = (state, actionCode) => {
-    state = Object.assign({}, state);//State is immutable so make clone
-    let downOneRowReward = 4;
-    switch (actionCode) {
-        case "w":
-            if (state.position.y > 0) {
-                state.position.y--;
-            }
-            state.score = state.score - downOneRowReward;
-            break;
-        case "a":
-            if (state.position.x > 0) {
-                state.position.x--;
-            }
-            break;
-        case "s":
-            if (state.position.y < state.size - 1) {
-                state.position.y++;
-            }
-            state.score = state.score + downOneRowReward;
-            break;
-        case "d":
-            if (state.position.x < state.size - 1) {
-                state.position.x++;
-            }
-            break;
-    }
-
-    state.score = state.score - state.costs[state.position.x][state.position.y];
-
-    state.isComplete = state.position.y == state.size - 1 || state.score < -100;
-
-    return state;
-};
-/* harmony export (immutable) */ __webpack_exports__["c"] = applyAction;
-
-
-/**
- * Returns an observation about the given state that is intended for the agent to see
- *
- * @param {State} state
- * @returns {Observation}
- */
-const getObservation = (state) => {
-    return new Observation(
-        state.size,
-        state.costs,
-        getVisibleCosts(state),
-        state.position,
-        state.score,
-        state.isComplete
-    );
-};
-/* unused harmony export getObservation */
-
-
-/**
- * Generates a random set of costs for generated random environment states
- *
- * @param {Number} size
- * @returns {Array}
- */
-function generateRandomCosts(size) {
-    const costs = [];
-    const min = 1;
-    const max = 9;
-    for (let xi = 0; xi < size; xi++) {
-        costs[xi] = [];
-        for (let yi = 0; yi < size; yi++) {
-            let cost = Math.floor(Math.random() * (max - min + 1)) + min;
-
-            if (cost < 7) {
-                cost = 0;
-            } else {
-                cost = 9;
-            }
-
-            costs[xi][yi] = cost;
+function getBestFeeler(feelersWithValues) {
+    return feelersWithValues.reduce((bestFeelerSoFar, feeler) => {
+        if (bestFeelerSoFar === null || feeler.value > bestFeelerSoFar.value) {
+            return feeler;
+        } else {
+            return bestFeelerSoFar
         }
-    }
-    return costs;
+    }, null)
+}
+
+function getActionViaFeelers(observation, feelerPaths, lastAction) {
+    //This filter prevents infinite back-and-forth movement
+    const safeFeelerPaths = filterPathsWithFirstAction(
+        feelerPaths, oppositeActions[lastAction]
+    );
+
+    const feelersWithValues = getFeelerValues(observation, safeFeelerPaths);
+
+    const bestFeeler = getBestFeeler(feelersWithValues);
+
+    return bestFeeler.path[0];
 }
 
 
@@ -453,7 +340,7 @@ function toComment(sourceMap) {
   return '/*# ' + data + ' */';
 }
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(12).Buffer))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(13).Buffer))
 
 /***/ }),
 /* 3 */
@@ -493,7 +380,7 @@ var stylesInDom = {},
 	singletonElement = null,
 	singletonCounter = 0,
 	styleElementsInsertedAtTop = [],
-	fixUrls = __webpack_require__(17);
+	fixUrls = __webpack_require__(18);
 
 module.exports = function(list, options) {
 	if(typeof DEBUG !== "undefined" && DEBUG) {
@@ -753,12 +640,91 @@ function updateLink(linkElement, options, obj) {
 
 /***/ }),
 /* 4 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* unused harmony export createMatrix */
+/* harmony export (immutable) */ __webpack_exports__["b"] = getMatrixDimensions;
+/* unused harmony export matrixPositionExists */
+/* unused harmony export forEachValueInMatrix */
+/* unused harmony export shiftMatrix */
+/* harmony export (immutable) */ __webpack_exports__["a"] = shiftAndTrimMatrix;
+function createMatrix(dimensions, defaultValue) {//@TODO take dimensions instead of size
+    let matrix = [];
+
+    for (let i0 = 0; i0 < dimensions[0]; i0++) {
+        matrix[i0] = [];
+        for (let i1 = 0; i1 < dimensions[1]; i1++) {
+            matrix[i0][i1] = defaultValue;
+        }
+    }
+
+    return matrix;
+}
+
+function getMatrixDimensions(matrix) {
+    return [matrix.length, matrix[0].length];
+}
+
+function matrixPositionExists(matrix, x, y) {
+    return typeof matrix[x] !== 'undefined' && typeof matrix[x][y] !== 'undefined';
+}
+
+function forEachValueInMatrix(matrix, callback) {
+    const dimensions = getMatrixDimensions(matrix);
+    for (let x = 0; x < dimensions[0]; x++) {
+        for (let y = 0; y < dimensions[1]; y++) {
+            callback(x, y, matrix[x][y]);
+        }
+    }
+}
+
+function shiftMatrix(matrix, vector, defaultValue) {
+    const dimensions = getMatrixDimensions(matrix);
+    const newMatrix = createMatrix(dimensions, defaultValue);
+
+    for (let x = 0; x < dimensions[0]; x++) {
+        for (let y = 0; y < dimensions[1]; y++) {
+            const fromX = x + vector[0];
+            const fromY = y + vector[1];
+            if (fromX >= 0 && fromX < dimensions[0] && fromY >= 0 && fromY < dimensions[0]) {
+                newMatrix[x][y] = matrix[fromX][fromY]
+            }
+        }
+    }
+
+    return newMatrix;
+}
+
+
+function shiftAndTrimMatrix(matrix, shiftVector, defaultValue, trimVector) {
+    shiftVector = [shiftVector[0] + trimVector[0], shiftVector[1] + trimVector[1]];
+    const dimensions = [matrix.length, matrix[0].length];
+    const newDimensions = [dimensions[0] - trimVector[0] * 2, dimensions[1] - trimVector[1] * 2];
+    const newMatrix = createMatrix(newDimensions, defaultValue);
+
+    for (let x = 0; x < newDimensions[0]; x++) {
+        for (let y = 0; y < newDimensions[1]; y++) {
+            const fromX = x + shiftVector[0];
+            const fromY = y + shiftVector[1];
+            if (fromX >= 0 && fromX < dimensions[0] && fromY >= 0 && fromY < dimensions[0]) {
+                newMatrix[x][y] = matrix[fromX][fromY]
+            }
+        }
+    }
+
+    return newMatrix;
+}
+
+
+/***/ }),
+/* 5 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // style-loader: Adds some css to the DOM by adding a <style> tag
 
 // load the styles
-var content = __webpack_require__(15);
+var content = __webpack_require__(16);
 if(typeof content === 'string') content = [[module.i, content, '']];
 // add the styles to the DOM
 var update = __webpack_require__(3)(content, {});
@@ -778,7 +744,7 @@ if(false) {
 }
 
 /***/ }),
-/* 5 */
+/* 6 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -787,237 +753,329 @@ if(false) {
  *
  * @constructor
  */
-/* harmony default export */ __webpack_exports__["a"] = (() => {
-    return {
-        action: 's',
-        state: {}
-    }
-});
-
-
-/***/ }),
-/* 6 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/**
- * An Agent that has a preferred lateral direction and moves that way if its less costly than moving down.
- *
- * @constructor
- */
-/* harmony default export */ __webpack_exports__["a"] = ((observation, agentState)=> {
+class AlwaysDown {
     /**
-     * Clone the previous agent state and ensure it has needed default values
-     * @type {*}
+     *
+     * @param {AgentObservation} observation
+     * @return {string} action code
      */
-    agentState = Object.assign(
-        {},
-        {
-            lateralAvoidanceDirection: 'd'
-        },
-        agentState
-    );
-
-    let immediateCosts = getImmediateCosts(observation);
-
-    //If we are on the edge of the game, reverse the lateral avoidance direction
-    if (observation.position.x == observation.size - 1) {
-        agentState.lateralAvoidanceDirection = 'a';
-    } else if (observation.position.x == 0) {
-        agentState.lateralAvoidanceDirection = 'd';
-    }
-
-    let costToSide = agentState.lateralAvoidanceDirection == 'd' ? immediateCosts.d : immediateCosts.a;
-
-    let action = 's';
-
-    if (immediateCosts.s > costToSide) {
-        action = agentState.lateralAvoidanceDirection;
-    }
-
-    return {
-        action: action,
-        state: agentState //@todo clone
-    };
-});
-
-function getImmediateCosts(observation) {
-    let costOneBelow = 0;
-    if (observation.position.y < observation.size - 1) {
-        costOneBelow = observation.costs[observation.position.x][observation.position.y + 1];
-    }
-
-    let costOneToRight = 100;
-    if (observation.position.x < observation.size - 1) {
-        costOneToRight = observation.costs[observation.position.x + 1][observation.position.y];
-    }
-
-    let costOneToLeft = 100;
-    if (observation.position.x > 0) {
-        costOneToLeft = observation.costs[observation.position.x - 1][observation.position.y];
-    }
-    return {
-        'a': costOneToLeft,
-        's': costOneBelow - 4,
-        'd': costOneToRight
+    getAction(observation) {
+        return 's';
     }
 }
+/* harmony export (immutable) */ __webpack_exports__["a"] = AlwaysDown;
+
+
 
 /***/ }),
 /* 7 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__helper_lookAhead__ = __webpack_require__(0);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__helper_generatePaths__ = __webpack_require__(20);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__environment__ = __webpack_require__(0);
 
 
-
-//Will be used in normal situations
-const standardActionPathsToCheck = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1__helper_generatePaths__["a" /* default */])(5);
-
-//Will be used if the agent appears to be stuck in an infinite action loop
-const fallBackActionPathsToCheck = [
-    {path: ['a', 's']},
-    {path: ['s']},
-    {path: ['d', 's']}
-];
+function getImmediateCosts(observation) {
+    const costOneBelow = observation.costs[observation.position[0]][observation.position[1] + 1];
+    const costOneToRight = observation.costs[observation.position[0] + 1][observation.position[1]];
+    const costOneToLeft = observation.costs[observation.position[0] - 1][observation.position[1]];
+    return {
+        'a': costOneToLeft,
+        's': costOneBelow - __WEBPACK_IMPORTED_MODULE_0__environment__["b" /* config */].verticalDeltaScore,
+        'd': costOneToRight
+    };
+}
 
 /**
- * Look at the current observation and the previous agent internal state, then come
- * up with an appropriate action and a new internal state.
+ * An Agent that has a preferred lateral direction and moves that way if its less costly than moving down.
  *
- * @param {Object} observation What the agent gets to see about the environment
- * @param {Object|null} agentState The agent's previous internal state
- * @returns {{action: *, state: *}}
+ * @constructor
  */
-/* harmony default export */ __webpack_exports__["a"] = ((observation, agentState)=> {
-    /**
-     * Clone the previous agent state and ensure it has needed default values
-     * @type {*}
-     */
-    agentState = Object.assign(
-        {},
-        {
-            previousPositions: []
-        },
-        agentState
-    );
-
-    const positionAsString = observation.position.x + ',' + observation.position.y;
-
-    let actionPathsToCheck = standardActionPathsToCheck;
-
-    if (agentState.previousPositions.indexOf(positionAsString) !== -1) {
-        /**
-         * If we have been in the current position before, use the fallback action list to prevent infinite
-         * action loops
-         */
-        actionPathsToCheck = fallBackActionPathsToCheck;
+class LateralWallBouncer {
+    constructor() {
+        this._state = {
+            lateralAvoidanceDirection: 'd'
+        }
     }
 
-    agentState.previousPositions.push(positionAsString);
+    /**
+     *
+     * @param {AgentObservation} observation
+     * @return {string} action code
+     */
+    getAction(observation) {
+        let immediateCosts = getImmediateCosts(observation);
 
-    return {
-        action: __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__helper_lookAhead__["a" /* default */])(observation, actionPathsToCheck),
-        state: agentState
-    };
-});
+        //If we are on the edge of the game, reverse the lateral avoidance direction
+        if (observation.position[0] == __WEBPACK_IMPORTED_MODULE_0__environment__["b" /* config */].size[0] - 1) {
+            this._state.lateralAvoidanceDirection = 'a';
+        } else if (observation.position[0] == 0) {
+            this._state.lateralAvoidanceDirection = 'd';
+        }
+
+        let costToSide = this._state.lateralAvoidanceDirection == 'd' ? immediateCosts.d : immediateCosts.a;
+
+        let action = 's';
+
+        if (immediateCosts.s > costToSide) {
+            action = this._state.lateralAvoidanceDirection;
+        }
+
+        return action;
+    }
+}
+/* harmony export (immutable) */ __webpack_exports__["a"] = LateralWallBouncer;
+
+
 
 /***/ }),
 /* 8 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__helper_lookAhead__ = __webpack_require__(0);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__helper_feeler__ = __webpack_require__(1);
 
 
-const actionPathsToCheck = [
-    {path: ['a', 's']},
-    {path: ['s']},
-    {path: ['d', 's']}
+const feelerPaths = [
+    ['s'],
+    ['a', 's'],
+    ['a', 'a', 's'],
+    ['a', 'a', 'a', 's'],
+    ['a', 'a', 'a', 'a', 's'],
+    ['d', 's'],
+    ['d', 'd', 's'],
+    ['d', 'd', 'd', 's'],
+    ['d', 'd', 'd', 'd', 's'],
 ];
 
-/**
- * An agent that looks ahead one square below, and to both sides. It then chooses the least costly.
- *
- * @constructor
- */
-/* harmony default export */ __webpack_exports__["a"] = ((observation, agentState)=> {
-    return {
-        action: __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__helper_lookAhead__["a" /* default */])(observation, actionPathsToCheck),
-        state: {}
-    };
-});
+class LookFourAdjacentOneDown {
+    /**
+     *
+     * @param {AgentObservation} observation
+     * @return {string} action code
+     */
+    getAction(observation) {
+        return __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__helper_feeler__["a" /* getActionViaFeelers */])(observation, feelerPaths, null);
+    }
+}
+/* harmony export (immutable) */ __webpack_exports__["a"] = LookFourAdjacentOneDown;
+
+
 
 /***/ }),
 /* 9 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__helper_lookAhead__ = __webpack_require__(0);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__helper_feeler__ = __webpack_require__(1);
 
 
-const actionPathsToCheck = [
-    {path: ['s']},
-    {path: ['a', 's']},
-    {path: ['a', 'a', 's']},
-    {path: ['a', 'a', 'a', 's']},
-    {path: ['a', 'a', 'a', 'a', 's']},
-    {path: ['a', 'a', 'a', 'a', 'a', 's']},
-    {path: ['a', 'a', 'a', 'a', 'a', 'a', 's']},
-    {path: ['a', 'a', 'a', 'a', 'a', 'a', 'a', 's']},
-    {path: ['a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 's']},
-    {path: ['a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 's']},
-    {path: ['a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 's']},
-    {path: ['d', 's']},
-    {path: ['d', 'd', 's']},
-    {path: ['d', 'd', 'd', 's']},
-    {path: ['d', 'd', 'd', 'd', 's']},
-    {path: ['d', 'd', 'd', 'd', 'd', 's']},
-    {path: ['d', 'd', 'd', 'd', 'd', 'd', 's']},
-    {path: ['d', 'd', 'd', 'd', 'd', 'd', 'd', 's']},
-    {path: ['d', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 's']},
-    {path: ['d', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 's']},
-    {path: ['d', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 's']}
+const feelerPaths = [ //Warning the paths below may not include all possibilities
+
+    ['s', 's', 's'],
+
+    ////
+
+    ['s', 'a', 's', 's'],
+    ['s', 'a', 's', 'a', 's'],
+    ['s', 'a', 's', 'a', 'a', 's'],
+
+    ['s', 'a', 'a', 's', 's'],
+    ['s', 'a', 'a', 's', 'a', 's'],
+    ['s', 'a', 'a', 'a', 's', 's'],
+
+    ['s', 's', 'a', 's'],
+    ['s', 's', 'a', 'a', 's'],
+    ['s', 's', 'a', 'a', 'a', 's'],
+
+    ['a', 's', 's', 's'],
+    ['a', 's', 's', 'a', 's'],
+    ['a', 's', 's', 'a', 'a', 's'],
+
+    ['a', 's', 'a', 's', 's'],
+    ['a', 's', 'a', 's', 'a', 's'],
+
+    ['a', 'a', 's', 's', 's'],
+    ['a', 'a', 's', 'a', 's', 's'],
+    ['a', 'a', 's', 'a', 's', 'a', 's'],
+
+    ['a', 'a', 'a', 's', 's', 's'],
+
+    ////
+
+    ['s', 'd', 's', 's'],
+    ['s', 'd', 's', 'd', 's'],
+    ['s', 'd', 's', 'd', 'd', 's'],
+
+    ['s', 'd', 'd', 's', 's'],
+    ['s', 'd', 'd', 's', 'd', 's'],
+    ['s', 'd', 'd', 'd', 's', 's'],
+
+    ['s', 's', 'd', 's'],
+    ['s', 's', 'd', 'd', 's'],
+    ['s', 's', 'd', 'd', 'd', 's'],
+
+    ['d', 's', 's', 's'],
+    ['d', 's', 's', 'd', 's'],
+    ['d', 's', 's', 'd', 'd', 's'],
+
+    ['d', 's', 'd', 's', 's'],
+    ['d', 's', 'd', 's', 'd', 's'],
+
+    ['d', 'd', 's', 's', 's'],
+    ['d', 'd', 's', 'd', 's', 's'],
+    ['d', 'd', 's', 'd', 's', 'd', 's'],
+
+    ['d', 'd', 'd', 's', 's', 's'],
+
+    ////
+
+    ['a', 's', 's', 'd', 's'],
+    ['a', 'a', 's', 's', 'd', 's'],
+    ['a', 'a', 's', 's', 'd', 'd', 's'],
+    ['a', 'a', 's', 's', 'd', 'd', 'd', 's'],
+    ['a', 'a', 'a', 's', 's', 'd', 's'],
+    ['a', 'a', 'a', 's', 's', 'd', 'd', 's'],
+    ['a', 'a', 'a', 's', 's', 'd', 'd', 'd', 's'],
+
+    ////
+
+    ['d', 's', 's', 'a', 's'],
+    ['d', 'd', 's', 's', 'a', 's'],
+    ['d', 'd', 's', 's', 'a', 'a', 's'],
+    ['d', 'd', 's', 's', 'a', 'a', 'a', 's'],
+    ['d', 'd', 'd', 's', 's', 'a', 's'],
+    ['d', 'd', 'd', 's', 's', 'a', 'a', 's'],
+    ['d', 'd', 'd', 's', 's', 'a', 'a', 'a', 's'],
 ];
 
-/**
- * An agent that looks at 7 lateral moves in each direction and one move downwards for each one.
- *
- * @constructor
- */
+class LookThreeAdjacentTwoDown {
+    constructor() {
+        this._state = {lastAction: null};
+    }
 
-/* harmony default export */ __webpack_exports__["a"] = ((observation, agentState)=> {
-    return {
-        action: __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__helper_lookAhead__["a" /* default */])(observation, actionPathsToCheck),
-        state: {}
-    };
-});
+    /**
+     *
+     * @param {AgentObservation} observation
+     * @return {string} action code
+     */
+    getAction(observation) {
+        let action = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__helper_feeler__["a" /* getActionViaFeelers */])(observation, feelerPaths, this._state.lastAction);
+
+        this._state.lastAction = action;
+
+        return action;
+    }
+}
+/* harmony export (immutable) */ __webpack_exports__["a"] = LookThreeAdjacentTwoDown;
+
+
 
 /***/ }),
 /* 10 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__HtmlTableRenderer_css__ = __webpack_require__(18);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__HtmlTableRenderer_css___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__HtmlTableRenderer_css__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__helper_feeler__ = __webpack_require__(1);
 
+
+const feelerPaths = [
+    ['s', 's'],
+
+    ['a', 's', 's'],
+    ['s', 'a', 's'],
+    ['a', 'a', 's', 's'],
+    ['s', 'a', 'a', 's'],
+    ['s', 'a', 'a', 'a', 's'],
+    ['a', 's', 'a', 'a', 's'],
+    ['a', 'a', 's', 'a', 's'],
+    ['a', 'a', 'a', 's', 's'],
+
+    ['d', 's', 's'],
+    ['s', 'd', 's'],
+    ['d', 'd', 's', 's'],
+    ['s', 'd', 'd', 's'],
+    ['s', 'd', 'd', 'd', 's'],
+    ['d', 's', 'd', 'd', 's'],
+    ['d', 'd', 's', 'd', 's'],
+    ['d', 'd', 'd', 's', 's'],
+];
+
+class LookThreeAdjacentTwoDown {
+    constructor() {
+        this._state = {lastAction: null};
+    }
+
+    /**
+     *
+     * @param {AgentObservation} observation
+     * @return {string} action code
+     */
+    getAction(observation) {
+        let action = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__helper_feeler__["a" /* getActionViaFeelers */])(observation, feelerPaths, this._state.lastAction);
+
+        this._state.lastAction = action;
+
+        return action;
+    }
+}
+/* harmony export (immutable) */ __webpack_exports__["a"] = LookThreeAdjacentTwoDown;
+
+
+
+/***/ }),
+/* 11 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__HtmlTableRenderer_css__ = __webpack_require__(19);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__HtmlTableRenderer_css___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__HtmlTableRenderer_css__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__tensorTools__ = __webpack_require__(4);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__environment__ = __webpack_require__(0);
+
+
+
+
+function generateTableHtml(size, tableClassName) {
+    let html = '';
+    for (let y = 0; y < size[0]; y++) {
+        html += '<tr>';
+        for (let x = 0; x < size[1]; x++) {
+            html += '<td class="tile-' + x + '-' + y + '"></td>';
+        }
+        html += '</tr>';
+    }
+    return '<table class="' + tableClassName + '">' + html + '</table>';
+}
+
+function getTdElements(size, tableClassName) {
+    let tdElements = [];
+    for (let x = 0; x < size[0]; x++) {
+        tdElements[x] = [];
+        for (let y = 0; y < size[1]; y++) {
+            tdElements[x][y] = document.querySelector('table.' + tableClassName + ' td.tile-' + x + '-' + y);
+        }
+    }
+    return tdElements;
+}
 
 class HtmlTableRenderer {
-    constructor(containerElement, environmentConfig) {
+    constructor(containerElement) {
         this.clear();//Call clear to init internal observation properties
 
-        let html = '';
-        for (let yi = 0; yi < environmentConfig.size; yi++) {
-            html += '<tr>';
-            for (let xi = 0; xi < environmentConfig.size; xi++) {
-                html += '<td id="' + xi + '-' + yi + '"></td>';
-            }
-            html += '</tr>';
-        }
+        containerElement.innerHTML = '<div class="InfectionGameHtmlTableRender">' +
+            '<div>' +
+            'Agent View' +
+            generateTableHtml(__WEBPACK_IMPORTED_MODULE_2__environment__["b" /* config */].viewPortSize, 'renderer-table-canvas-agent') +
+            '</div>' +
+            '<div>' +
+            'Environment View' +
+            generateTableHtml(__WEBPACK_IMPORTED_MODULE_2__environment__["b" /* config */].size, 'renderer-table-canvas-god') +
+            '</div>' +
+            '</div>';
 
-        containerElement.innerHTML = '<table class="InfectionGameHtmlTableRender">' + html + '</table>';
+        this._agentTds = getTdElements(__WEBPACK_IMPORTED_MODULE_2__environment__["b" /* config */].viewPortSize, 'renderer-table-canvas-agent');
+        this._godTds = getTdElements(__WEBPACK_IMPORTED_MODULE_2__environment__["b" /* config */].size, 'renderer-table-canvas-god')
     }
 
     /**
@@ -1030,40 +1088,55 @@ class HtmlTableRenderer {
     /**
      * Render the current observation of the environment in HTML
      *
-     * @param {Observation} observation
+     * @param {AgentObservation} agentObservation
+     * @param {State} godObservation
      */
-    render(observation) {
-        for (let yi = 0; yi < observation.size; yi++) {
-            for (let xi = 0; xi < observation.size; xi++) {
+    render(agentObservation, godObservation) {
+        //Render the agent view
+        const agentDimensions = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1__tensorTools__["b" /* getMatrixDimensions */])(agentObservation.costs);
+        for (let x = 0; x < agentDimensions[0]; x++) {
+            for (let y = 0; y < agentDimensions[1]; y++) {
                 let color = {r: 50, g: 50, b: 50};
-                // color.r = observation.costs[xi][yi] === 0 ? 0 : 230;
-                // color.g = 0;
-                // else if (observation.visibles[xi][yi] !== 0) {
-                //     color.b = 50;
-                //     // color.g = 50;
-                //     // color.r = 50;
-                // }
-                if (observation.visibles[xi][yi] === 0) { //UNCOMMENT TO SEE VISION, MOVE TO BOTTOM TO LIMIT VISION
-                    color={r:0,g:0, b:0};
+                // if (agentObservation.visibles[x][y] === 0) {
+                //     color = {r: 0, g: 0, b: 0};
+                // } else
+                if (x == agentObservation.position[0] && y == agentObservation.position[1] && agentObservation.costs[x][y] !== 0) {
+                    color = {r: 255, g: 255, b: 0};
+                } else if (x == agentObservation.position[0] && y == agentObservation.position[1]) {
+                    color = {r: 0, g: 255, b: 0};
+                } else if (agentObservation.costs[x][y] !== 0) {
+                    color = {r: 230, g: 0, b: 0};
                 }
-                if(observation.costs[xi][yi]!==0){
-                    color={r:230,g:0, b:0};
-                }
-                if (this._previousPositions[xi + ',' + yi]) {
-                    color={r:0,g:128, b:0}
-                }
-                if (this._previousPositions[xi + ',' + yi] && observation.costs[xi][yi]!==0) {
-                    color={r:255,g:255, b:0}
-                }
-                if (xi == observation.position.x && yi == observation.position.y) {
-                    color={r:0,g:255, b:0};
-                }
-                document.getElementById(xi + '-' + yi).style
+                this._agentTds[x][y].style
                     .backgroundColor = 'rgb(' + color.r + ',' + color.g + ',' + color.b + ')';
             }
         }
-        // this._previousPositions.splice(2);//@TODO could be more performant
-        this._previousPositions[observation.position.x + ',' + observation.position.y] = true;
+
+        //Render the god view
+        const godDimensions = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1__tensorTools__["b" /* getMatrixDimensions */])(godObservation.costs);
+        for (let y = 0; y < godDimensions[0]; y++) {
+            for (let x = 0; x < godDimensions[1]; x++) {
+                let color = {r: 50, g: 50, b: 50};
+                if (x == godObservation.position[0] && y == godObservation.position[1] && godObservation.costs[x][y] !== 0) {
+                    color = {r: 255, g: 255, b: 0};
+                } else if (x == godObservation.position[0] && y == godObservation.position[1]) {
+                    color = {r: 0, g: 255, b: 0};
+                } else if (this._previousPositions[x + ',' + y] && godObservation.costs[x][y] !== 0) {
+                    color = {r: 255, g: 255, b: 128}
+                } else if (this._previousPositions[x + ',' + y]) {
+                    color = {r: 0, g: 128, b: 0}
+                } else if (godObservation.costs[x][y] !== 0) {
+                    color = {r: 230, g: 0, b: 0};
+                }
+                // } else if (godObservation.visibles[x][y] === 0) {
+                //     color = {r: 0, g: 0, b: 0};
+                // }
+                this._godTds[x][y].style
+                    .backgroundColor = 'rgb(' + color.r + ',' + color.g + ',' + color.b + ')';
+            }
+        }
+
+        this._previousPositions[godObservation.position[0] + ',' + godObservation.position[1]] = true;
     };
 }
 /* harmony export (immutable) */ __webpack_exports__["a"] = HtmlTableRenderer;
@@ -1071,7 +1144,7 @@ class HtmlTableRenderer {
 
 
 /***/ }),
-/* 11 */
+/* 12 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1192,7 +1265,7 @@ function fromByteArray (uint8) {
 
 
 /***/ }),
-/* 12 */
+/* 13 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1206,9 +1279,9 @@ function fromByteArray (uint8) {
 
 
 
-var base64 = __webpack_require__(11)
-var ieee754 = __webpack_require__(16)
-var isArray = __webpack_require__(13)
+var base64 = __webpack_require__(12)
+var ieee754 = __webpack_require__(17)
+var isArray = __webpack_require__(14)
 
 exports.Buffer = Buffer
 exports.SlowBuffer = SlowBuffer
@@ -2986,10 +3059,10 @@ function isnan (val) {
   return val !== val // eslint-disable-line no-self-compare
 }
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(19)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(20)))
 
 /***/ }),
-/* 13 */
+/* 14 */
 /***/ (function(module, exports) {
 
 var toString = {}.toString;
@@ -3000,7 +3073,7 @@ module.exports = Array.isArray || function (arr) {
 
 
 /***/ }),
-/* 14 */
+/* 15 */
 /***/ (function(module, exports, __webpack_require__) {
 
 exports = module.exports = __webpack_require__(2)(undefined);
@@ -3014,7 +3087,7 @@ exports.push([module.i, "\n", ""]);
 
 
 /***/ }),
-/* 15 */
+/* 16 */
 /***/ (function(module, exports, __webpack_require__) {
 
 exports = module.exports = __webpack_require__(2)(undefined);
@@ -3022,13 +3095,13 @@ exports = module.exports = __webpack_require__(2)(undefined);
 
 
 // module
-exports.push([module.i, "#info {\n    margin-right: 2em;\n    float: left\n}\n\n.InfectionGameHtmlTableRender {\n    float: left;\n    border-spacing: 0\n}\n\n.InfectionGameHtmlTableRender td {\n    height: 10px;\n    width: 10px;\n}", ""]);
+exports.push([module.i, "#info {\n    margin-right: 2em;\n    /*float: left*/\n}\n\n.InfectionGameHtmlTableRender {\n    /*float: left;*/\n}\n\n.InfectionGameHtmlTableRender table {\n    padding-right: 2em;\n    border-spacing: 0;\n}\n\n.InfectionGameHtmlTableRender > div {\n    float: left;\n    border-spacing: 0;\n    margin-right: 2em;\n}\n\n.InfectionGameHtmlTableRender table.renderer-table-canvas-agent {\n    padding: 10px;\n    background-color: black;\n}\n\n.InfectionGameHtmlTableRender .renderer-table-canvas-god td {\n    height: 5px;\n    width: 5px;\n}\n.InfectionGameHtmlTableRender .renderer-table-canvas-agent td {\n    height: 20px;\n    width: 20px;\n}\n", ""]);
 
 // exports
 
 
 /***/ }),
-/* 16 */
+/* 17 */
 /***/ (function(module, exports) {
 
 exports.read = function (buffer, offset, isLE, mLen, nBytes) {
@@ -3118,7 +3191,7 @@ exports.write = function (buffer, value, offset, isLE, mLen, nBytes) {
 
 
 /***/ }),
-/* 17 */
+/* 18 */
 /***/ (function(module, exports) {
 
 
@@ -3213,13 +3286,13 @@ module.exports = function (css) {
 
 
 /***/ }),
-/* 18 */
+/* 19 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // style-loader: Adds some css to the DOM by adding a <style> tag
 
 // load the styles
-var content = __webpack_require__(14);
+var content = __webpack_require__(15);
 if(typeof content === 'string') content = [[module.i, content, '']];
 // add the styles to the DOM
 var update = __webpack_require__(3)(content, {});
@@ -3239,7 +3312,7 @@ if(false) {
 }
 
 /***/ }),
-/* 19 */
+/* 20 */
 /***/ (function(module, exports) {
 
 var g;
@@ -3266,67 +3339,144 @@ module.exports = g;
 
 
 /***/ }),
-/* 20 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony default export */ __webpack_exports__["a"] = ((actionCountToLookAhead)=> {
-    // let antiActions = {
-    //     'a': 'd',
-    //     's': 'w',
-    //     'd': 'a',
-    //     'w': 's'
-    // };
-
-    let paths = [
-        {path: ['a']},
-        {path: ['s']},
-        {path: ['d']},
-        // {path: ['w']},
-    ];
-
-    function generateMorePaths() {
-        let morePaths = [];
-        paths.forEach(function (path) {
-            if (path.path[path.path.length - 1] != 'd') { //Prevent infinite back and forth operations
-                morePaths.push({path: path.path.concat(['a'])});
-            }
-            if (path.path[path.path.length - 1] != 'w') { //Prevent infinite back and forth operations
-                morePaths.push({path: path.path.concat(['s'])});
-            }
-            // if (path.path[path.path.length - 1] != 's') { //Prevent infinite back and forth operations
-            //     morePaths.push({path: path.path.concat(['w'])});
-            // }
-            if (path.path[path.path.length - 1] != 'a') { //Prevent infinite back and forth operations
-                morePaths.push({path: path.path.concat(['d'])});
-            }
-        });
-        paths = paths.concat(morePaths);
-    }
-
-    for (var i = 1; i < actionCountToLookAhead; i++) {
-        generateMorePaths();
-    }
-
-    paths = paths.filter((path)=>path.path.length == actionCountToLookAhead);
-
-    return paths;
-});
-
-/***/ }),
 /* 21 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
+/**
+ * Data model that holds what the agent gets to see about the environment
+ */
+class AgentObservation {
+    /**
+     *
+    // * @param {Array} visibles
+     * @param {Array} costs
+     * @param {int} score
+     * @param {Array} position
+     */
+    constructor(/*visibles,*/ costs, score, position) {
+        /**
+         * @type {Array}
+         */
+        this.costs = costs;
+        // this.visibles = visibles;
+        /**
+         * @type {Number}
+         */
+        this.score = score;
+        this.position = position;
+    }
+}
+/* harmony export (immutable) */ __webpack_exports__["a"] = AgentObservation;
+
+
+
+/***/ }),
+/* 22 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/**
+ * Data model that holds the environment's full internal state
+ */
+class State {
+    /**
+     * @param {Array} costs
+     * @param {Array} position [x,y]
+     * @param {Number} score
+     * @param {Boolean} isComplete
+     */
+    constructor(costs, position, score, isComplete) {
+        /**
+         * @type {Array}
+         */
+        this.costs = costs;
+        /**
+         * @type {Array} position [x,y]
+         */
+        this.position = position;
+        /**
+         * @type {Number}
+         */
+        this.score = score;
+        /**
+         * @type {Boolean}
+         */
+        this.isComplete = isComplete;
+    }
+}
+/* harmony export (immutable) */ __webpack_exports__["a"] = State;
+
+
+
+/***/ }),
+/* 23 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__State__ = __webpack_require__(22);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__index__ = __webpack_require__(0);
+
+
+
+/**
+ * Returns a random initial starting state
+ *
+ * @returns {State}
+ */
+const generateInitialState = () => {
+    return new __WEBPACK_IMPORTED_MODULE_0__State__["a" /* default */](
+        generateRandomCosts(__WEBPACK_IMPORTED_MODULE_1__index__["b" /* config */].size),
+        [Math.floor(__WEBPACK_IMPORTED_MODULE_1__index__["b" /* config */].size[0] / 2), 0],
+        0,
+        false
+    );
+};
+/* harmony export (immutable) */ __webpack_exports__["a"] = generateInitialState;
+
+
+/**
+ * Generates a random set of costs for generated random environment states
+ *
+ * @param {Array} size
+ * @returns {Array}
+ */
+function generateRandomCosts(size) {
+    const costs = [];
+    const min = 1;
+    const max = 9;
+    for (let xi = 0; xi < size[0]; xi++) {
+        costs[xi] = [];
+        for (let yi = 0; yi < size[1]; yi++) {
+            let cost = Math.floor(Math.random() * (max - min + 1)) + min;
+
+            if (cost < 7) {
+                cost = 0;
+            } else {
+                cost = 9;
+            }
+
+            costs[xi][yi] = cost;
+        }
+    }
+    return costs;
+}
+
+
+/***/ }),
+/* 24 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__environment__ = __webpack_require__(1);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__renderer_HtmlTableRenderer__ = __webpack_require__(10);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__agent_lookAheadFiveActions__ = __webpack_require__(7);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__agent_alwaysDown__ = __webpack_require__(5);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__agent_lateralWallBouncer__ = __webpack_require__(6);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__agent_lookAheadOneRowOneAdjacent__ = __webpack_require__(8);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__agent_lookAheadOneRowTenAdjacent__ = __webpack_require__(9);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__style_css__ = __webpack_require__(4);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__environment__ = __webpack_require__(0);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__renderer_HtmlTableRenderer__ = __webpack_require__(11);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__agent_LookFourAdjacentOneDown__ = __webpack_require__(8);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__agent_LookThreeAdjacentTwoDown__ = __webpack_require__(10);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__agent_LookThreeAdjacentThreeDown__ = __webpack_require__(9);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__agent_LateralWallBouncer__ = __webpack_require__(7);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__agent_AlwaysDown__ = __webpack_require__(6);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__style_css__ = __webpack_require__(5);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__style_css___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_7__style_css__);
 
 
@@ -3340,10 +3490,11 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 document.body.innerHTML =
     '<div id="info">Agent: <select id="agentSelector"></select>' +
     '<br>Speed Interval: <select id="interval">' +
-    '<option value="no-render" selected>0ms with no rendering</option>' +
+    '<option value="no-render">0ms with no rendering</option>' +
     '<option value="0">0ms</option>' +
-    '<option value="100" selected>100ms</option>' +
+    '<option value="100">100ms</option>' +
     '<option value="200">200ms</option>' +
+    '<option value="250" selected>250ms</option>' +
     '<option value="500">500ms</option>' +
     '<option value="1000">1000ms</option>' +
     '<option value="paused">Paused</option>' +
@@ -3358,29 +3509,27 @@ document.body.innerHTML =
     '</pre>' +
     '</div>' +
     '<div id="rendererContainer"></div>';
+const scoreElement = document.getElementById('score');
 
 let enableRendering = true;
 let autoPlay = true;
 let environment;
-let agent;
-// let renderer;
 let scoreSum = 0;
 let gameCount = 0;
 let lastGameScore = 0;
-let speed = 100;
+let speed = 250;
 let intervalReference = null;
-let agentState = {};
+let agent;
 let currentAgentName;
-let environmentConfig = {size: 32};
-let renderer = new __WEBPACK_IMPORTED_MODULE_1__renderer_HtmlTableRenderer__["a" /* default */](document.getElementById('rendererContainer'), environmentConfig);
+let renderer = new __WEBPACK_IMPORTED_MODULE_1__renderer_HtmlTableRenderer__["a" /* default */](document.getElementById('rendererContainer'));
 
 
 let agents = {
-    'lookAheadFiveActions - 91': __WEBPACK_IMPORTED_MODULE_2__agent_lookAheadFiveActions__["a" /* default */],
-    'lookAheadOneRowTenAdjacent - 86': __WEBPACK_IMPORTED_MODULE_6__agent_lookAheadOneRowTenAdjacent__["a" /* default */],
-    'lookAheadOneRowOneAdjacent - 72': __WEBPACK_IMPORTED_MODULE_5__agent_lookAheadOneRowOneAdjacent__["a" /* default */],
-    'lateralWallBouncer - 64': __WEBPACK_IMPORTED_MODULE_4__agent_lateralWallBouncer__["a" /* default */],
-    'alwaysDown - 22': __WEBPACK_IMPORTED_MODULE_3__agent_alwaysDown__["a" /* default */],
+    'LookThreeAdjacentThreeDown - ranked 103': __WEBPACK_IMPORTED_MODULE_4__agent_LookThreeAdjacentThreeDown__["a" /* default */],
+    'LookThreeAdjacentTwoDown - ranked 101': __WEBPACK_IMPORTED_MODULE_3__agent_LookThreeAdjacentTwoDown__["a" /* default */],
+    'LookFourAdjacentOneDown - ranked 94': __WEBPACK_IMPORTED_MODULE_2__agent_LookFourAdjacentOneDown__["a" /* default */],
+    'LateralWallBouncer - ranked 78': __WEBPACK_IMPORTED_MODULE_5__agent_LateralWallBouncer__["a" /* default */],
+    'AlwaysDown - ranked 29': __WEBPACK_IMPORTED_MODULE_6__agent_AlwaysDown__["a" /* default */],
 };
 for (agent in agents) {
     //Select the first agent in the list
@@ -3394,45 +3543,44 @@ function clearHistory() {
     scoreSum = 0;
 }
 
-function newGame() {
-    environment = new __WEBPACK_IMPORTED_MODULE_0__environment__["a" /* default */](environmentConfig);
-    agentState = null;
+function renderScore(score) {
+    scoreElement.innerHTML =
+        'Agent: ' + currentAgentName +
+        '\nCurrent Score: ' + score +
+        '\nLast Game Final Score: ' + lastGameScore +
+        '\nAvg Final Score: ' + (Math.round(scoreSum / gameCount) || 0) +
+        '\nGame Count: ' + gameCount;
+}
 
-    agent = agents[currentAgentName];
+function newGame() {
+    environment = new __WEBPACK_IMPORTED_MODULE_0__environment__["a" /* default */]();
+
+    agent = new agents[currentAgentName];
 
     if (enableRendering) {
         //@TODO have this render make the table its self inside a given div
         renderer.clear();
-        renderer.render(environment.getObservation());
+        renderer.render(environment.getAgentObservation(), environment.getGodObservation());
+    } else {
+        renderScore(0);//Makes score show up between games when rendering is disabled
     }
 }
 
-function getAgentAction() {
-    const observation = environment.getObservation(environment);
-    const agentResponse = agent(observation, agentState);
-    agentState = agentResponse.state;
-    return agentResponse.action;
-}
-
-function takeAction(actionCode) {
+function takeAction(actionCode, agentObservation) {
     environment.applyAction(actionCode);
-    let observation = environment.getObservation();
-    if (enableRendering) {
-        renderer.render(observation);
-    }
-    if (observation.isComplete) {//@Find better way to communicate "isComplete"
-        lastGameScore = observation.score;
-        scoreSum += observation.score;
+    let godObservation = environment.getGodObservation();
+
+    if (godObservation.isComplete) {//@Find better way to communicate "isComplete"
+        lastGameScore = agentObservation.score;
+        scoreSum += agentObservation.score;
         gameCount += 1;
         newGame();
     }
 
-    document.getElementById('score').innerHTML =
-        'Agent: ' + currentAgentName +
-        '\nCurrent Score: ' + observation.score +
-        '\nLast Game Final Score: ' + lastGameScore +
-        '\nAvg Final Score: ' + (Math.round(scoreSum / gameCount) || 0) +
-        '\nGame Count: ' + gameCount;
+    if (enableRendering) {
+        renderer.render(agentObservation, godObservation);
+        renderScore(agentObservation.score);
+    }
 }
 
 let agentSelectorElement = document.getElementById('agentSelector');
@@ -3442,13 +3590,13 @@ for (agent in agents) {
     optionElement.value = agent;
     agentSelectorElement.appendChild(optionElement)
 }
-agentSelectorElement.addEventListener('change', (event)=> {
+agentSelectorElement.addEventListener('change', (event) => {
     currentAgentName = agentSelectorElement.value;
     clearHistory();
     newGame();
 });
 
-document.getElementById('interval').addEventListener('change', (event)=> {
+document.getElementById('interval').addEventListener('change', (event) => {
     const value = event.target.value;
     enableRendering = true;
     autoPlay = true;
@@ -3464,21 +3612,35 @@ document.getElementById('interval').addEventListener('change', (event)=> {
     setupInterval();
 });
 
+function tick() {
+    const agentObservation = environment.getAgentObservation(environment);
+    const action = agent.getAction(agentObservation);
+    takeAction(action, agentObservation);
+}
+
 function setupInterval() {
     clearInterval(intervalReference);
     if (autoPlay) {
-        intervalReference = setInterval(function () {
-            takeAction(getAgentAction());
-        }, enableRendering ? speed : 0);
+        if (enableRendering) {
+            intervalReference = setInterval(tick, speed);
+        } else {
+            //Normal ticking takes 3ms between ticks which is not fast enough, so tick 1000 times
+            intervalReference = setInterval(function () {
+                for (let i = 0; i < 1000; i++) {
+                    tick();
+                }
+            }, 0);
+        }
     }
 }
 
 document.body.addEventListener('keydown', function (event) {
-    takeAction(event.key);
+    takeAction(event.key,environment.getAgentObservation(environment));
 });
 
 newGame();
 setupInterval();
+
 
 /***/ })
 /******/ ]);
