@@ -6,7 +6,7 @@ import LookThreeAdjacentThreeDown from './agent/LookThreeAdjacentThreeDown'
 import LateralWallBouncer from './agent/LateralWallBouncer'
 import AlwaysDown from './agent/AlwaysDown'
 import QLearner from './agent/QLearner'
-import QLearnerPreTrained from './agent/QLearnerPreTrained'
+// import QLearnerPreTrained from './agent/QLearnerPreTrained'
 import './style.css'
 
 document.body.innerHTML =
@@ -47,7 +47,7 @@ let renderer = new HtmlTableRenderer(document.getElementById('rendererContainer'
 
 
 let agents = {
-    'QLearnerPreTrainedOn3000Games - ranked 83': QLearnerPreTrained,
+    // 'QLearnerPreTrainedOn3000Games - ranked 83': QLearnerPreTrained,
     'QLearner': QLearner,
     'LookThreeAdjacentThreeDown - ranked 103': LookThreeAdjacentThreeDown,
     'LookThreeAdjacentTwoDown - ranked 101': LookThreeAdjacentTwoDown,

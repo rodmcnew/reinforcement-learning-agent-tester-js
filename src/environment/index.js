@@ -5,10 +5,10 @@ import {generateInitialState} from './generateInitialState'
 
 export const config = {
     size: [31, 31],
-    viewPortSize: [7, 5],
-    viewPortOffset: [0, 1],
-    // viewPortSize: [3, 2],
+    // viewPortSize: [7, 5],
     // viewPortOffset: [0, 1],
+    viewPortSize: [9, 9],
+    viewPortOffset: [0, 2],
     verticalDeltaScore: 4,
     maxTileCost: 9
 };
