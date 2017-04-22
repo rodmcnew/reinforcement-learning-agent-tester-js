@@ -47,7 +47,7 @@ let renderer = new HtmlTableRenderer(document.getElementById('rendererContainer'
 
 
 let agents = {
-    'QLearnerPreTrained3000 - ranked 83': QLearnerPreTrained,
+    'QLearnerPreTrainedOn3000Games - ranked 83': QLearnerPreTrained,
     'QLearner': QLearner,
     'LookThreeAdjacentThreeDown - ranked 103': LookThreeAdjacentThreeDown,
     'LookThreeAdjacentTwoDown - ranked 101': LookThreeAdjacentTwoDown,
