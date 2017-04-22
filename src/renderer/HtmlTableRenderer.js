@@ -4,9 +4,9 @@ import {config as environmentConfig} from '../environment'
 
 function generateTableHtml(size, tableClassName) {
     let html = '';
-    for (let y = 0; y < size[0]; y++) {
+    for (let y = 0; y < size[1]; y++) {
         html += '<tr>';
-        for (let x = 0; x < size[1]; x++) {
+        for (let x = 0; x < size[0]; x++) {
             html += '<td class="tile-' + x + '-' + y + '"></td>';
         }
         html += '</tr>';
@@ -59,9 +59,8 @@ export default class HtmlTableRenderer {
      */
     render(agentObservation, godObservation) {
         //Render the agent view
-        const agentDimensions = getMatrixDimensions(agentObservation.costs);
-        for (let x = 0; x < agentDimensions[0]; x++) {
-            for (let y = 0; y < agentDimensions[1]; y++) {
+        for (let x = 0; x < environmentConfig.viewPortSize[0]; x++) {
+            for (let y = 0; y < environmentConfig.viewPortSize[1]; y++) {
                 let color = {r: 50, g: 50, b: 50};
                 // if (agentObservation.visibles[x][y] === 0) {
                 //     color = {r: 0, g: 0, b: 0};
@@ -79,9 +78,8 @@ export default class HtmlTableRenderer {
         }
 
         //Render the god view
-        const godDimensions = getMatrixDimensions(godObservation.costs);
-        for (let y = 0; y < godDimensions[0]; y++) {
-            for (let x = 0; x < godDimensions[1]; x++) {
+        for (let y = 0; y < environmentConfig.size[0]; y++) {
+            for (let x = 0; x < environmentConfig.size[1]; x++) {
                 let color = {r: 50, g: 50, b: 50};
                 if (x == godObservation.position[0] && y == godObservation.position[1] && godObservation.costs[x][y] !== 0) {
                     color = {r: 255, g: 255, b: 0};

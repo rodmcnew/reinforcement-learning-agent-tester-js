@@ -64,3 +64,11 @@ export function shiftAndTrimMatrix(matrix, shiftVector, defaultValue, trimVector
 
     return newMatrix;
 }
+
+export function matrixToVector(matrix) {
+    let vector = [];
+    for (let xI = 0, len = matrix[0].length; xI < len; xI++) {
+        vector = [...vector, ...matrix[xI]];
+    }
+    return vector;
+}

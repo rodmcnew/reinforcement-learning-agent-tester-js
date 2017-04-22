@@ -5,6 +5,8 @@ import LookThreeAdjacentTwoDown from './agent/LookThreeAdjacentTwoDown'
 import LookThreeAdjacentThreeDown from './agent/LookThreeAdjacentThreeDown'
 import LateralWallBouncer from './agent/LateralWallBouncer'
 import AlwaysDown from './agent/AlwaysDown'
+import QLearner from './agent/QLearner'
+import QLearnerPreTrained from './agent/QLearnerPreTrained'
 import './style.css'
 
 document.body.innerHTML =
@@ -45,6 +47,8 @@ let renderer = new HtmlTableRenderer(document.getElementById('rendererContainer'
 
 
 let agents = {
+    'QLearnerPreTrained3000 - ranked 83': QLearnerPreTrained,
+    'QLearner': QLearner,
     'LookThreeAdjacentThreeDown - ranked 103': LookThreeAdjacentThreeDown,
     'LookThreeAdjacentTwoDown - ranked 101': LookThreeAdjacentTwoDown,
     'LookFourAdjacentOneDown - ranked 94': LookFourAdjacentOneDown,
@@ -133,7 +137,7 @@ document.getElementById('interval').addEventListener('change', (event) => {
 });
 
 function tick() {
-    const agentObservation = environment.getAgentObservation(environment);
+    const agentObservation = environment.getAgentObservation();
     const action = agent.getAction(agentObservation);
     takeAction(action, agentObservation);
 }
@@ -144,9 +148,9 @@ function setupInterval() {
         if (enableRendering) {
             intervalReference = setInterval(tick, speed);
         } else {
-            //Normal ticking takes 3ms between ticks which is not fast enough, so tick 1000 times
+            //Normal ticking takes 3ms between ticks which is not fast enough, so tick 100 times
             intervalReference = setInterval(function () {
-                for (let i = 0; i < 1000; i++) {
+                for (let i = 0; i < 100; i++) {
                     tick();
                 }
             }, 0);
@@ -155,7 +159,12 @@ function setupInterval() {
 }
 
 document.body.addEventListener('keydown', function (event) {
-    takeAction(event.key,environment.getAgentObservation(environment));
+    takeAction(event.key, environment.getAgentObservation());
+    if (enableRendering) {
+        const agentObservation = environment.getAgentObservation();
+        renderer.render(agentObservation, environment.getGodObservation());
+        renderScore(agentObservation.score);
+    }
 });
 
 newGame();

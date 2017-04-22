@@ -5,7 +5,10 @@ import {generateInitialState} from './generateInitialState'
 
 export const config = {
     size: [31, 31],
-    viewPortSize: [9, 9],
+    viewPortSize: [7, 5],
+    viewPortOffset: [0, 1],
+    // viewPortSize: [3, 2],
+    // viewPortOffset: [0, 1],
     verticalDeltaScore: 4,
     maxTileCost: 9
 };
@@ -56,7 +59,7 @@ export default class Environment {
 
         this._state.score = this._state.score - this._state.costs[this._state.position[0]][this._state.position[1]];
 
-        this._state.isComplete = this._state.position[1] == config.size[1] - 1 || this._state.score < -100;
+        this._state.isComplete = this._state.position[1] == config.size[1] - 1;// || this._state.score < -100;
 
     }
 
@@ -66,14 +69,13 @@ export default class Environment {
      * @returns {AgentObservation}
      */
     getAgentObservation() {
-        const positionOffset = [0, 2];
         const trimAmount = [
             Math.floor((config.size[0] - config.viewPortSize[0]) / 2),
             Math.floor((config.size[1] - config.viewPortSize[1]) / 2)
         ];
         const shiftVector = [
             Math.ceil(this._state.position[0] - config.size[0] / 2),
-            Math.ceil(this._state.position[1] - config.size[0] / 2) + positionOffset[1]
+            Math.ceil(this._state.position[1] - config.size[0] / 2) + config.viewPortOffset[1]
         ];
         const trimVector = [trimAmount[0], trimAmount[1]];
         return new AgentObservation(
@@ -82,7 +84,7 @@ export default class Environment {
             this._state.score,
             [
                 Math.floor(config.size[0] / 2) - trimAmount[0],
-                Math.floor(config.size[1] / 2) - trimAmount[1] - positionOffset[1]
+                Math.floor(config.size[1] / 2) - trimAmount[1] - config.viewPortOffset[1]
             ]
         );
     }

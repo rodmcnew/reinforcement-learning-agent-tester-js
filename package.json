@@ -9,6 +9,7 @@
   "devDependencies": {
     "css-loader": "^0.28.0",
     "html-webpack-plugin": "^2.28.0",
+    "underscore": "^1.8.3",
     "webpack": "^2.3.3",
     "webpack-dev-server": "^2.4.2"
   },
