@@ -858,7 +858,7 @@ const feelerPaths = [
     ['d', 'd', 'd', 'd', 's'],
 ];
 
-class LookFourAdjacentOneDown {
+class LookAheadWideAndShallow {
     /**
      *
      * @param {AgentObservation} observation
@@ -868,7 +868,7 @@ class LookFourAdjacentOneDown {
         return __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__helper_feeler__["a" /* getActionViaFeelers */])(observation, feelerPaths, null);
     }
 }
-/* harmony export (immutable) */ __webpack_exports__["a"] = LookFourAdjacentOneDown;
+/* harmony export (immutable) */ __webpack_exports__["a"] = LookAheadWideAndShallow;
 
 
 
@@ -959,7 +959,7 @@ const feelerPaths = [ //Warning the paths below may not include all possibilitie
     ['d', 'd', 'd', 's', 's', 'a', 'a', 'a', 's'],
 ];
 
-class LookThreeAdjacentTwoDown {
+class LookAheadWide {
     constructor() {
         this._state = {lastAction: null};
     }
@@ -977,7 +977,7 @@ class LookThreeAdjacentTwoDown {
         return action;
     }
 }
-/* harmony export (immutable) */ __webpack_exports__["a"] = LookThreeAdjacentTwoDown;
+/* harmony export (immutable) */ __webpack_exports__["a"] = LookAheadWide;
 
 
 
@@ -1011,7 +1011,7 @@ const feelerPaths = [
     ['d', 'd', 'd', 's', 's'],
 ];
 
-class LookThreeAdjacentTwoDown {
+class LookAheadWide {
     constructor() {
         this._state = {lastAction: null};
     }
@@ -1029,7 +1029,7 @@ class LookThreeAdjacentTwoDown {
         return action;
     }
 }
-/* harmony export (immutable) */ __webpack_exports__["a"] = LookThreeAdjacentTwoDown;
+/* harmony export (immutable) */ __webpack_exports__["a"] = LookAheadWide;
 
 
 
@@ -5093,8 +5093,8 @@ function generateRandomCosts(size) {
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__environment__ = __webpack_require__(0);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__renderer_HtmlTableRenderer__ = __webpack_require__(12);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__agent_LookFourAdjacentOneDown__ = __webpack_require__(8);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__agent_LookThreeAdjacentTwoDown__ = __webpack_require__(10);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__agent_LookAheadWideAndShallow__ = __webpack_require__(8);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__agent_LookAheadWide__ = __webpack_require__(10);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__agent_LookThreeAdjacentThreeDown__ = __webpack_require__(9);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__agent_LateralWallBouncer__ = __webpack_require__(7);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__agent_AlwaysDown__ = __webpack_require__(6);
@@ -5153,8 +5153,8 @@ let agents = {
     // 'QLearnerPreTrainedOn3000Games - ranked 83': QLearnerPreTrained,
     'QLearner': __WEBPACK_IMPORTED_MODULE_7__agent_QLearner__["a" /* default */],
     'LookThreeAdjacentThreeDown - ranked 103': __WEBPACK_IMPORTED_MODULE_4__agent_LookThreeAdjacentThreeDown__["a" /* default */],
-    'LookThreeAdjacentTwoDown - ranked 101': __WEBPACK_IMPORTED_MODULE_3__agent_LookThreeAdjacentTwoDown__["a" /* default */],
-    'LookFourAdjacentOneDown - ranked 94': __WEBPACK_IMPORTED_MODULE_2__agent_LookFourAdjacentOneDown__["a" /* default */],
+    'LookAheadWide - ranked 101': __WEBPACK_IMPORTED_MODULE_3__agent_LookAheadWide__["a" /* default */],
+    'LookAheadWideAndShallow - ranked 94': __WEBPACK_IMPORTED_MODULE_2__agent_LookAheadWideAndShallow__["a" /* default */],
     'LateralWallBouncer - ranked 78': __WEBPACK_IMPORTED_MODULE_5__agent_LateralWallBouncer__["a" /* default */],
     'AlwaysDown - ranked 29': __WEBPACK_IMPORTED_MODULE_6__agent_AlwaysDown__["a" /* default */],
 };

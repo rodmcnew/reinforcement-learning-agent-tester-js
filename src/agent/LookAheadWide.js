@@ -11,6 +11,7 @@ const feelerPaths = [
     ['a', 's', 'a', 'a', 's'],
     ['a', 'a', 's', 'a', 's'],
     ['a', 'a', 'a', 's', 's'],
+    ['a', 'a', 'a', 'a', 's', 's'],
 
     ['d', 's', 's'],
     ['s', 'd', 's'],
@@ -20,9 +21,10 @@ const feelerPaths = [
     ['d', 's', 'd', 'd', 's'],
     ['d', 'd', 's', 'd', 's'],
     ['d', 'd', 'd', 's', 's'],
+    ['d', 'd', 'd', 'd', 's', 's'],
 ];
 
-export default class LookThreeAdjacentTwoDown {
+export default class LookAheadWide {
     constructor() {
         this._state = {lastAction: null};
     }

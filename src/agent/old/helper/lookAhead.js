@@ -9,7 +9,7 @@ export default (observation, actionPathsToCheck)=> {
     function modelActionPathCost(actions, observation) {
         let environmentState = new EnvironmentState(
             observation.size,
-            observation.costs,
+            observation.tileTypes,
             [observation.position[0], observation.position[1]],
             observation.score,
             false

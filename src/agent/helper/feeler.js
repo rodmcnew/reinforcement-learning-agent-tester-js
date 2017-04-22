@@ -22,15 +22,15 @@ export function getFeelerValue(observation, feelerSteps) {
         const vector = actionVectors[step];
         position = [position[0] + vector[0], position[1] + vector[1]];
         let cost;
-        if (typeof observation.costs[position[0]] === 'undefined' || typeof observation.costs[position[0]][position[1]] === 'undefined') {
-            cost = config.maxTileCost * 2; //If going off map, make look very expensive
+        if (typeof observation.tileTypes[position[0]] === 'undefined' || typeof observation.tileTypes[position[0]][position[1]] === 'undefined') {
+            cost = config.minTileValue * 2; //If going off map, make look very expensive
             // } else
             //     if (observation.visibles[position[0]][position[1]] === 0) {
             //     cost = 1;//config.maxTileCost / 2; //@TODO there must be a better way to deal with unknown tiles
         } else {
-            cost = observation.costs[position[0]][position[1]]
+            cost = config.tileValueMap[observation.tileTypes[position[0]][position[1]]]
         }
-        value = value + vector[2] - cost;
+        value = value + vector[2] + cost;
     });
     return value;
 }

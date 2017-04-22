@@ -37,7 +37,7 @@ export default class QLearnerPreTrained {
      * @return {string} action code
      */
     getAction(observation) {
-        const state = matrixToVector(observation.costs);
+        const state = matrixToVector(observation.tileTypes);
 
         // if (this._lastScore !== null) {
         //     agent.learn(observation.score - this._lastScore);

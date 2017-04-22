@@ -5,15 +5,15 @@ export default class AgentObservation {
     /**
      *
     // * @param {Array} visibles
-     * @param {Array} costs
+     * @param {Array} tileTypes
      * @param {int} score
      * @param {Array} position
      */
-    constructor(/*visibles,*/ costs, score, position) {
+    constructor(/*visibles,*/ tileTypes, score, position) {
         /**
          * @type {Array}
          */
-        this.costs = costs;
+        this.tileTypes = tileTypes;
         // this.visibles = visibles;
         /**
          * @type {Number}

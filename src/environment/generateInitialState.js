@@ -8,7 +8,7 @@ import {config} from './index'
  */
 export const generateInitialState = () => {
     return new State(
-        generateRandomCosts(config.size),
+        generateRandomTileTypes(config.size),
         [Math.floor(config.size[0] / 2), 0],
         0,
         false
@@ -16,28 +16,30 @@ export const generateInitialState = () => {
 };
 
 /**
- * Generates a random set of costs for generated random environment states
+ * Generates a random set of tileTypes for generated random environment states
  *
  * @param {Array} size
  * @returns {Array}
  */
-function generateRandomCosts(size) {
-    const costs = [];
+function generateRandomTileTypes(size) {
+    const tileTypes = [];
     const min = 1;
     const max = 9;
     for (let xi = 0; xi < size[0]; xi++) {
-        costs[xi] = [];
+        tileTypes[xi] = [];
         for (let yi = 0; yi < size[1]; yi++) {
-            let cost = Math.floor(Math.random() * (max - min + 1)) + min;
+            let randomValue = Math.floor(Math.random() * (max - min + 1)) + min;
 
-            if (cost < 7) {
-                cost = 0;
+            let tileType;
+
+            if (randomValue < 7) {
+                tileType = 0;
             } else {
-                cost = 9;
+                tileType = 1;
             }
 
-            costs[xi][yi] = cost;
+            tileTypes[xi][yi] = tileType;
         }
     }
-    return costs;
+    return tileTypes;
 }

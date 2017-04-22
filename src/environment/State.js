@@ -3,16 +3,16 @@
  */
 export default class State {
     /**
-     * @param {Array} costs
+     * @param {Array} tileTypes
      * @param {Array} position [x,y]
      * @param {Number} score
      * @param {Boolean} isComplete
      */
-    constructor(costs, position, score, isComplete) {
+    constructor(tileTypes, position, score, isComplete) {
         /**
          * @type {Array}
          */
-        this.costs = costs;
+        this.tileTypes = tileTypes;
         /**
          * @type {Array} position [x,y]
          */

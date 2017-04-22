@@ -12,8 +12,9 @@ const feelerPaths = [
     ['d', 'd', 'd', 'd', 's'],
 ];
 
-export default class LookFourAdjacentOneDown {
+export default class LookAheadWideAndShallow {
     /**
+     * An agent that looks far to the sides but one tile downward
      *
      * @param {AgentObservation} observation
      * @return {string} action code

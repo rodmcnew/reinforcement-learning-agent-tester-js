@@ -1,9 +1,9 @@
 import {config} from '../environment'
 
 function getImmediateCosts(observation) {
-    const costOneBelow = observation.costs[observation.position[0]][observation.position[1] + 1];
-    const costOneToRight = observation.costs[observation.position[0] + 1][observation.position[1]];
-    const costOneToLeft = observation.costs[observation.position[0] - 1][observation.position[1]];
+    const costOneBelow = config.tileValueMap[observation.tileTypes[observation.position[0]][observation.position[1] + 1]];
+    const costOneToRight = config.tileValueMap[observation.tileTypes[observation.position[0] + 1][observation.position[1]]];
+    const costOneToLeft = config.tileValueMap[observation.tileTypes[observation.position[0] - 1][observation.position[1]]];
     return {
         'a': costOneToLeft,
         's': costOneBelow - config.verticalDeltaScore,

@@ -9,8 +9,9 @@ export const config = {
     // viewPortOffset: [0, 1],
     viewPortSize: [9, 9],
     viewPortOffset: [0, 2],
-    verticalDeltaScore: 4,
-    maxTileCost: 9
+    verticalDeltaScore: 10,
+    minTileValue: -40,
+    tileValueMap: [-1, -40]
 };
 
 /**
@@ -57,7 +58,7 @@ export default class Environment {
                 break;
         }
 
-        this._state.score = this._state.score - this._state.costs[this._state.position[0]][this._state.position[1]];
+        this._state.score = this._state.score + config.tileValueMap[this._state.tileTypes[this._state.position[0]][this._state.position[1]]];
 
         this._state.isComplete = this._state.position[1] == config.size[1] - 1;// || this._state.score < -100;
 
@@ -78,9 +79,23 @@ export default class Environment {
             Math.ceil(this._state.position[1] - config.size[0] / 2) + config.viewPortOffset[1]
         ];
         const trimVector = [trimAmount[0], trimAmount[1]];
+
+        let tileTypes = shiftAndTrimMatrix(this._state.tileTypes, shiftVector, 1, trimVector);
+
+
+        //Make the bottom exit row look safe by making its tile not red
+        const limit = config.size[1] - trimAmount[1] - shiftVector[1];
+        if (limit < config.viewPortSize[1]) {
+            for (let x = 0; x < config.viewPortSize[0]; x++) {
+                for (let y = limit; y < config.viewPortSize[1]; y++) {
+                    tileTypes[x][y] = 0;
+                }
+            }
+        }
+
         return new AgentObservation(
             // shiftAndTrimMatrix(getVisibleTiles(this._state), shiftVector, 1, trimVector),
-            shiftAndTrimMatrix(this._state.costs, shiftVector, 9, trimVector),
+            tileTypes,
             this._state.score,
             [
                 Math.floor(config.size[0] / 2) - trimAmount[0],

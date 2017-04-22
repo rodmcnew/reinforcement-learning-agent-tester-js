@@ -5,6 +5,7 @@
 
 .InfectionGameHtmlTableRender {
     /*float: left;*/
+    overflow: auto;
 }
 
 .InfectionGameHtmlTableRender table {

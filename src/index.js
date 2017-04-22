@@ -1,11 +1,13 @@
-import Environment from './environment'
 import HtmlTableRenderer from './renderer/HtmlTableRenderer'
-import LookFourAdjacentOneDown from './agent/LookFourAdjacentOneDown'
-import LookThreeAdjacentTwoDown from './agent/LookThreeAdjacentTwoDown'
+import LookAheadWideAndShallow from './agent/LookAheadWideAndShallow'
+import LookAheadWide from './agent/LookAheadWide'
 import LookThreeAdjacentThreeDown from './agent/LookThreeAdjacentThreeDown'
-import LateralWallBouncer from './agent/LateralWallBouncer'
+// import LateralWallBouncer from './agent/LateralWallBouncer'
 import AlwaysDown from './agent/AlwaysDown'
 import QLearner from './agent/QLearner'
+import {config as environmentConfig} from './environment'
+import GameRunner from './GameRunner'
+
 // import QLearnerPreTrained from './agent/QLearnerPreTrained'
 import './style.css'
 
@@ -24,10 +26,11 @@ document.body.innerHTML =
     '<pre id="score"></pre>' +
     '<pre>' +
     '\nGame Rules:' +
-    '\n- Gain 4 points for every row lower you go' +
-    '\n- Loose 4 points for every row higher you go' +
-    '\n- Loose 9 points any time you move in a red square' +
     '\n- Get to the bottom row to complete the game' +
+    '\n- Gain ' + environmentConfig.verticalDeltaScore + ' points for every row lower you go' +
+    '\n- Loose ' + environmentConfig.verticalDeltaScore + ' points for every row higher you go' +
+    '\n- Loose ' + -environmentConfig.tileValueMap[1] + ' points when moving into a red square' +
+    '\n- Loose ' + -environmentConfig.tileValueMap[0] + ' points when moving into a grey square' +
     '</pre>' +
     '</div>' +
     '<div id="rendererContainer"></div>';
@@ -36,24 +39,22 @@ const scoreElement = document.getElementById('score');
 let enableRendering = true;
 let autoPlay = true;
 let environment;
-let scoreSum = 0;
-let gameCount = 0;
-let lastGameScore = 0;
 let speed = 250;
 let intervalReference = null;
 let agent;
 let currentAgentName;
 let renderer = new HtmlTableRenderer(document.getElementById('rendererContainer'));
 
+let gameRunner = new GameRunner(renderer, handleGameRunnerStatusChange);
 
 let agents = {
     // 'QLearnerPreTrainedOn3000Games - ranked 83': QLearnerPreTrained,
     'QLearner': QLearner,
-    'LookThreeAdjacentThreeDown - ranked 103': LookThreeAdjacentThreeDown,
-    'LookThreeAdjacentTwoDown - ranked 101': LookThreeAdjacentTwoDown,
-    'LookFourAdjacentOneDown - ranked 94': LookFourAdjacentOneDown,
-    'LateralWallBouncer - ranked 78': LateralWallBouncer,
-    'AlwaysDown - ranked 29': AlwaysDown,
+    'LookThreeAdjacentThreeDown - ranked 198': LookThreeAdjacentThreeDown,
+    'LookAheadWide - ranked 192': LookAheadWide,
+    'LookAheadWideAndShallow - ranked 157': LookAheadWideAndShallow,
+    // 'LateralWallBouncer - ranked 78': LateralWallBouncer,
+    'AlwaysDown - ranked negative 116': AlwaysDown,
 };
 for (agent in agents) {
     //Select the first agent in the list
@@ -61,50 +62,13 @@ for (agent in agents) {
     break;
 }
 
-function clearHistory() {
-    gameCount = 0;
-    lastGameScore = 0;
-    scoreSum = 0;
-}
-
-function renderScore(score) {
+function handleGameRunnerStatusChange(stats) {
     scoreElement.innerHTML =
         'Agent: ' + currentAgentName +
-        '\nCurrent Score: ' + score +
-        '\nLast Game Final Score: ' + lastGameScore +
-        '\nAvg Final Score: ' + (Math.round(scoreSum / gameCount) || 0) +
-        '\nGame Count: ' + gameCount;
-}
-
-function newGame() {
-    environment = new Environment();
-
-    agent = new agents[currentAgentName];
-
-    if (enableRendering) {
-        //@TODO have this render make the table its self inside a given div
-        renderer.clear();
-        renderer.render(environment.getAgentObservation(), environment.getGodObservation());
-    } else {
-        renderScore(0);//Makes score show up between games when rendering is disabled
-    }
-}
-
-function takeAction(actionCode, agentObservation) {
-    environment.applyAction(actionCode);
-    let godObservation = environment.getGodObservation();
-
-    if (godObservation.isComplete) {//@Find better way to communicate "isComplete"
-        lastGameScore = agentObservation.score;
-        scoreSum += agentObservation.score;
-        gameCount += 1;
-        newGame();
-    }
-
-    if (enableRendering) {
-        renderer.render(agentObservation, godObservation);
-        renderScore(agentObservation.score);
-    }
+        '\nCurrent Score: ' + stats.currentScore +
+        '\nLast Game Final Score: ' + stats.lastGameScore +
+        '\nAvg Final Score: ' + (Math.round(stats.scoreSum / stats.gameCount) || 0) +
+        '\nGame Count: ' + stats.gameCount;
 }
 
 let agentSelectorElement = document.getElementById('agentSelector');
@@ -116,16 +80,16 @@ for (agent in agents) {
 }
 agentSelectorElement.addEventListener('change', (event) => {
     currentAgentName = agentSelectorElement.value;
-    clearHistory();
-    newGame();
+    gameRunner.clearStats();
+    newGame()
 });
 
 document.getElementById('interval').addEventListener('change', (event) => {
     const value = event.target.value;
-    enableRendering = true;
+    let newEnableRenderingValue = true;
     autoPlay = true;
     if (value === 'no-render') {
-        enableRendering = false;
+        newEnableRenderingValue = false;
         speed = 0;
         renderer.clear();
     } else if (value === 'paused') {
@@ -133,25 +97,23 @@ document.getElementById('interval').addEventListener('change', (event) => {
     } else {
         speed = value;
     }
+    if(newEnableRenderingValue != enableRendering){
+        enableRendering=newEnableRenderingValue;
+        newGame();
+    }
     setupInterval();
 });
-
-function tick() {
-    const agentObservation = environment.getAgentObservation();
-    const action = agent.getAction(agentObservation);
-    takeAction(action, agentObservation);
-}
 
 function setupInterval() {
     clearInterval(intervalReference);
     if (autoPlay) {
         if (enableRendering) {
-            intervalReference = setInterval(tick, speed);
+            intervalReference = setInterval(gameRunner.tick, speed);
         } else {
             //Normal ticking takes 3ms between ticks which is not fast enough, so tick 100 times
             intervalReference = setInterval(function () {
                 for (let i = 0; i < 100; i++) {
-                    tick();
+                    gameRunner.tick();
                 }
             }, 0);
         }
@@ -159,13 +121,16 @@ function setupInterval() {
 }
 
 document.body.addEventListener('keydown', function (event) {
-    takeAction(event.key, environment.getAgentObservation());
-    if (enableRendering) {
-        const agentObservation = environment.getAgentObservation();
-        renderer.render(agentObservation, environment.getGodObservation());
-        renderScore(agentObservation.score);
-    }
+    gameRunner.takeAction(event.key);
+    // if (enableRendering) {
+    //     const agentObservation = environment.getAgentObservation();
+    //     renderer.render(agentObservation, environment.getGodObservation());
+    // }
 });
+
+function newGame() {
+    gameRunner.newGame(new agents[currentAgentName], enableRendering);
+}
 
 newGame();
 setupInterval();

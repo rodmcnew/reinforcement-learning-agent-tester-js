@@ -65,11 +65,11 @@ export default class HtmlTableRenderer {
                 // if (agentObservation.visibles[x][y] === 0) {
                 //     color = {r: 0, g: 0, b: 0};
                 // } else
-                if (x == agentObservation.position[0] && y == agentObservation.position[1] && agentObservation.costs[x][y] !== 0) {
+                if (x == agentObservation.position[0] && y == agentObservation.position[1] && agentObservation.tileTypes[x][y] !== 0) {
                     color = {r: 255, g: 255, b: 0};
                 } else if (x == agentObservation.position[0] && y == agentObservation.position[1]) {
                     color = {r: 0, g: 255, b: 0};
-                } else if (agentObservation.costs[x][y] !== 0) {
+                } else if (agentObservation.tileTypes[x][y] !== 0) {
                     color = {r: 230, g: 0, b: 0};
                 }
                 this._agentTds[x][y].style
@@ -81,15 +81,15 @@ export default class HtmlTableRenderer {
         for (let y = 0; y < environmentConfig.size[0]; y++) {
             for (let x = 0; x < environmentConfig.size[1]; x++) {
                 let color = {r: 50, g: 50, b: 50};
-                if (x == godObservation.position[0] && y == godObservation.position[1] && godObservation.costs[x][y] !== 0) {
+                if (x == godObservation.position[0] && y == godObservation.position[1] && godObservation.tileTypes[x][y] !== 0) {
                     color = {r: 255, g: 255, b: 0};
                 } else if (x == godObservation.position[0] && y == godObservation.position[1]) {
                     color = {r: 0, g: 255, b: 0};
-                } else if (this._previousPositions[x + ',' + y] && godObservation.costs[x][y] !== 0) {
+                } else if (this._previousPositions[x + ',' + y] && godObservation.tileTypes[x][y] !== 0) {
                     color = {r: 255, g: 255, b: 128}
                 } else if (this._previousPositions[x + ',' + y]) {
                     color = {r: 0, g: 128, b: 0}
-                } else if (godObservation.costs[x][y] !== 0) {
+                } else if (godObservation.tileTypes[x][y] !== 0) {
                     color = {r: 230, g: 0, b: 0};
                 }
                 // } else if (godObservation.visibles[x][y] === 0) {

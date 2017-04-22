@@ -35,7 +35,7 @@ export default class QLearner {
      * @return {string} action code
      */
     getAction(observation) {
-        const state = matrixToVector(observation.costs);
+        const state = matrixToVector(observation.tileTypes);
 
         if (this._lastScore !== null) {
             agent.learn(observation.score - this._lastScore);
@@ -43,9 +43,16 @@ export default class QLearner {
 
         if (Math.random() < .001) {
             if (!document.getElementById('q-learning-data')) {
-                let element = document.createElement("TEXTAREA");
-                element.setAttribute('id','q-learning-data');
-                document.body.appendChild(element);
+                let div = document.createElement('div');
+                let label = document.createElement('div');
+                label.innerHTML='<br/>Q Learner Internal State Dump';
+                let textArea = document.createElement("TEXTAREA");
+                textArea.style.width='100%';
+                textArea.style.height='10em';
+                textArea.setAttribute('id','q-learning-data');
+                div.appendChild(label);
+                div.appendChild(textArea);
+                document.body.appendChild(div);
             }
             document.getElementById('q-learning-data').innerHTML = JSON.stringify(agent.toJSON());
         }
