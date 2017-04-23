@@ -7,6 +7,7 @@ import RL_DQN_5X5Viewport_In_Learning_Mode from './agent/RL_DQN_5X5Viewport_In_L
 import BarelyLookAhead from './agent/BarelyLookAhead'
 import RL_DQN_5X5Viewport_PreTrained from './agent/RL_DQN_5X5Viewport_PreTrained'
 import RL_DQN_InLearningMode from './agent/RL_DQN_InLearningMode'
+import RL_DQN_PreTrained from './agent/RL_DQN_PreTrained'
 import {config as environmentConfig} from './environment'
 import GameRunner from './GameRunner'
 
@@ -50,9 +51,10 @@ let renderer = new HtmlTableRenderer(document.getElementById('rendererContainer'
 let gameRunner = new GameRunner(renderer, handleGameRunnerStatusChange);
 
 let agents = {
+    'RL_DQN_PreTrained - ranked 188': RL_DQN_PreTrained,
+    'RL_DQN_InLearningMode': RL_DQN_InLearningMode,
     'RL_DQN_5X5Viewport_PreTrained - ranked 192': RL_DQN_5X5Viewport_PreTrained,
     'RL_DQN_5X5Viewport_In_Learning_Mode': RL_DQN_5X5Viewport_In_Learning_Mode,
-    'RL_DQN_InLearningMode': RL_DQN_InLearningMode,
     'LookAheadWideAndDeep - ranked 234': LookAheadWideAndDeep,
     'LookAheadWide - ranked 230': LookAheadWide,
     'ColumnCompare - ranked 208': ColumnCompare,
