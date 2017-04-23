@@ -419,7 +419,7 @@ function ensureElementsExist() {
         return;
     }
     document.getElementById('agentRendererContainer').innerHTML =
-        `<div id="DQNRender"><strong>Deep Q-Network Stats</strong>
+        `<div id="DQNRender">
     <br />Action Choice:
     <div style="overflow: auto"><div style="float: left">w:&nbsp;</div> <div id="action0" style="background-color: lightgoldenrodyellow;"></div></div>
     <div style="overflow: auto"><div style="float: left">a:&nbsp;</div> <div id="action1" style="background-color: lightsalmon"></div></div>
