@@ -69,27 +69,9 @@ var R = {}; // the Recurrent library
         this.dw = zeros(n * d);
     }
     Mat.prototype = {
-        get: function (row, col) {
-            // slow but careful accessor function
-            // we want row-major order
-            var ix = (this.d * row) + col;
-            assert(ix >= 0 && ix < this.w.length);
-            return this.w[ix];
-        },
-        set: function (row, col, v) {
-            // slow but careful accessor function
-            var ix = (this.d * row) + col;
-            assert(ix >= 0 && ix < this.w.length);
-            this.w[ix] = v;
-        },
         setFrom: function (arr) {
             for (var i = 0, n = arr.length; i < n; i++) {
                 this.w[i] = arr[i];
-            }
-        },
-        setColumn: function (m, i) {
-            for (var q = 0, n = m.w.length; q < n; q++) {
-                this.w[(this.d * q) + i] = m.w[q];
             }
         },
         toJSON: function () {
@@ -164,35 +146,6 @@ var R = {}; // the Recurrent library
         }
         return net;
     }
-    var netZeroGrads = function (net) {
-        for (var p in net) {
-            if (net.hasOwnProperty(p)) {
-                var mat = net[p];
-                gradFillConst(mat, 0);
-            }
-        }
-    }
-    var netFlattenGrads = function (net) {
-        var n = 0;
-        for (var p in net) {
-            if (net.hasOwnProperty(p)) {
-                var mat = net[p];
-                n += mat.dw.length;
-            }
-        }
-        var g = new Mat(n, 1);
-        var ix = 0;
-        for (var p in net) {
-            if (net.hasOwnProperty(p)) {
-                var mat = net[p];
-                for (var i = 0, m = mat.dw.length; i < m; i++) {
-                    g.w[ix] = mat.dw[i];
-                    ix++;
-                }
-            }
-        }
-        return g;
-    }
 
     // return Mat but filled with random numbers from gaussian
     var RandMat = function (n, d, mu, std) {
@@ -207,16 +160,6 @@ var R = {}; // the Recurrent library
     var fillRandn = function (m, mu, std) {
         for (var i = 0, n = m.w.length; i < n; i++) {
             m.w[i] = randn(mu, std);
-        }
-    }
-    var fillRand = function (m, lo, hi) {
-        for (var i = 0, n = m.w.length; i < n; i++) {
-            m.w[i] = randf(lo, hi);
-        }
-    }
-    var gradFillConst = function (m, c) {
-        for (var i = 0, n = m.dw.length; i < n; i++) {
-            m.dw[i] = c
         }
     }
 
@@ -291,22 +234,6 @@ var R = {}; // the Recurrent library
                         // grad for z = tanh(x) is (1 - z^2)
                         var mwi = out.w[i];
                         m.dw[i] += mwi * (1.0 - mwi) * out.dw[i];
-                    }
-                }
-                this.backprop.push(backward);
-            }
-            return out;
-        },
-        relu: function (m) {
-            var out = new Mat(m.n, m.d);
-            var n = m.w.length;
-            for (var i = 0; i < n; i++) {
-                out.w[i] = Math.max(0, m.w[i]); // relu
-            }
-            if (this.needs_backprop) {
-                var backward = function () {
-                    for (var i = 0; i < n; i++) {
-                        m.dw[i] += m.w[i] > 0 ? out.dw[i] : 0.0;
                     }
                 }
                 this.backprop.push(backward);
@@ -404,170 +331,6 @@ var R = {}; // the Recurrent library
         },
     }
 
-    var softmax = function (m) {
-        var out = new Mat(m.n, m.d); // probability volume
-        var maxval = -999999;
-        for (var i = 0, n = m.w.length; i < n; i++) {
-            if (m.w[i] > maxval) maxval = m.w[i];
-        }
-
-        var s = 0.0;
-        for (var i = 0, n = m.w.length; i < n; i++) {
-            out.w[i] = Math.exp(m.w[i] - maxval);
-            s += out.w[i];
-        }
-        for (var i = 0, n = m.w.length; i < n; i++) {
-            out.w[i] /= s;
-        }
-
-        // no backward pass here needed
-        // since we will use the computed probabilities outside
-        // to set gradients directly on m
-        return out;
-    }
-
-    var Solver = function () {
-        this.decay_rate = 0.999;
-        this.smooth_eps = 1e-8;
-        this.step_cache = {};
-    }
-    Solver.prototype = {
-        step: function (model, step_size, regc, clipval) {
-            // perform parameter update
-            var solver_stats = {};
-            var num_clipped = 0;
-            var num_tot = 0;
-            for (var k in model) {
-                if (model.hasOwnProperty(k)) {
-                    var m = model[k]; // mat ref
-                    if (!(k in this.step_cache)) {
-                        this.step_cache[k] = new Mat(m.n, m.d);
-                    }
-                    var s = this.step_cache[k];
-                    for (var i = 0, n = m.w.length; i < n; i++) {
-
-                        // rmsprop adaptive learning rate
-                        var mdwi = m.dw[i];
-                        s.w[i] = s.w[i] * this.decay_rate + (1.0 - this.decay_rate) * mdwi * mdwi;
-
-                        // gradient clip
-                        if (mdwi > clipval) {
-                            mdwi = clipval;
-                            num_clipped++;
-                        }
-                        if (mdwi < -clipval) {
-                            mdwi = -clipval;
-                            num_clipped++;
-                        }
-                        num_tot++;
-
-                        // update (and regularize)
-                        m.w[i] += -step_size * mdwi / Math.sqrt(s.w[i] + this.smooth_eps) - regc * m.w[i];
-                        m.dw[i] = 0; // reset gradients for next iteration
-                    }
-                }
-            }
-            solver_stats['ratio_clipped'] = num_clipped * 1.0 / num_tot;
-            return solver_stats;
-        }
-    }
-
-    var initLSTM = function (input_size, hidden_sizes, output_size) {
-        // hidden size should be a list
-
-        var model = {};
-        for (var d = 0; d < hidden_sizes.length; d++) { // loop over depths
-            var prev_size = d === 0 ? input_size : hidden_sizes[d - 1];
-            var hidden_size = hidden_sizes[d];
-
-            // gates parameters
-            model['Wix' + d] = new RandMat(hidden_size, prev_size, 0, 0.08);
-            model['Wih' + d] = new RandMat(hidden_size, hidden_size, 0, 0.08);
-            model['bi' + d] = new Mat(hidden_size, 1);
-            model['Wfx' + d] = new RandMat(hidden_size, prev_size, 0, 0.08);
-            model['Wfh' + d] = new RandMat(hidden_size, hidden_size, 0, 0.08);
-            model['bf' + d] = new Mat(hidden_size, 1);
-            model['Wox' + d] = new RandMat(hidden_size, prev_size, 0, 0.08);
-            model['Woh' + d] = new RandMat(hidden_size, hidden_size, 0, 0.08);
-            model['bo' + d] = new Mat(hidden_size, 1);
-            // cell write params
-            model['Wcx' + d] = new RandMat(hidden_size, prev_size, 0, 0.08);
-            model['Wch' + d] = new RandMat(hidden_size, hidden_size, 0, 0.08);
-            model['bc' + d] = new Mat(hidden_size, 1);
-        }
-        // decoder params
-        model['Whd'] = new RandMat(output_size, hidden_size, 0, 0.08);
-        model['bd'] = new Mat(output_size, 1);
-        return model;
-    }
-
-    var forwardLSTM = function (G, model, hidden_sizes, x, prev) {
-        // forward prop for a single tick of LSTM
-        // G is graph to append ops to
-        // model contains LSTM parameters
-        // x is 1D column vector with observation
-        // prev is a struct containing hidden and cell
-        // from previous iteration
-
-        if (prev == null || typeof prev.h === 'undefined') {
-            var hidden_prevs = [];
-            var cell_prevs = [];
-            for (var d = 0; d < hidden_sizes.length; d++) {
-                hidden_prevs.push(new R.Mat(hidden_sizes[d], 1));
-                cell_prevs.push(new R.Mat(hidden_sizes[d], 1));
-            }
-        } else {
-            var hidden_prevs = prev.h;
-            var cell_prevs = prev.c;
-        }
-
-        var hidden = [];
-        var cell = [];
-        for (var d = 0; d < hidden_sizes.length; d++) {
-
-            var input_vector = d === 0 ? x : hidden[d - 1];
-            var hidden_prev = hidden_prevs[d];
-            var cell_prev = cell_prevs[d];
-
-            // input gate
-            var h0 = G.mul(model['Wix' + d], input_vector);
-            var h1 = G.mul(model['Wih' + d], hidden_prev);
-            var input_gate = G.sigmoid(G.add(G.add(h0, h1), model['bi' + d]));
-
-            // forget gate
-            var h2 = G.mul(model['Wfx' + d], input_vector);
-            var h3 = G.mul(model['Wfh' + d], hidden_prev);
-            var forget_gate = G.sigmoid(G.add(G.add(h2, h3), model['bf' + d]));
-
-            // output gate
-            var h4 = G.mul(model['Wox' + d], input_vector);
-            var h5 = G.mul(model['Woh' + d], hidden_prev);
-            var output_gate = G.sigmoid(G.add(G.add(h4, h5), model['bo' + d]));
-
-            // write operation on cells
-            var h6 = G.mul(model['Wcx' + d], input_vector);
-            var h7 = G.mul(model['Wch' + d], hidden_prev);
-            var cell_write = G.tanh(G.add(G.add(h6, h7), model['bc' + d]));
-
-            // compute new cell activation
-            var retain_cell = G.eltmul(forget_gate, cell_prev); // what do we keep from cell
-            var write_cell = G.eltmul(input_gate, cell_write); // what do we write to cell
-            var cell_d = G.add(retain_cell, write_cell); // new cell contents
-
-            // compute hidden state as gated, saturated cell activations
-            var hidden_d = G.eltmul(output_gate, G.tanh(cell_d));
-
-            hidden.push(hidden_d);
-            cell.push(cell_d);
-        }
-
-        // one decoder to outputs at end
-        var output = G.add(G.mul(model['Whd'], hidden[hidden.length - 1]), model['bd']);
-
-        // return cell memory, hidden representation and output
-        return {'h': hidden, 'c': cell, 'o': output};
-    }
-
     var sig = function (x) {
         // helper function for computing sigmoid
         return 1.0 / (1 + Math.exp(-x));
@@ -587,35 +350,16 @@ var R = {}; // the Recurrent library
         return maxix;
     }
 
-    var samplei = function (w) {
-        // sample argmax from w, assuming w are
-        // probabilities that sum to one
-        var r = randf(0, 1);
-        var x = 0.0;
-        var i = 0;
-        while (true) {
-            x += w[i];
-            if (x > r) {
-                return i;
-            }
-            i++;
-        }
-        return w.length - 1; // pretty sure we should never get here?
-    }
-
     // various utils
     global.assert = assert;
     global.zeros = zeros;
     global.maxi = maxi;
-    global.samplei = samplei;
     global.randi = randi;
     global.randn = randn;
-    global.softmax = softmax;
+    // global.softmax = softmax;
     // classes
     global.Mat = Mat;
     global.RandMat = RandMat;
-    global.forwardLSTM = forwardLSTM;
-    global.initLSTM = initLSTM;
     // more utils
     global.updateMat = updateMat;
     global.updateNet = updateNet;
@@ -623,10 +367,8 @@ var R = {}; // the Recurrent library
     global.copyNet = copyNet;
     global.netToJSON = netToJSON;
     global.netFromJSON = netFromJSON;
-    global.netZeroGrads = netZeroGrads;
-    global.netFlattenGrads = netFlattenGrads;
+    // global.netFlattenGrads = netFlattenGrads;
     // optimization
-    global.Solver = Solver;
     global.Graph = Graph;
 })(R);
 
@@ -644,28 +386,7 @@ var RL = {};
         return (typeof opt[field_name] !== 'undefined') ? opt[field_name] : default_value;
     }
 
-    var zeros = R.zeros; // inherit these
-    var assert = R.assert;
     var randi = R.randi;
-    var randf = R.randf;
-
-    var setConst = function (arr, c) {
-        for (var i = 0, n = arr.length; i < n; i++) {
-            arr[i] = c;
-        }
-    }
-
-    var sampleWeighted = function (p) {
-        var r = Math.random();
-        var c = 0.0;
-        for (var i = 0, n = p.length; i < n; i++) {
-            c += p[i];
-            if (c >= r) {
-                return i;
-            }
-        }
-        assert(false, 'wtf');
-    }
 
     var DQNAgent = function (env, opt) {
         this.gamma = getopt(opt, 'gamma', 0.75); // future reward discount factor
@@ -819,13 +540,7 @@ var RL = {};
         }
     }
 
-// exports
-//     global.DPAgent = DPAgent;
-//     global.TDAgent = TDAgent;
     global.DQNAgent = DQNAgent;
-//global.SimpleReinforceAgent = SimpleReinforceAgent;
-//global.RecurrentReinforceAgent = RecurrentReinforceAgent;
-//global.DeterministPG = DeterministPG;
 })(RL);
 
 export const rl = RL;
