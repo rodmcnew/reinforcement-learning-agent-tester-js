@@ -3,7 +3,7 @@ import ColumnCompare from './agent/ColumnCompare'
 import LookAheadWide from './agent/LookAheadWide'
 import LookAheadWideAndDeep from './agent/LookAheadWideAndDeep'
 import AlwaysDown from './agent/AlwaysDown'
-import RL_DQN_5X5 from './agent/RL_DQN_5X5'
+import RL_DQN_5X5Viewport_In_Learning_Mode from './agent/RL_DQN_5X5Viewport_In_Learning_Mode'
 import BarelyLookAhead from './agent/BarelyLookAhead'
 import RL_DQN_5X5Viewport_PreTrained from './agent/RL_DQN_5X5Viewport_PreTrained'
 import {config as environmentConfig} from './environment'
@@ -51,7 +51,7 @@ let gameRunner = new GameRunner(renderer, handleGameRunnerStatusChange);
 let agents = {
     'LookAheadWideAndDeep - ranked 334': LookAheadWideAndDeep,
     'RL_DQN_5X5Viewport_PreTrained - ranked 201': RL_DQN_5X5Viewport_PreTrained,
-    'RL_DQN_5X5': RL_DQN_5X5,
+    'RL_DQN_5X5Viewport_In_Learning_Mode': RL_DQN_5X5Viewport_In_Learning_Mode,
     'LookAheadWide - ranked 330': LookAheadWide,
     'ColumnCompare - ranked 308': ColumnCompare,
     'BarelyLookAhead - ranked 292': BarelyLookAhead,

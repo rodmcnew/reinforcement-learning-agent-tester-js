@@ -1206,7 +1206,7 @@ const numberOfStates = 5 * 5 + 1;
 
 let rlDqn = new __WEBPACK_IMPORTED_MODULE_1__helper_RlDqn__["a" /* default */](true, numberOfStates);
 
-class RL_DQN_5X5 {
+class RL_DQN_5X5Viewport_In_Learning_Mode {
     constructor() {
         this._lastScore = null;
         this._lastActionIndex = 2; //2='s'
@@ -1241,7 +1241,7 @@ class RL_DQN_5X5 {
         return action;
     }
 }
-/* harmony export (immutable) */ __webpack_exports__["a"] = RL_DQN_5X5;
+/* harmony export (immutable) */ __webpack_exports__["a"] = RL_DQN_5X5Viewport_In_Learning_Mode;
 
 
 /***/ }),
@@ -5311,7 +5311,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__agent_LookAheadWide__ = __webpack_require__(12);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__agent_LookAheadWideAndDeep__ = __webpack_require__(13);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__agent_AlwaysDown__ = __webpack_require__(9);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__agent_RL_DQN_5X5__ = __webpack_require__(14);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__agent_RL_DQN_5X5Viewport_In_Learning_Mode__ = __webpack_require__(14);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__agent_BarelyLookAhead__ = __webpack_require__(10);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__agent_RL_DQN_5X5Viewport_PreTrained__ = __webpack_require__(15);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__environment__ = __webpack_require__(0);
@@ -5371,7 +5371,7 @@ let gameRunner = new __WEBPACK_IMPORTED_MODULE_9__GameRunner__["a" /* default */
 let agents = {
     'LookAheadWideAndDeep - ranked 334': __WEBPACK_IMPORTED_MODULE_3__agent_LookAheadWideAndDeep__["a" /* default */],
     'RL_DQN_5X5Viewport_PreTrained - ranked 201': __WEBPACK_IMPORTED_MODULE_7__agent_RL_DQN_5X5Viewport_PreTrained__["a" /* default */],
-    'RL_DQN_5X5': __WEBPACK_IMPORTED_MODULE_5__agent_RL_DQN_5X5__["a" /* default */],
+    'RL_DQN_5X5Viewport_In_Learning_Mode': __WEBPACK_IMPORTED_MODULE_5__agent_RL_DQN_5X5Viewport_In_Learning_Mode__["a" /* default */],
     'LookAheadWide - ranked 330': __WEBPACK_IMPORTED_MODULE_2__agent_LookAheadWide__["a" /* default */],
     'ColumnCompare - ranked 308': __WEBPACK_IMPORTED_MODULE_1__agent_ColumnCompare__["a" /* default */],
     'BarelyLookAhead - ranked 292': __WEBPACK_IMPORTED_MODULE_6__agent_BarelyLookAhead__["a" /* default */],
