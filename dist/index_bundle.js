@@ -327,6 +327,8 @@ let actionElements = null;
 let randomActionElement = null;
 let rewardElements = null;
 
+let currentAgent; //@TODO WARNING IS HUGE HACK
+
 function ensureElementsExist() {
     if (document.getElementById('DQNRender')) {
         return;
@@ -343,6 +345,7 @@ function ensureElementsExist() {
         Reward:
         <div style="overflow: auto"><div style="float: left">good&nbsp;</div> <div id="good" style="background-color: greenyellow"></div></div>
     <div style="overflow: auto"><div style="float: left">bad&nbsp;</div> <div id="bad" style="background-color: orangered"></div></div>
+<br /><button id="dump-agent-internal-data">Dump Agent Internal Data</button>
 </div>`;
     actionElements = [
         document.getElementById('action0'),
@@ -355,6 +358,22 @@ function ensureElementsExist() {
         document.getElementById('good'),
         document.getElementById('bad'),
     ];
+
+    document.getElementById('dump-agent-internal-data').addEventListener('click',()=>{
+        if (!document.getElementById('q-learning-data')) {
+            let div = document.createElement('div');
+            let label = document.createElement('div');
+            label.innerHTML = '<br/>Q Learner Internal State Dump';
+            let textArea = document.createElement("TEXTAREA");
+            textArea.style.width = '100%';
+            textArea.style.height = '10em';
+            textArea.setAttribute('id', 'q-learning-data');
+            div.appendChild(label);
+            div.appendChild(textArea);
+            document.body.appendChild(div);
+        }
+        document.getElementById('q-learning-data').innerHTML = JSON.stringify(currentAgent.toJSON());
+    });
 }
 
 function renderActionResponse(actionResponse) {
@@ -420,35 +439,17 @@ class RlDqn {
             this._agent.fromJSON(previousSavedData);
         }
 
-        this._dumpTimer = 0;
         this._learningEnabled = learningEnabled;
     }
 
     getAction(state, reward) {
+        currentAgent = this._agent;
+
         if (this._learningEnabled) {
             if (reward !== null) {
                 this._agent.learn(reward);
                 renderReward(reward)
             }
-
-            this._dumpTimer++;
-            if (this._dumpTimer === 1000) {
-                this._dumpTimer = 0;
-                if (!document.getElementById('q-learning-data')) {
-                    let div = document.createElement('div');
-                    let label = document.createElement('div');
-                    label.innerHTML = '<br/>Q Learner Internal State Dump';
-                    let textArea = document.createElement("TEXTAREA");
-                    textArea.style.width = '100%';
-                    textArea.style.height = '10em';
-                    textArea.setAttribute('id', 'q-learning-data');
-                    div.appendChild(label);
-                    div.appendChild(textArea);
-                    document.body.appendChild(div);
-                }
-                document.getElementById('q-learning-data').innerHTML = JSON.stringify(this._agent.toJSON());
-            }
-
         }
         let actionResponse = this._agent.act(state);
 
