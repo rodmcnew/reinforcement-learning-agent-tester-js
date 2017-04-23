@@ -24,10 +24,10 @@
     margin-right: 2em;
 }
 
-.InfectionGameHtmlTableRender table.renderer-table-canvas-agent {
-    padding: 10px;
-    background-color: black;
-}
+/*.InfectionGameHtmlTableRender table.renderer-table-canvas-agent {*/
+    /*padding: 10px;*/
+    /*background-color: black;*/
+/*}*/
 
 .InfectionGameHtmlTableRender .renderer-table-canvas-god td {
     height: 5px;
@@ -35,8 +35,8 @@
 }
 
 .InfectionGameHtmlTableRender .renderer-table-canvas-agent td {
-    height: 20px;
-    width: 20px;
+    height: 22px;
+    width: 22px;
 }
 
 #agentRendererContainer {
