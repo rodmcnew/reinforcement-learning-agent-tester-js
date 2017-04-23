@@ -21,7 +21,7 @@ export const config = {
     verticalDeltaScore: 10,
     minTileValue: -20,
     tileValueMap: [-1, -20],
-    pointsForCompletion: 100
+    // pointsForCompletion: 100
 };
 
 /**
@@ -71,9 +71,9 @@ export default class Environment {
 
         this._state.score = this._state.score + config.tileValueMap[this._state.tileTypes[this._state.position[0]][this._state.position[1]]];
 
-        if (this._state.isComplete) {
-            this._state.score += config.pointsForCompletion;
-        }
+        // if (this._state.isComplete) {
+        //     this._state.score += config.pointsForCompletion;
+        // }
     }
 
     /**

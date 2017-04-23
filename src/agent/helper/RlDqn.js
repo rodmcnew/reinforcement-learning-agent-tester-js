@@ -28,17 +28,40 @@ function getMinimumVectorIndex(w) {
 
 let actionElements = null;
 let randomActionElement = null;
+let rewardElements = null;
+
+function ensureElementsExist() {
+    if (document.getElementById('DQNRender')) {
+        return;
+    }
+    document.getElementById('agentRendererContainer').innerHTML =
+        `<div id="DQNRender"><strong>Deep Q-Network Stats</strong>
+    <br />Action Choice:
+    <div style="overflow: auto"><div style="float: left">w:&nbsp;</div> <div id="action0" style="background-color: lightgoldenrodyellow;"></div></div>
+    <div style="overflow: auto"><div style="float: left">a:&nbsp;</div> <div id="action1" style="background-color: lightsalmon"></div></div>
+    <div style="overflow: auto"><div style="float: left">s:&nbsp;</div> <div id="action2" style="background-color: lightskyblue"></div></div>
+    <div style="overflow: auto"><div style="float: left">d:&nbsp;</div> <div id="action3" style="background-color: lightseagreen"></div></div>
+        <div style="overflow: auto"><div style="float: left">random action&nbsp;</div> <div id="actionRandom" style="background-color: lightcoral;height: 1em"></div></div>
+        <br>
+        Reward:
+        <div style="overflow: auto"><div style="float: left">good&nbsp;</div> <div id="good" style="background-color: greenyellow"></div></div>
+    <div style="overflow: auto"><div style="float: left">bad&nbsp;</div> <div id="bad" style="background-color: orangered"></div></div>
+</div>`;
+    actionElements = [
+        document.getElementById('action0'),
+        document.getElementById('action1'),
+        document.getElementById('action2'),
+        document.getElementById('action3'),
+    ];
+    randomActionElement = document.getElementById('actionRandom');
+    rewardElements = [
+        document.getElementById('good'),
+        document.getElementById('bad'),
+    ];
+}
 
 function renderActionResponse(actionResponse) {
-    if (actionElements === null) {
-        actionElements = [
-            document.getElementById('action0'),
-            document.getElementById('action1'),
-            document.getElementById('action2'),
-            document.getElementById('action3'),
-        ];
-        randomActionElement = document.getElementById('actionRandom');
-    }
+    ensureElementsExist();
 
     if (actionResponse.wasRandom) {
         // randomElement.innerHTML = 100;
@@ -64,6 +87,22 @@ function renderActionResponse(actionResponse) {
             actionElements[i].innerHTML = fixedValue;
         });
     }
+}
+
+function renderReward(reward) {
+    let good = 0;
+    let bad = 0;
+    if (reward < 0) {
+        bad = -reward;
+    } else {
+        good = reward;
+    }
+
+    rewardElements[0].style.width = (good * 15 + 50) + 'px';
+    rewardElements[0].innerHTML = good;
+
+    rewardElements[1].style.width = (bad * 15 + 50) + 'px';
+    rewardElements[1].innerHTML = bad;
 }
 
 export default class RlDqn {
@@ -92,6 +131,7 @@ export default class RlDqn {
         if (this._learningEnabled) {
             if (reward !== null) {
                 this._agent.learn(reward);
+                renderReward(reward)
             }
 
             this._dumpTimer++;

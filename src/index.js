@@ -27,17 +27,10 @@ document.body.innerHTML =
     '<pre id="score"></pre>' +
     '</div>' +
     '<div id="rendererContainer"></div>' +
-    `<div id="agentRendererContainer">
-    Deep Q-Network Stats:
-    <div style="overflow: auto"><div style="float: left">w:&nbsp;</div> <div id="action0" style="background-color: lightgoldenrodyellow;"></div></div>
-    <div style="overflow: auto"><div style="float: left">a:&nbsp;</div> <div id="action1" style="background-color: lightsalmon"></div></div>
-    <div style="overflow: auto"><div style="float: left">s:&nbsp;</div> <div id="action2" style="background-color: lightskyblue"></div></div>
-    <div style="overflow: auto"><div style="float: left">d:&nbsp;</div> <div id="action3" style="background-color: lightseagreen"></div></div>
-        <div style="overflow: auto"><div style="float: left">random action&nbsp;</div> <div id="actionRandom" style="background-color: lightcoral;height: 1em"></div></div>
-    </div>` +
+    '<div id="agentRendererContainer"></div>' +
     '<pre>' +
     '\nGame Rules:' +
-    '\n- Gain ' + environmentConfig.pointsForCompletion + ' points for making it to the bottom row' +
+    // '\n- Gain ' + environmentConfig.pointsForCompletion + ' points for making it to the bottom row' +
     '\n- Gain ' + environmentConfig.verticalDeltaScore + ' points for every row lower you go' +
     '\n- Loose ' + environmentConfig.verticalDeltaScore + ' points for every row higher you go' +
     '\n- Loose ' + -environmentConfig.tileValueMap[1] + ' points when moving into a red square' +
@@ -56,13 +49,13 @@ let renderer = new HtmlTableRenderer(document.getElementById('rendererContainer'
 let gameRunner = new GameRunner(renderer, handleGameRunnerStatusChange);
 
 let agents = {
-    'RL_DQN_5X5Viewport_PreTrained - ranked 241': RL_DQN_5X5Viewport_PreTrained,
+    'RL_DQN_5X5Viewport_PreTrained - ranked 192': RL_DQN_5X5Viewport_PreTrained,
     'RL_DQN_5X5Viewport_In_Learning_Mode': RL_DQN_5X5Viewport_In_Learning_Mode,
-    'LookAheadWideAndDeep - ranked 334': LookAheadWideAndDeep,
-    'LookAheadWide - ranked 330': LookAheadWide,
-    'ColumnCompare - ranked 308': ColumnCompare,
-    'BarelyLookAhead - ranked 292': BarelyLookAhead,
-    'AlwaysDown - ranked 180': AlwaysDown,
+    'LookAheadWideAndDeep - ranked 234': LookAheadWideAndDeep,
+    'LookAheadWide - ranked 230': LookAheadWide,
+    'ColumnCompare - ranked 208': ColumnCompare,
+    'BarelyLookAhead - ranked 192': BarelyLookAhead,
+    'AlwaysDown - ranked 80': AlwaysDown,
 };
 for (agent in agents) {
     //Select the first agent in the list
@@ -88,6 +81,7 @@ for (agent in agents) {
 }
 agentSelectorElement.addEventListener('change', (event) => {
     currentAgentName = agentSelectorElement.value;
+    document.getElementById('agentRendererContainer').innerHTML = '';
     gameRunner.clearStats();
     newGame()
 });
@@ -137,7 +131,7 @@ document.body.addEventListener('keydown', function (event) {
 });
 
 function newGame() {
-    gameRunner.newGame(new agents[currentAgentName], enableRendering);
+    gameRunner.newGame(agents[currentAgentName], enableRendering);
 }
 
 newGame();

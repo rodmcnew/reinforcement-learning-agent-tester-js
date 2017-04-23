@@ -15,6 +15,7 @@ export default class GameRunner {
         this._onStatusChange = onStatusChange;
         this._agentObservation = null;
         this._godObservation = null;
+        this._agentClass = null;
 
         this.newGame = this.newGame.bind(this);
         this.takeAction = this.takeAction.bind(this);
@@ -22,8 +23,9 @@ export default class GameRunner {
         this.clearStats = this.clearStats.bind(this);
     }
 
-    newGame(agent, enableRendering) {
-        this._agent = agent;
+    newGame(agentClass, enableRendering) {
+        this._agentClass = agentClass;
+        this._agent = new this._agentClass();
         this._enableRendering = enableRendering;
         this._environment = new Environment();
         this._stats.currentScore = 0;//@TODO get from environment?
@@ -51,7 +53,7 @@ export default class GameRunner {
             this._stats.lastGameScore = this._agentObservation.score;
             this._stats.scoreSum += this._agentObservation.score;
             this._stats.gameCount += 1;
-            this.newGame(this._agent, this._enableRendering);
+            this.newGame(this._agentClass, this._enableRendering);
         }
 
         if (this._enableRendering) {
@@ -70,7 +72,7 @@ export default class GameRunner {
         this._stats = Object.assign({}, defaultStats);
     }
 
-    _updateObservations(){
+    _updateObservations() {
         this._agentObservation = this._environment.getAgentObservation();
         this._godObservation = this._environment.getGodObservation();
     }

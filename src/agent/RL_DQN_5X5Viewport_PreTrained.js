@@ -1,6 +1,6 @@
 import {matrixToVector} from '../tensorTools'
 import {config as environmentConfig} from '../environment'
-import {data as savedNeuralNetwork} from './neural-network-saves/view-port-5-5-0-1/best'
+import {data as savedNeuralNetwork} from './neural-network-saves/view-port-5-5-0-1/games-10000'
 import RlDqn from './helper/RlDqn'
 import {convert9x9to5x5} from './helper/viewportConversions'
 const actions = ['w', 'a', 's', 'd'];
