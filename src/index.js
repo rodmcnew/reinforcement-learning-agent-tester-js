@@ -26,7 +26,15 @@ document.body.innerHTML =
     '</select>' +
     '<pre id="score"></pre>' +
     '</div>' +
-    '<div id="rendererContainer"></div>'+
+    '<div id="rendererContainer"></div>' +
+    `<div id="agentRendererContainer">
+    Deep Q-Network Stats:
+    <div style="overflow: auto"><div style="float: left">w:&nbsp;</div> <div id="action0" style="background-color: lightgoldenrodyellow;"></div></div>
+    <div style="overflow: auto"><div style="float: left">a:&nbsp;</div> <div id="action1" style="background-color: lightsalmon"></div></div>
+    <div style="overflow: auto"><div style="float: left">s:&nbsp;</div> <div id="action2" style="background-color: lightskyblue"></div></div>
+    <div style="overflow: auto"><div style="float: left">d:&nbsp;</div> <div id="action3" style="background-color: lightseagreen"></div></div>
+        <div style="overflow: auto"><div style="float: left">random action:&nbsp;</div> <div id="actionRandom" style="background-color: red;"></div></div>
+    </div>` +
     '<pre>' +
     '\nGame Rules:' +
     '\n- Gain ' + environmentConfig.pointsForCompletion + ' points for making it to the bottom row' +
@@ -48,9 +56,9 @@ let renderer = new HtmlTableRenderer(document.getElementById('rendererContainer'
 let gameRunner = new GameRunner(renderer, handleGameRunnerStatusChange);
 
 let agents = {
-    'LookAheadWideAndDeep - ranked 334': LookAheadWideAndDeep,
     'RL_DQN_5X5Viewport_PreTrained - ranked 201': RL_DQN_5X5Viewport_PreTrained,
     'RL_DQN_5X5Viewport_In_Learning_Mode': RL_DQN_5X5Viewport_In_Learning_Mode,
+    'LookAheadWideAndDeep - ranked 334': LookAheadWideAndDeep,
     'LookAheadWide - ranked 330': LookAheadWide,
     'ColumnCompare - ranked 308': ColumnCompare,
     'BarelyLookAhead - ranked 292': BarelyLookAhead,

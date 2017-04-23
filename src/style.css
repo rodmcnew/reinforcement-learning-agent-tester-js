@@ -32,3 +32,7 @@
     height: 20px;
     width: 20px;
 }
+
+#agentRendererContainer{
+    margin-top: 1em;
+}

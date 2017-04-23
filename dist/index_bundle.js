@@ -4681,6 +4681,7 @@ var RL = {};
 
             // epsilon greedy policy
             if(Math.random() < this.epsilon) {
+				console.log(this.na);
                 var a = randi(0, this.na);
             } else {
                 // greedy wrt Q function
