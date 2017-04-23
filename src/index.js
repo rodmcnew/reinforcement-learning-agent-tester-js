@@ -51,7 +51,7 @@ let renderer = new HtmlTableRenderer(document.getElementById('rendererContainer'
 let gameRunner = new GameRunner(renderer, handleGameRunnerStatusChange);
 
 let agents = {
-    'RL_DQN_PreTrained - ranked 188': RL_DQN_PreTrained,
+    'RL_DQN_PreTrained - ranked 192': RL_DQN_PreTrained,
     'RL_DQN_InLearningMode': RL_DQN_InLearningMode,
     'RL_DQN_5X5TrimmedViewport_PreTrained - ranked 192': RL_DQN_5X5TrimmedViewport_PreTrained,
     'RL_DQN_5X5TrimmedViewport_InLearningMode': RL_DQN_5X5TrimmedViewport_InLearningMode,

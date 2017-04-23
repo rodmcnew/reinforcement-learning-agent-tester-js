@@ -4898,7 +4898,7 @@ let renderer = new __WEBPACK_IMPORTED_MODULE_0__renderer_HtmlTableRenderer__["a"
 let gameRunner = new __WEBPACK_IMPORTED_MODULE_11__GameRunner__["a" /* default */](renderer, handleGameRunnerStatusChange);
 
 let agents = {
-    'RL_DQN_PreTrained - ranked 188': __WEBPACK_IMPORTED_MODULE_9__agent_RL_DQN_PreTrained__["a" /* default */],
+    'RL_DQN_PreTrained - ranked 192': __WEBPACK_IMPORTED_MODULE_9__agent_RL_DQN_PreTrained__["a" /* default */],
     'RL_DQN_InLearningMode': __WEBPACK_IMPORTED_MODULE_8__agent_RL_DQN_InLearningMode__["a" /* default */],
     'RL_DQN_5X5TrimmedViewport_PreTrained - ranked 192': __WEBPACK_IMPORTED_MODULE_7__agent_RL_DQN_5X5TrimmedViewport_PreTrained__["a" /* default */],
     'RL_DQN_5X5TrimmedViewport_InLearningMode': __WEBPACK_IMPORTED_MODULE_5__agent_RL_DQN_5X5TrimmedViewport_InLearningMode__["a" /* default */],
