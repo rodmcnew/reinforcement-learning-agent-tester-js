@@ -7,7 +7,7 @@ const numberOfStates = 5 * 5 + 1;
 
 let rlDqn = new RlDqn(true, numberOfStates);
 
-export default class RL_DQN_5X5Viewport_In_Learning_Mode {
+export default class RL_DQN_5X5TrimmedViewport_InLearningMode {
     constructor() {
         this._lastScore = null;
         this._lastActionIndex = 2; //2='s'

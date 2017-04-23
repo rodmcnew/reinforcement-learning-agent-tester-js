@@ -10,7 +10,7 @@ const numberOfStates = 5 * 5 + 1;
 
 let rlDqn = new RlDqn(true, numberOfStates, savedNeuralNetwork);
 
-export default class RL_DQN_5X5 {
+export default class RL_DQN_5X5TrimmedViewport_PreTrained {
     constructor() {
         this._lastScore = null;
         this._lastActionIndex = 2; //2='s'
