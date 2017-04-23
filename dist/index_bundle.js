@@ -63,7 +63,7 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 31);
+/******/ 	return __webpack_require__(__webpack_require__.s = 32);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -72,8 +72,8 @@
 
 "use strict";
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__tensorTools__ = __webpack_require__(1);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__AgentObservation__ = __webpack_require__(28);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__generateInitialState__ = __webpack_require__(30);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__AgentObservation__ = __webpack_require__(29);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__generateInitialState__ = __webpack_require__(31);
 
 
 
@@ -378,6 +378,177 @@ function getActionViaFeelers(observation, feelerPaths, lastAction) {
 
 /***/ }),
 /* 3 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__rl__ = __webpack_require__(27);
+
+
+function getMinimumVectorIndex(w) {
+    var minv = w[0];
+    var minix = 0;
+    for (var i = 1, n = w.length; i < n; i++) {
+        var v = w[i];
+        if (v < minv) {
+            minix = i;
+            minv = v;
+        }
+    }
+    return minix;
+}
+
+// function maxi(w) {
+//     var minv = w[0];
+//     var minix = 0;
+//     for (var i = 1, n = w.length; i < n; i++) {
+//         var v = w[i];
+//         if (v < minv) {
+//             minix = i;
+//             minv = v;
+//         }
+//     }
+//     return minix;
+// }
+
+let actionElements = null;
+let randomActionElement = null;
+let rewardElements = null;
+
+function ensureElementsExist() {
+    if (document.getElementById('DQNRender')) {
+        return;
+    }
+    document.getElementById('agentRendererContainer').innerHTML =
+        `<div id="DQNRender"><strong>Deep Q-Network Stats</strong>
+    <br />Action Choice:
+    <div style="overflow: auto"><div style="float: left">w:&nbsp;</div> <div id="action0" style="background-color: lightgoldenrodyellow;"></div></div>
+    <div style="overflow: auto"><div style="float: left">a:&nbsp;</div> <div id="action1" style="background-color: lightsalmon"></div></div>
+    <div style="overflow: auto"><div style="float: left">s:&nbsp;</div> <div id="action2" style="background-color: lightskyblue"></div></div>
+    <div style="overflow: auto"><div style="float: left">d:&nbsp;</div> <div id="action3" style="background-color: lightseagreen"></div></div>
+        <div style="overflow: auto"><div style="float: left">random action&nbsp;</div> <div id="actionRandom" style="background-color: lightcoral;height: 1em"></div></div>
+        <br>
+        Reward:
+        <div style="overflow: auto"><div style="float: left">good&nbsp;</div> <div id="good" style="background-color: greenyellow"></div></div>
+    <div style="overflow: auto"><div style="float: left">bad&nbsp;</div> <div id="bad" style="background-color: orangered"></div></div>
+</div>`;
+    actionElements = [
+        document.getElementById('action0'),
+        document.getElementById('action1'),
+        document.getElementById('action2'),
+        document.getElementById('action3'),
+    ];
+    randomActionElement = document.getElementById('actionRandom');
+    rewardElements = [
+        document.getElementById('good'),
+        document.getElementById('bad'),
+    ];
+}
+
+function renderActionResponse(actionResponse) {
+    ensureElementsExist();
+
+    if (actionResponse.wasRandom) {
+        // randomElement.innerHTML = 100;
+        randomActionElement.style.width = (100 * 3 + 50) + 'px';
+        actionElements.forEach((element)=> {
+            element.innerHTML = 0;
+            element.style.width = '50px';
+        });
+    } else {
+        // randomElement.innerHTML = 0;
+        randomActionElement.style.width = '10px';
+        const minAction = getMinimumVectorIndex(actionResponse.weights);
+        // const maxA = maxi(actionResponse.weights);
+        const maxAction = actionResponse.action;
+        actionResponse.weights.forEach(function (value, i) { //@TODO what about if not in this else?
+            let adder = 0;
+            if (actionResponse.weights[minAction] < 0) {
+                adder = -actionResponse.weights[minAction];
+            }
+            let fixedValue = Math.floor((value + adder) / (actionResponse.weights[maxAction] + adder) * 100);
+
+            actionElements[i].style.width = (fixedValue * 3 + 50) + 'px';
+            actionElements[i].innerHTML = fixedValue;
+        });
+    }
+}
+
+function renderReward(reward) {
+    let good = 0;
+    let bad = 0;
+    if (reward < 0) {
+        bad = -reward;
+    } else {
+        good = reward;
+    }
+
+    rewardElements[0].style.width = (good * 15 + 50) + 'px';
+    rewardElements[0].innerHTML = good;
+
+    rewardElements[1].style.width = (bad * 15 + 50) + 'px';
+    rewardElements[1].innerHTML = bad;
+}
+
+class RlDqn {
+    constructor(learningEnabled, numberOfStates, previousSavedData) {
+        // create an environment object
+        var env = {};
+        env.getNumStates = function () {
+            return numberOfStates;
+        };
+        env.getMaxNumActions = function () {
+            return 4;
+        };
+
+        // create the DQN agent
+        var spec = {alpha: 0.01}; // see full options on DQN page
+        this._agent = new __WEBPACK_IMPORTED_MODULE_0__rl__["a" /* rl */].DQNAgent(env, spec);
+        if (typeof previousSavedData !== 'undefined') {
+            this._agent.fromJSON(previousSavedData);
+        }
+
+        this._dumpTimer = 0;
+        this._learningEnabled = learningEnabled;
+    }
+
+    getAction(state, reward) {
+        if (this._learningEnabled) {
+            if (reward !== null) {
+                this._agent.learn(reward);
+                renderReward(reward)
+            }
+
+            this._dumpTimer++;
+            if (this._dumpTimer === 1000) {
+                this._dumpTimer = 0;
+                if (!document.getElementById('q-learning-data')) {
+                    let div = document.createElement('div');
+                    let label = document.createElement('div');
+                    label.innerHTML = '<br/>Q Learner Internal State Dump';
+                    let textArea = document.createElement("TEXTAREA");
+                    textArea.style.width = '100%';
+                    textArea.style.height = '10em';
+                    textArea.setAttribute('id', 'q-learning-data');
+                    div.appendChild(label);
+                    div.appendChild(textArea);
+                    document.body.appendChild(div);
+                }
+                document.getElementById('q-learning-data').innerHTML = JSON.stringify(this._agent.toJSON());
+            }
+
+        }
+        let actionResponse = this._agent.act(state);
+
+        renderActionResponse(actionResponse);
+
+        return actionResponse.action;
+    }
+}
+/* harmony export (immutable) */ __webpack_exports__["a"] = RlDqn;
+
+
+/***/ }),
+/* 4 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(Buffer) {/*
@@ -456,10 +627,10 @@ function toComment(sourceMap) {
   return '/*# ' + data + ' */';
 }
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(18).Buffer))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(19).Buffer))
 
 /***/ }),
-/* 4 */
+/* 5 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /*
@@ -496,7 +667,7 @@ var stylesInDom = {},
 	singletonElement = null,
 	singletonCounter = 0,
 	styleElementsInsertedAtTop = [],
-	fixUrls = __webpack_require__(23);
+	fixUrls = __webpack_require__(24);
 
 module.exports = function(list, options) {
 	if(typeof DEBUG !== "undefined" && DEBUG) {
@@ -755,177 +926,6 @@ function updateLink(linkElement, options, obj) {
 
 
 /***/ }),
-/* 5 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__rl__ = __webpack_require__(26);
-
-
-function getMinimumVectorIndex(w) {
-    var minv = w[0];
-    var minix = 0;
-    for (var i = 1, n = w.length; i < n; i++) {
-        var v = w[i];
-        if (v < minv) {
-            minix = i;
-            minv = v;
-        }
-    }
-    return minix;
-}
-
-// function maxi(w) {
-//     var minv = w[0];
-//     var minix = 0;
-//     for (var i = 1, n = w.length; i < n; i++) {
-//         var v = w[i];
-//         if (v < minv) {
-//             minix = i;
-//             minv = v;
-//         }
-//     }
-//     return minix;
-// }
-
-let actionElements = null;
-let randomActionElement = null;
-let rewardElements = null;
-
-function ensureElementsExist() {
-    if (document.getElementById('DQNRender')) {
-        return;
-    }
-    document.getElementById('agentRendererContainer').innerHTML =
-        `<div id="DQNRender"><strong>Deep Q-Network Stats</strong>
-    <br />Action Choice:
-    <div style="overflow: auto"><div style="float: left">w:&nbsp;</div> <div id="action0" style="background-color: lightgoldenrodyellow;"></div></div>
-    <div style="overflow: auto"><div style="float: left">a:&nbsp;</div> <div id="action1" style="background-color: lightsalmon"></div></div>
-    <div style="overflow: auto"><div style="float: left">s:&nbsp;</div> <div id="action2" style="background-color: lightskyblue"></div></div>
-    <div style="overflow: auto"><div style="float: left">d:&nbsp;</div> <div id="action3" style="background-color: lightseagreen"></div></div>
-        <div style="overflow: auto"><div style="float: left">random action&nbsp;</div> <div id="actionRandom" style="background-color: lightcoral;height: 1em"></div></div>
-        <br>
-        Reward:
-        <div style="overflow: auto"><div style="float: left">good&nbsp;</div> <div id="good" style="background-color: greenyellow"></div></div>
-    <div style="overflow: auto"><div style="float: left">bad&nbsp;</div> <div id="bad" style="background-color: orangered"></div></div>
-</div>`;
-    actionElements = [
-        document.getElementById('action0'),
-        document.getElementById('action1'),
-        document.getElementById('action2'),
-        document.getElementById('action3'),
-    ];
-    randomActionElement = document.getElementById('actionRandom');
-    rewardElements = [
-        document.getElementById('good'),
-        document.getElementById('bad'),
-    ];
-}
-
-function renderActionResponse(actionResponse) {
-    ensureElementsExist();
-
-    if (actionResponse.wasRandom) {
-        // randomElement.innerHTML = 100;
-        randomActionElement.style.width = (100 * 3 + 50) + 'px';
-        actionElements.forEach((element)=> {
-            element.innerHTML = 0;
-            element.style.width = '50px';
-        });
-    } else {
-        // randomElement.innerHTML = 0;
-        randomActionElement.style.width = '10px';
-        const minAction = getMinimumVectorIndex(actionResponse.weights);
-        // const maxA = maxi(actionResponse.weights);
-        const maxAction = actionResponse.action;
-        actionResponse.weights.forEach(function (value, i) { //@TODO what about if not in this else?
-            let adder = 0;
-            if (actionResponse.weights[minAction] < 0) {
-                adder = -actionResponse.weights[minAction];
-            }
-            let fixedValue = Math.floor((value + adder) / (actionResponse.weights[maxAction] + adder) * 100);
-
-            actionElements[i].style.width = (fixedValue * 3 + 50) + 'px';
-            actionElements[i].innerHTML = fixedValue;
-        });
-    }
-}
-
-function renderReward(reward) {
-    let good = 0;
-    let bad = 0;
-    if (reward < 0) {
-        bad = -reward;
-    } else {
-        good = reward;
-    }
-
-    rewardElements[0].style.width = (good * 15 + 50) + 'px';
-    rewardElements[0].innerHTML = good;
-
-    rewardElements[1].style.width = (bad * 15 + 50) + 'px';
-    rewardElements[1].innerHTML = bad;
-}
-
-class RlDqn {
-    constructor(learningEnabled, numberOfStates, previousSavedData) {
-        // create an environment object
-        var env = {};
-        env.getNumStates = function () {
-            return numberOfStates;
-        };
-        env.getMaxNumActions = function () {
-            return 4;
-        };
-
-        // create the DQN agent
-        var spec = {alpha: 0.01}; // see full options on DQN page
-        this._agent = new __WEBPACK_IMPORTED_MODULE_0__rl__["a" /* rl */].DQNAgent(env, spec);
-        if (typeof previousSavedData !== 'undefined') {
-            this._agent.fromJSON(previousSavedData);
-        }
-
-        this._dumpTimer = 0;
-        this._learningEnabled = learningEnabled;
-    }
-
-    getAction(state, reward) {
-        if (this._learningEnabled) {
-            if (reward !== null) {
-                this._agent.learn(reward);
-                renderReward(reward)
-            }
-
-            this._dumpTimer++;
-            if (this._dumpTimer === 1000) {
-                this._dumpTimer = 0;
-                if (!document.getElementById('q-learning-data')) {
-                    let div = document.createElement('div');
-                    let label = document.createElement('div');
-                    label.innerHTML = '<br/>Q Learner Internal State Dump';
-                    let textArea = document.createElement("TEXTAREA");
-                    textArea.style.width = '100%';
-                    textArea.style.height = '10em';
-                    textArea.setAttribute('id', 'q-learning-data');
-                    div.appendChild(label);
-                    div.appendChild(textArea);
-                    document.body.appendChild(div);
-                }
-                document.getElementById('q-learning-data').innerHTML = JSON.stringify(this._agent.toJSON());
-            }
-
-        }
-        let actionResponse = this._agent.act(state);
-
-        renderActionResponse(actionResponse);
-
-        return actionResponse.action;
-    }
-}
-/* harmony export (immutable) */ __webpack_exports__["a"] = RlDqn;
-
-
-/***/ }),
 /* 6 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -945,10 +945,10 @@ function convert9x9to5x5(matrix){
 // style-loader: Adds some css to the DOM by adding a <style> tag
 
 // load the styles
-var content = __webpack_require__(21);
+var content = __webpack_require__(22);
 if(typeof content === 'string') content = [[module.i, content, '']];
 // add the styles to the DOM
-var update = __webpack_require__(4)(content, {});
+var update = __webpack_require__(5)(content, {});
 if(content.locals) module.exports = content.locals;
 // Hot Module Replacement
 if(false) {
@@ -1308,7 +1308,7 @@ class LookAheadWideAndDeep {
 
 "use strict";
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__tensorTools__ = __webpack_require__(1);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__helper_RlDqn__ = __webpack_require__(5);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__helper_RlDqn__ = __webpack_require__(3);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__helper_viewportConversions__ = __webpack_require__(6);
 
 
@@ -1364,8 +1364,8 @@ class RL_DQN_5X5Viewport_In_Learning_Mode {
 "use strict";
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__tensorTools__ = __webpack_require__(1);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__environment__ = __webpack_require__(0);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__neural_network_saves_view_port_5_5_0_1_games_10000__ = __webpack_require__(27);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__helper_RlDqn__ = __webpack_require__(5);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__neural_network_saves_view_port_5_5_0_1_games_10000__ = __webpack_require__(28);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__helper_RlDqn__ = __webpack_require__(3);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__helper_viewportConversions__ = __webpack_require__(6);
 
 
@@ -1422,7 +1422,58 @@ class RL_DQN_5X5 {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__HtmlTableRenderer_css__ = __webpack_require__(24);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__tensorTools__ = __webpack_require__(1);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__helper_RlDqn__ = __webpack_require__(3);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__environment__ = __webpack_require__(0);
+
+
+
+const actions = ['w', 'a', 's', 'd'];
+
+const numberOfStates = __WEBPACK_IMPORTED_MODULE_2__environment__["a" /* config */].viewPortSize[0] * __WEBPACK_IMPORTED_MODULE_2__environment__["a" /* config */].viewPortSize[1] + 1;
+
+let rlDqn = new __WEBPACK_IMPORTED_MODULE_1__helper_RlDqn__["a" /* default */](true, numberOfStates);
+
+class RL_DQN_InLearningMode {
+    constructor() {
+        this._lastScore = null;
+        this._lastActionIndex = 2; //2='s'
+    }
+
+    /**
+     *
+     * @param {AgentObservation} observation
+     * @return {string} action code
+     */
+    getAction(observation) {
+        const state = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__tensorTools__["a" /* matrixToVector */])(observation.tileTypes);
+
+        //Give the agent memory of the last action it took. This may be cheating.
+        state.push(this._lastActionIndex);
+
+        let reward = null;
+        if (this._lastScore !== null) {
+            reward = observation.score - this._lastScore;
+        }
+
+        const actionIndex = rlDqn.getAction(state, reward);
+
+        let action = actions[actionIndex];
+
+        this._lastScore = observation.score;
+        this._lastActionIndex = actionIndex;
+        return action;
+    }
+}
+/* harmony export (immutable) */ __webpack_exports__["a"] = RL_DQN_InLearningMode;
+
+
+/***/ }),
+/* 17 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__HtmlTableRenderer_css__ = __webpack_require__(25);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__HtmlTableRenderer_css___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__HtmlTableRenderer_css__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__tensorTools__ = __webpack_require__(1);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__environment__ = __webpack_require__(0);
@@ -1540,7 +1591,7 @@ class HtmlTableRenderer {
 
 
 /***/ }),
-/* 17 */
+/* 18 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1661,7 +1712,7 @@ function fromByteArray (uint8) {
 
 
 /***/ }),
-/* 18 */
+/* 19 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1675,9 +1726,9 @@ function fromByteArray (uint8) {
 
 
 
-var base64 = __webpack_require__(17)
-var ieee754 = __webpack_require__(22)
-var isArray = __webpack_require__(19)
+var base64 = __webpack_require__(18)
+var ieee754 = __webpack_require__(23)
+var isArray = __webpack_require__(20)
 
 exports.Buffer = Buffer
 exports.SlowBuffer = SlowBuffer
@@ -3455,10 +3506,10 @@ function isnan (val) {
   return val !== val // eslint-disable-line no-self-compare
 }
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(25)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(26)))
 
 /***/ }),
-/* 19 */
+/* 20 */
 /***/ (function(module, exports) {
 
 var toString = {}.toString;
@@ -3469,10 +3520,10 @@ module.exports = Array.isArray || function (arr) {
 
 
 /***/ }),
-/* 20 */
+/* 21 */
 /***/ (function(module, exports, __webpack_require__) {
 
-exports = module.exports = __webpack_require__(3)(undefined);
+exports = module.exports = __webpack_require__(4)(undefined);
 // imports
 
 
@@ -3483,10 +3534,10 @@ exports.push([module.i, "\n", ""]);
 
 
 /***/ }),
-/* 21 */
+/* 22 */
 /***/ (function(module, exports, __webpack_require__) {
 
-exports = module.exports = __webpack_require__(3)(undefined);
+exports = module.exports = __webpack_require__(4)(undefined);
 // imports
 
 
@@ -3497,7 +3548,7 @@ exports.push([module.i, "#info {\n    margin-right: 2em;\n    /*float: left*/\n}
 
 
 /***/ }),
-/* 22 */
+/* 23 */
 /***/ (function(module, exports) {
 
 exports.read = function (buffer, offset, isLE, mLen, nBytes) {
@@ -3587,7 +3638,7 @@ exports.write = function (buffer, value, offset, isLE, mLen, nBytes) {
 
 
 /***/ }),
-/* 23 */
+/* 24 */
 /***/ (function(module, exports) {
 
 
@@ -3682,16 +3733,16 @@ module.exports = function (css) {
 
 
 /***/ }),
-/* 24 */
+/* 25 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // style-loader: Adds some css to the DOM by adding a <style> tag
 
 // load the styles
-var content = __webpack_require__(20);
+var content = __webpack_require__(21);
 if(typeof content === 'string') content = [[module.i, content, '']];
 // add the styles to the DOM
-var update = __webpack_require__(4)(content, {});
+var update = __webpack_require__(5)(content, {});
 if(content.locals) module.exports = content.locals;
 // Hot Module Replacement
 if(false) {
@@ -3708,7 +3759,7 @@ if(false) {
 }
 
 /***/ }),
-/* 25 */
+/* 26 */
 /***/ (function(module, exports) {
 
 var g;
@@ -3735,7 +3786,7 @@ module.exports = g;
 
 
 /***/ }),
-/* 26 */
+/* 27 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -4574,7 +4625,7 @@ const rl = RL;
 
 
 /***/ }),
-/* 27 */
+/* 28 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -4584,7 +4635,7 @@ const data =
 
 
 /***/ }),
-/* 28 */
+/* 29 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -4617,7 +4668,7 @@ class AgentObservation {
 
 
 /***/ }),
-/* 29 */
+/* 30 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -4655,11 +4706,11 @@ class State {
 
 
 /***/ }),
-/* 30 */
+/* 31 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__State__ = __webpack_require__(29);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__State__ = __webpack_require__(30);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__index__ = __webpack_require__(0);
 
 
@@ -4711,12 +4762,12 @@ function generateRandomTileTypes(size) {
 
 
 /***/ }),
-/* 31 */
+/* 32 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__renderer_HtmlTableRenderer__ = __webpack_require__(16);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__renderer_HtmlTableRenderer__ = __webpack_require__(17);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__agent_ColumnCompare__ = __webpack_require__(11);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__agent_LookAheadWide__ = __webpack_require__(12);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__agent_LookAheadWideAndDeep__ = __webpack_require__(13);
@@ -4724,10 +4775,12 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__agent_RL_DQN_5X5Viewport_In_Learning_Mode__ = __webpack_require__(14);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__agent_BarelyLookAhead__ = __webpack_require__(10);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__agent_RL_DQN_5X5Viewport_PreTrained__ = __webpack_require__(15);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__environment__ = __webpack_require__(0);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__GameRunner__ = __webpack_require__(8);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_10__style_css__ = __webpack_require__(7);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_10__style_css___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_10__style_css__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__agent_RL_DQN_InLearningMode__ = __webpack_require__(16);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__environment__ = __webpack_require__(0);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_10__GameRunner__ = __webpack_require__(8);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_11__style_css__ = __webpack_require__(7);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_11__style_css___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_11__style_css__);
+
 
 
 
@@ -4761,10 +4814,10 @@ document.body.innerHTML =
     '<pre>' +
     '\nGame Rules:' +
     // '\n- Gain ' + environmentConfig.pointsForCompletion + ' points for making it to the bottom row' +
-    '\n- Gain ' + __WEBPACK_IMPORTED_MODULE_8__environment__["a" /* config */].verticalDeltaScore + ' points for every row lower you go' +
-    '\n- Loose ' + __WEBPACK_IMPORTED_MODULE_8__environment__["a" /* config */].verticalDeltaScore + ' points for every row higher you go' +
-    '\n- Loose ' + -__WEBPACK_IMPORTED_MODULE_8__environment__["a" /* config */].tileValueMap[1] + ' points when moving into a red square' +
-    '\n- Loose ' + -__WEBPACK_IMPORTED_MODULE_8__environment__["a" /* config */].tileValueMap[0] + ' points when moving into a grey square' +
+    '\n- Gain ' + __WEBPACK_IMPORTED_MODULE_9__environment__["a" /* config */].verticalDeltaScore + ' points for every row lower you go' +
+    '\n- Loose ' + __WEBPACK_IMPORTED_MODULE_9__environment__["a" /* config */].verticalDeltaScore + ' points for every row higher you go' +
+    '\n- Loose ' + -__WEBPACK_IMPORTED_MODULE_9__environment__["a" /* config */].tileValueMap[1] + ' points when moving into a red square' +
+    '\n- Loose ' + -__WEBPACK_IMPORTED_MODULE_9__environment__["a" /* config */].tileValueMap[0] + ' points when moving into a grey square' +
     '</pre>';
 const scoreElement = document.getElementById('score');
 
@@ -4776,11 +4829,12 @@ let agent;
 let currentAgentName;
 let renderer = new __WEBPACK_IMPORTED_MODULE_0__renderer_HtmlTableRenderer__["a" /* default */](document.getElementById('rendererContainer'));
 
-let gameRunner = new __WEBPACK_IMPORTED_MODULE_9__GameRunner__["a" /* default */](renderer, handleGameRunnerStatusChange);
+let gameRunner = new __WEBPACK_IMPORTED_MODULE_10__GameRunner__["a" /* default */](renderer, handleGameRunnerStatusChange);
 
 let agents = {
     'RL_DQN_5X5Viewport_PreTrained - ranked 192': __WEBPACK_IMPORTED_MODULE_7__agent_RL_DQN_5X5Viewport_PreTrained__["a" /* default */],
     'RL_DQN_5X5Viewport_In_Learning_Mode': __WEBPACK_IMPORTED_MODULE_5__agent_RL_DQN_5X5Viewport_In_Learning_Mode__["a" /* default */],
+    'RL_DQN_InLearningMode': __WEBPACK_IMPORTED_MODULE_8__agent_RL_DQN_InLearningMode__["a" /* default */],
     'LookAheadWideAndDeep - ranked 234': __WEBPACK_IMPORTED_MODULE_3__agent_LookAheadWideAndDeep__["a" /* default */],
     'LookAheadWide - ranked 230': __WEBPACK_IMPORTED_MODULE_2__agent_LookAheadWide__["a" /* default */],
     'ColumnCompare - ranked 208': __WEBPACK_IMPORTED_MODULE_1__agent_ColumnCompare__["a" /* default */],
