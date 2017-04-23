@@ -1,4 +1,4 @@
-import {rl} from './rl'
+import {DQNAgent} from './DQNAgent'
 
 function getMinimumVectorIndex(w) {
     var minv = w[0];
@@ -118,7 +118,7 @@ export default class RlDqn {
 
         // create the DQN agent
         var spec = {alpha: 0.01}; // see full options on DQN page
-        this._agent = new rl.DQNAgent(env, spec);
+        this._agent = new DQNAgent(env, spec);
         if (typeof previousSavedData !== 'undefined') {
             this._agent.fromJSON(previousSavedData);
         }
