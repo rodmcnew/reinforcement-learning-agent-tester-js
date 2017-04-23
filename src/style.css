@@ -13,6 +13,10 @@
     border-spacing: 0;
 }
 
+.InfectionGameHtmlTableRender table td {
+    border: 0; /*For iphones*/
+}
+
 .InfectionGameHtmlTableRender > div {
     float: left;
     border-spacing: 0;
@@ -28,11 +32,12 @@
     height: 5px;
     width: 5px;
 }
+
 .InfectionGameHtmlTableRender .renderer-table-canvas-agent td {
     height: 20px;
     width: 20px;
 }
 
-#agentRendererContainer{
+#agentRendererContainer {
     margin-top: 1em;
 }
