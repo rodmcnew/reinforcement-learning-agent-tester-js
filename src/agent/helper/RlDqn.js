@@ -1,4 +1,71 @@
 import {rl} from './rl'
+
+function getMinimumVectorIndex(w) {
+    var minv = w[0];
+    var minix = 0;
+    for (var i = 1, n = w.length; i < n; i++) {
+        var v = w[i];
+        if (v < minv) {
+            minix = i;
+            minv = v;
+        }
+    }
+    return minix;
+}
+
+// function maxi(w) {
+//     var minv = w[0];
+//     var minix = 0;
+//     for (var i = 1, n = w.length; i < n; i++) {
+//         var v = w[i];
+//         if (v < minv) {
+//             minix = i;
+//             minv = v;
+//         }
+//     }
+//     return minix;
+// }
+
+let actionElements = null;
+let randomActionElement = null;
+
+function renderActionResponse(actionResponse) {
+    if (actionElements === null) {
+        actionElements = [
+            document.getElementById('action0'),
+            document.getElementById('action1'),
+            document.getElementById('action2'),
+            document.getElementById('action3'),
+        ];
+        randomActionElement = document.getElementById('actionRandom');
+    }
+
+    if (actionResponse.wasRandom) {
+        // randomElement.innerHTML = 100;
+        randomActionElement.style.width = (100 * 3 + 50) + 'px';
+        actionElements.forEach((element)=> {
+            element.innerHTML = 0;
+            element.style.width = '50px';
+        });
+    } else {
+        // randomElement.innerHTML = 0;
+        randomActionElement.style.width = '10px';
+        const minAction = getMinimumVectorIndex(actionResponse.weights);
+        // const maxA = maxi(actionResponse.weights);
+        const maxAction = actionResponse.action;
+        actionResponse.weights.forEach(function (value, i) { //@TODO what about if not in this else?
+            let adder = 0;
+            if (actionResponse.weights[minAction] < 0) {
+                adder = -actionResponse.weights[minAction];
+            }
+            let fixedValue = Math.floor((value + adder) / (actionResponse.weights[maxAction] + adder) * 100);
+
+            actionElements[i].style.width = (fixedValue * 3 + 50) + 'px';
+            actionElements[i].innerHTML = fixedValue;
+        });
+    }
+}
+
 export default class RlDqn {
     constructor(learningEnabled, numberOfStates, previousSavedData) {
         // create an environment object
@@ -46,6 +113,10 @@ export default class RlDqn {
             }
 
         }
-        return this._agent.act(state);
+        let actionResponse = this._agent.act(state);
+
+        renderActionResponse(actionResponse);
+
+        return actionResponse.action;
     }
 }
