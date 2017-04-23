@@ -5281,7 +5281,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__renderer_HtmlTableRenderer__ = __webpack_require__(15);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__agent_ColumnCompare__ = __webpack_require__(10);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__agent_LookAheadWide__ = __webpack_require__(11);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__agent_LookThreeAdjacentThreeDown__ = __webpack_require__(12);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__agent_LookAheadWideAndDeep__ = __webpack_require__(12);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__agent_AlwaysDown__ = __webpack_require__(9);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__agent_RL_DQN_5X5__ = __webpack_require__(13);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__agent_RL_DQN_5X5Viewport_PreTrained__ = __webpack_require__(14);
@@ -5342,7 +5342,7 @@ let gameRunner = new __WEBPACK_IMPORTED_MODULE_8__GameRunner__["a" /* default */
 let agents = {
     'RL_DQN_5X5Viewport_PreTrained - ranked 201': __WEBPACK_IMPORTED_MODULE_6__agent_RL_DQN_5X5Viewport_PreTrained__["a" /* default */],
     'RL_DQN_5X5': __WEBPACK_IMPORTED_MODULE_5__agent_RL_DQN_5X5__["a" /* default */],
-    'LookThreeAdjacentThreeDown - ranked 334': __WEBPACK_IMPORTED_MODULE_3__agent_LookThreeAdjacentThreeDown__["a" /* default */],
+    'LookAheadWideAndDeep - ranked 334': __WEBPACK_IMPORTED_MODULE_3__agent_LookAheadWideAndDeep__["a" /* default */],
     'LookAheadWide - ranked 330': __WEBPACK_IMPORTED_MODULE_2__agent_LookAheadWide__["a" /* default */],
     'ColumnCompare - ranked 308': __WEBPACK_IMPORTED_MODULE_1__agent_ColumnCompare__["a" /* default */],
     // 'LateralWallBouncer - ranked 78': LateralWallBouncer,

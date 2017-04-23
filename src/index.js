@@ -1,10 +1,10 @@
 import HtmlTableRenderer from './renderer/HtmlTableRenderer'
 import ColumnCompare from './agent/ColumnCompare'
 import LookAheadWide from './agent/LookAheadWide'
-import LookThreeAdjacentThreeDown from './agent/LookThreeAdjacentThreeDown'
-// import LateralWallBouncer from './agent/LateralWallBouncer'
+import LookAheadWideAndDeep from './agent/LookAheadWideAndDeep'
 import AlwaysDown from './agent/AlwaysDown'
 import RL_DQN_5X5 from './agent/RL_DQN_5X5'
+import BarelyLookAhead from './agent/BarelyLookAhead'
 import RL_DQN_5X5Viewport_PreTrained from './agent/RL_DQN_5X5Viewport_PreTrained'
 import {config as environmentConfig} from './environment'
 import GameRunner from './GameRunner'
@@ -25,6 +25,8 @@ document.body.innerHTML =
     '<option value="paused">Paused</option>' +
     '</select>' +
     '<pre id="score"></pre>' +
+    '</div>' +
+    '<div id="rendererContainer"></div>'+
     '<pre>' +
     '\nGame Rules:' +
     '\n- Gain ' + environmentConfig.pointsForCompletion + ' points for making it to the bottom row' +
@@ -32,9 +34,7 @@ document.body.innerHTML =
     '\n- Loose ' + environmentConfig.verticalDeltaScore + ' points for every row higher you go' +
     '\n- Loose ' + -environmentConfig.tileValueMap[1] + ' points when moving into a red square' +
     '\n- Loose ' + -environmentConfig.tileValueMap[0] + ' points when moving into a grey square' +
-    '</pre>' +
-    '</div>' +
-    '<div id="rendererContainer"></div>';
+    '</pre>';
 const scoreElement = document.getElementById('score');
 
 let enableRendering = true;
@@ -49,13 +49,13 @@ let renderer = new HtmlTableRenderer(document.getElementById('rendererContainer'
 let gameRunner = new GameRunner(renderer, handleGameRunnerStatusChange);
 
 let agents = {
+    'LookAheadWideAndDeep - ranked 334': LookAheadWideAndDeep,
     'RL_DQN_5X5Viewport_PreTrained - ranked 201': RL_DQN_5X5Viewport_PreTrained,
     'RL_DQN_5X5': RL_DQN_5X5,
-    'LookThreeAdjacentThreeDown - ranked 334': LookThreeAdjacentThreeDown,
     'LookAheadWide - ranked 330': LookAheadWide,
     'ColumnCompare - ranked 308': ColumnCompare,
-    // 'LateralWallBouncer - ranked 78': LateralWallBouncer,
-    'AlwaysDown - ranked negative 116': AlwaysDown,
+    'BarelyLookAhead - ranked 292': BarelyLookAhead,
+    'AlwaysDown - ranked 180': AlwaysDown,
 };
 for (agent in agents) {
     //Select the first agent in the list
