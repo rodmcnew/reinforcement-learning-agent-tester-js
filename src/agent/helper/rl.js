@@ -750,17 +750,33 @@ var RL = {};
                 // greedy wrt Q function
                 var amat = this.forwardQ(this.net, s, false);
 
+                var mini = function (w) {
+                    // argmin of array w
+                    var minv = w[0];
+                    var minix = 0;
+                    for (var i = 1, n = w.length; i < n; i++) {
+                        var v = w[i];
+                        if (v < minv) {
+                            minix = i;
+                            minv = v;
+                        }
+                    }
+                    return minix;
+                };
+
                 const randomElement = document.getElementById('actionRandom');
                 // randomElement.innerHTML = 0;
                 randomElement.style.width = '10px';
                 var a = R.maxi(amat.w); // returns index of argmax action
-
+                let minA = mini(amat.w);
                 amat.w.forEach(function (value, i) { //@TODO what about if not in this else?
                     const element = document.getElementById('action' + i);
-                    let fixedValue = Math.floor(value / amat.w[a] * 100);
-                    if (fixedValue < 0 || fixedValue > 100) {
-                        fixedValue = 0;
+                    let adder = 0;
+                    if (amat.w[minA] < 0) {
+                        adder = -amat.w[minA];
                     }
+                    let fixedValue = Math.floor((value + adder) / (amat.w[a] + adder) * 100);
+
                     element.style.width = (fixedValue * 3 + 50) + 'px';
                     element.innerHTML = fixedValue;
                 });
