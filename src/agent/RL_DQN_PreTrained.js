@@ -6,7 +6,7 @@ const actions = ['w', 'a', 's', 'd'];
 
 const numberOfStates = config.viewPortSize[0] * config.viewPortSize[1] + 1;
 
-let rlDqn = new RlDqn(false, numberOfStates, savedNeuralNetwork);
+let rlDqn = new RlDqn(true, numberOfStates, savedNeuralNetwork);
 
 export default class RL_DQN_PreTrained {
     constructor() {
