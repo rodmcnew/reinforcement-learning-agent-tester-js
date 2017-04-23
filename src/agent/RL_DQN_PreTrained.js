@@ -1,7 +1,7 @@
 import {matrixToVector} from '../tensorTools'
 import RlDqn from './helper/RlDqn'
 import {config} from '../environment'
-import {data as savedNeuralNetwork} from './neural-network-saves/view-port-9-9-0-2/games-10000'
+import {data as savedNeuralNetwork} from './neural-network-saves/view-port-9-9-0-2/best'
 const actions = ['w', 'a', 's', 'd'];
 
 const numberOfStates = config.viewPortSize[0] * config.viewPortSize[1] + 1;
