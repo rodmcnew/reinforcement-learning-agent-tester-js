@@ -4657,7 +4657,7 @@ document.body.innerHTML =
     <div style="overflow: auto"><div style="float: left">a:&nbsp;</div> <div id="action1" style="background-color: lightsalmon"></div></div>
     <div style="overflow: auto"><div style="float: left">s:&nbsp;</div> <div id="action2" style="background-color: lightskyblue"></div></div>
     <div style="overflow: auto"><div style="float: left">d:&nbsp;</div> <div id="action3" style="background-color: lightseagreen"></div></div>
-        <div style="overflow: auto"><div style="float: left">random action:&nbsp;</div> <div id="actionRandom" style="background-color: red;height: 1em"></div></div>
+        <div style="overflow: auto"><div style="float: left">random action:&nbsp;</div> <div id="actionRandom" style="background-color: lightcoral;height: 1em"></div></div>
     </div>` +
     '<pre>' +
     '\nGame Rules:' +
