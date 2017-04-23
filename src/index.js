@@ -39,7 +39,6 @@ const scoreElement = document.getElementById('score');
 
 let enableRendering = true;
 let autoPlay = true;
-let environment;
 let speed = 250;
 let intervalReference = null;
 let agent;
