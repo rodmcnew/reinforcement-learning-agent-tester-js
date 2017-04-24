@@ -62,7 +62,7 @@ function ensureElementsExist() {
         document.getElementById('bad'),
     ];
 
-    document.getElementById('dump-agent-internal-data').addEventListener('click',()=>{
+    document.getElementById('dump-agent-internal-data').addEventListener('click', ()=> {
         if (!document.getElementById('q-learning-data')) {
             let div = document.createElement('div');
             let label = document.createElement('div');
@@ -126,18 +126,9 @@ function renderReward(reward) {
 
 export default class RlDqn {
     constructor(learningEnabled, numberOfStates, previousSavedData) {
-        // create an environment object
-        var env = {};
-        env.getNumStates = function () {
-            return numberOfStates;
-        };
-        env.getMaxNumActions = function () {
-            return 4;
-        };
-
         // create the DQN agent
         var spec = {alpha: 0.01}; // see full options on DQN page
-        this._agent = new DQNAgent(env, spec);
+        this._agent = new DQNAgent(numberOfStates, 4, spec);
         if (typeof previousSavedData !== 'undefined') {
             this._agent.fromJSON(previousSavedData);
         }

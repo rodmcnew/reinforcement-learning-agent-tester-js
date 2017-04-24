@@ -10,7 +10,7 @@ var getopt = function (opt, field_name, default_value) {
 
 var randi = R.randi;
 
-var DQNAgentc = function (env, opt) {
+export const DQNAgent = function (numberOfStates, maxNumberOfActions, opt) {
     this.gamma = getopt(opt, 'gamma', 0.75); // future reward discount factor
     this.epsilon = getopt(opt, 'epsilon', 0.1); // for epsilon-greedy policy
     this.alpha = getopt(opt, 'alpha', 0.01); // value function learning rate
@@ -22,14 +22,14 @@ var DQNAgentc = function (env, opt) {
 
     this.num_hidden_units = getopt(opt, 'num_hidden_units', 100);
 
-    this.env = env;
+    this.ns = numberOfStates;
+    this.na = maxNumberOfActions;
+
     this.reset();
 }
-DQNAgentc.prototype = {
+DQNAgent.prototype = {
     reset: function () {
         this.nh = this.num_hidden_units; // number of hidden units
-        this.ns = this.env.getNumStates();
-        this.na = this.env.getMaxNumActions();
 
         // nets are hardcoded for now as key (str) -> Mat
         // not proud of this. better solution is to have a whole Net object
@@ -50,8 +50,6 @@ DQNAgentc.prototype = {
         this.s1 = null;
         this.a0 = null;
         this.a1 = null;
-
-        this.tderror = 0; // for visualization only...
     },
     toJSON: function () {
         // save function
@@ -116,7 +114,6 @@ DQNAgentc.prototype = {
 
             // learn from this tuple to get a sense of how "surprising" it is to the agent
             var tderror = this.learnFromTuple(this.s0, this.a0, this.r0, this.s1, this.a1);
-            this.tderror = tderror; // a measure of surprise
 
             // decide if we should keep this experience in the replay
             if (this.t % this.experience_add_every === 0) {
@@ -136,8 +133,12 @@ DQNAgentc.prototype = {
             }
         }
         this.r0 = r1; // store for next update
+        return {
+            tderror: tderror
+        }
     },
     learnFromTuple: function (s0, a0, r0, s1, a1) {
+
         // want: Q(s,a) = r + gamma * max_a' Q(s',a')
 
         // compute the target Q value
@@ -158,8 +159,7 @@ DQNAgentc.prototype = {
 
         // update net
         R.updateNet(this.net, this.alpha);
+
         return tderror;
     }
 }
-
-export const DQNAgent = DQNAgentc;
