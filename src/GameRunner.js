@@ -9,7 +9,7 @@ const defaultStats = {
 
 export default class GameRunner {
     constructor(renderer, onStatusChange) {
-        this._enableRendering = false;
+        this._renderingEnabled = false;
         this._renderer = renderer;
         this._stats = Object.assign({}, defaultStats);
         this._onStatusChange = onStatusChange;
@@ -23,13 +23,13 @@ export default class GameRunner {
         this.clearStats = this.clearStats.bind(this);
     }
 
-    newGame(agentClass, enableRendering) {
+    newGame(agentClass, renderingEnabled) {
         this._agentClass = agentClass;
         this._agent = new this._agentClass();
-        this._enableRendering = enableRendering;
+        this._renderingEnabled = renderingEnabled;
         this._environment = new Environment();
         this._stats.currentScore = 0;//@TODO get from environment?
-        if (this._enableRendering) {
+        if (this._renderingEnabled) {
             //@TODO have this render make the table its self inside a given div
             this._renderer.clear();
             this._renderer.render(this._environment.getAgentObservation(), this._environment.getGodObservation());
@@ -53,10 +53,10 @@ export default class GameRunner {
             this._stats.lastGameScore = this._agentObservation.score;
             this._stats.scoreSum += this._agentObservation.score;
             this._stats.gameCount += 1;
-            this.newGame(this._agentClass, this._enableRendering);
+            this.newGame(this._agentClass, this._renderingEnabled);
         }
 
-        if (this._enableRendering) {
+        if (this._renderingEnabled) {
             this._renderer.render(this._agentObservation, this._godObservation);
             this._stats.currentScore = this._agentObservation.score;
             this._onStatusChange(this._stats);

@@ -228,53 +228,18 @@ Graph.prototype = {
         }
 
         if (this.needs_backprop) {
-            var backward = function () {
-                //@TODO major performance bottle neck, this function takes 73% of runtime (maybe use multi dimensional arrays to fix?)
-                // if (m1.n * m2.d * m1.d === 8200) {
-                //     // console.log(m1.n, m2.d, m1.d);// returns 100, 1, 82
-                //     console.time('matMulBackward')
-                // }
-
-                // Defining these outside the loop saves 0.1ms on chrome mac-book pro retina
-                const m1N = m1.n;
-                const m2D = m2.d;
-                const m1D = m1.d;
-
-                //Defining these outside the loop saves 0.03ms
-                var i;
-                let j;
-                let k;
-
-                for (i = 0; i < m1N; i++) { // loop over rows of m1
-                    for (j = 0; j < m2D; j++) { // loop over cols of m2
-                        for (k = 0; k < m1D; k++) { // dot product loop
-                            //Doing these calculations inline with no caching saves 0.02ms
-
-                            // This group alone takes 0.1ms
-                            // m1.d * i + k;m2.d * k + j;d * i + j;
-                            // m2.d * k + j;m1.d * i + k;d * i + j;
-
-                            // This group alone takes 0.3ms
-                            // m1.dw[m1.d * i + k];
-                            // m2.dw[m2.d * k + j];
-
-                            //This group alone takes 0.2ms
-                            // m2.w[m2.d * k + j] * out.dw[d * i + j];
-                            // m1.w[m1.d * i + k] * out.dw[d * i + j];
-
-                            // console.log(m1.dw[m1.d * i + k],m2.w[m2.d * k + j],out.dw[d * i + j]); //0,1,verysmallnumb
-
-                            //This group takes 0.37ms
-                            m1.dw[m1.d * i + k] += m2.w[m2.d * k + j] * out.dw[d * i + j];
-                            m2.dw[m2.d * k + j] += m1.w[m1.d * i + k] * out.dw[d * i + j];
+            var backwardMul = function () {
+                for (var i = 0; i < m1.n; i++) { // loop over rows of m1
+                    for (var k = 0; k < m1.d; k++) { // dot product loop
+                        for (var j = 0; j < m2.d; j++) { // loop over cols of m2
+                            var b = out.dw[d * i + j];
+                            m1.dw[m1.d * i + k] += m2.w[m2.d * k + j] * b;
+                            m2.dw[m2.d * k + j] += m1.w[m1.d * i + k] * b;
                         }
                     }
                 }
-                // if (m1.n * m2.d * m1.d === 8200) {
-                //     console.timeEnd('matMulBackward')
-                // }
-            };
-            this.backprop.push(backward);
+            }
+            this.backprop.push(backwardMul);
         }
         return out;
     },

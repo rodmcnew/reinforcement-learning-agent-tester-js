@@ -1,4 +1,5 @@
 import {DQNAgent} from './DQNAgent'
+import {userSettings} from '../../index' //@TODO use DI instead for this
 
 function getMinimumVectorIndex(w) {
     var minv = w[0];
@@ -95,16 +96,16 @@ function renderActionResponse(actionResponse) {
         const minAction = getMinimumVectorIndex(actionResponse.weights);
         // const maxA = maxi(actionResponse.weights);
         const maxAction = actionResponse.action;
-        actionResponse.weights.forEach(function (value, i) { //@TODO what about if not in this else?
+        for (var i = 0, len = actionResponse.weights.length; i < len; i++) {
             let adder = 0;
             if (actionResponse.weights[minAction] < 0) {
                 adder = -actionResponse.weights[minAction];
             }
-            let fixedValue = Math.floor((value + adder) / (actionResponse.weights[maxAction] + adder) * 100);
+            let fixedValue = Math.floor((actionResponse.weights[i] + adder) / (actionResponse.weights[maxAction] + adder) * 100);
 
             actionElements[i].style.width = (fixedValue * 3 + 50) + 'px';
             actionElements[i].innerHTML = fixedValue;
-        });
+        }
     }
 }
 
@@ -142,12 +143,16 @@ export default class RlDqn {
         if (this._learningEnabled) {
             if (reward !== null) {
                 this._agent.learn(reward);
-                renderReward(reward)
+                if (userSettings.renderingEnabled) {
+                    renderReward(reward)
+                }
             }
         }
         let actionResponse = this._agent.act(state);
 
-        renderActionResponse(actionResponse);
+        if (userSettings.renderingEnabled) {
+            renderActionResponse(actionResponse);
+        }
 
         return actionResponse.action;
     }
