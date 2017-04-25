@@ -6,7 +6,7 @@ var getopt = function (opt, field_name, default_value) {
         return default_value;
     }
     return (typeof opt[field_name] !== 'undefined') ? opt[field_name] : default_value;
-}
+};
 
 var randi = R.randi;
 
@@ -26,7 +26,7 @@ export const DQNAgent = function (numberOfStates, maxNumberOfActions, opt) {
     this.na = maxNumberOfActions;
 
     this.reset();
-}
+};
 DQNAgent.prototype = {
     reset: function () {
         this.nh = this.num_hidden_units; // number of hidden units
@@ -77,33 +77,33 @@ DQNAgent.prototype = {
     },
     act: function (slist) {
         // convert to a Mat column vector
-        var s = new R.Mat(this.ns, 1);
-        s.setFrom(slist);
+        var state = new R.Mat(this.ns, 1);
+        state.setFrom(slist);
 
         let actionWasRandom = false;
         let actionWeights = null;
-        let a;
+        let action;
 
         // epsilon greedy policy
         if (Math.random() < this.epsilon) {
-            a = randi(0, this.na);
+            action = randi(0, this.na);
             actionWasRandom = true;
         } else {
             // greedy wrt Q function
-            var amat = this.forwardQ(this.net, s, false);
+            var actionMatrix = this.forwardQ(this.net, state, false);
 
-            actionWeights = amat.w;
-            a = R.maxi(amat.w); // returns index of argmax action
+            actionWeights = actionMatrix.w;
+            action = R.maxi(actionMatrix.w); // returns index of argmax action
         }
 
         // shift state memory
         this.s0 = this.s1;
         this.a0 = this.a1;
-        this.s1 = s;
-        this.a1 = a;
+        this.s1 = state;
+        this.a1 = action;
 
         return {
-            action: a,
+            action: action,
             wasRandom: actionWasRandom,
             weights: actionWeights
         };
@@ -113,11 +113,11 @@ DQNAgent.prototype = {
         if (!(this.r0 == null) && this.alpha > 0) {
 
             // learn from this tuple to get a sense of how "surprising" it is to the agent
-            var tderror = this.learnFromTuple(this.s0, this.a0, this.r0, this.s1, this.a1);
+            var tderror = this.learnFromTuple(this.s0, this.a0, this.r0, this.s1);
 
             // decide if we should keep this experience in the replay
             if (this.t % this.experience_add_every === 0) {
-                this.exp[this.expi] = [this.s0, this.a0, this.r0, this.s1, this.a1];
+                this.exp[this.expi] = [this.s0, this.a0, this.r0, this.s1];
                 this.expi += 1;
                 if (this.expi > this.experience_size) {
                     this.expi = 0;
@@ -129,7 +129,7 @@ DQNAgent.prototype = {
             for (var k = 0; k < this.learning_steps_per_iteration; k++) {
                 var ri = randi(0, this.exp.length); // todo: priority sweeps?
                 var e = this.exp[ri];
-                this.learnFromTuple(e[0], e[1], e[2], e[3], e[4])
+                this.learnFromTuple(e[0], e[1], e[2], e[3])
             }
         }
         this.r0 = r1; // store for next update
@@ -137,7 +137,7 @@ DQNAgent.prototype = {
             tderror: tderror
         }
     },
-    learnFromTuple: function (s0, a0, r0, s1, a1) {
+    learnFromTuple: function (s0, a0, r0, s1) {
 
         // want: Q(s,a) = r + gamma * max_a' Q(s',a')
 
@@ -162,4 +162,4 @@ DQNAgent.prototype = {
 
         return tderror;
     }
-}
+};

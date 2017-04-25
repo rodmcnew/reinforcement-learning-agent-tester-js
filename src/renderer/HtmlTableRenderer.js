@@ -3,10 +3,10 @@ import {getMatrixDimensions} from '../tensorTools'
 import {config as environmentConfig} from '../environment'
 
 function generateTableHtml(size, tableClassName) {
-    let html = '';
-    for (let y = 0; y < size[1]; y++) {
+    var html = '';
+    for (var y = 0; y < size[1]; y++) {
         html += '<tr>';
-        for (let x = 0; x < size[0]; x++) {
+        for (var x = 0; x < size[0]; x++) {
             html += '<td class="tile-' + x + '-' + y + '"></td>';
         }
         html += '</tr>';
@@ -15,10 +15,10 @@ function generateTableHtml(size, tableClassName) {
 }
 
 function getTdElements(size, tableClassName) {
-    let tdElements = [];
-    for (let x = 0; x < size[0]; x++) {
+    var tdElements = [];
+    for (var x = 0; x < size[0]; x++) {
         tdElements[x] = [];
-        for (let y = 0; y < size[1]; y++) {
+        for (var y = 0; y < size[1]; y++) {
             tdElements[x][y] = document.querySelector('table.' + tableClassName + ' td.tile-' + x + '-' + y);
         }
     }
@@ -48,7 +48,10 @@ export default class HtmlTableRenderer {
      * Clears the observation of the renderer causing it to forget any stored observation.
      */
     clear() {
-        this._previousPositions = [];
+        this._previousPositions = new Array(environmentConfig.size[0]);
+        for (var i = 0; i < environmentConfig.size[0]; i++) {
+            this._previousPositions[i] = new Array(environmentConfig.size[1]);
+        }
     }
 
     /**
@@ -59,13 +62,16 @@ export default class HtmlTableRenderer {
      */
     render(agentObservation, godObservation) {
         //Render the agent view
-        let agentViewPortSize = [
+        var agentViewPortSize = [
             agentObservation.tileTypes.length,
             agentObservation.tileTypes[0].length
         ];
-        for (let x = 0; x < agentViewPortSize[0]; x++) {
-            for (let y = 0; y < agentViewPortSize[1]; y++) {
-                let color = {r: 50, g: 50, b: 50};
+
+        var xLength = agentViewPortSize[0];
+        var yLength = agentViewPortSize[1];
+        for (var x = 0; x < xLength; x++) {
+            for (var y = 0; y < yLength; y++) {
+                var color = {r: 50, g: 50, b: 50};
                 // if (agentObservation.visibles[x][y] === 0) {
                 //     color = {r: 0, g: 0, b: 0};
                 // } else
@@ -82,28 +88,28 @@ export default class HtmlTableRenderer {
         }
 
         //Render the god view
-        for (let y = 0; y < environmentConfig.size[0]; y++) {
-            for (let x = 0; x < environmentConfig.size[1]; x++) {
-                let color = {r: 50, g: 50, b: 50};
+        var xLength = environmentConfig.size[0];
+        var yLength = environmentConfig.size[1];
+        for (var x = 0; x < xLength; x++) {
+            for (var y = 0; y < yLength; y++) {
+                var inPreviousPosition = this._previousPositions[x][y];
+                var color = {r: 50, g: 50, b: 50};
                 if (x == godObservation.position[0] && y == godObservation.position[1] && godObservation.tileTypes[x][y] !== 0) {
                     color = {r: 255, g: 255, b: 0};
                 } else if (x == godObservation.position[0] && y == godObservation.position[1]) {
                     color = {r: 0, g: 255, b: 0};
-                } else if (this._previousPositions[x + ',' + y] && godObservation.tileTypes[x][y] !== 0) {
+                } else if (inPreviousPosition && godObservation.tileTypes[x][y] !== 0) {
                     color = {r: 255, g: 255, b: 128}
-                } else if (this._previousPositions[x + ',' + y]) {
+                } else if (inPreviousPosition) {
                     color = {r: 0, g: 128, b: 0}
                 } else if (godObservation.tileTypes[x][y] !== 0) {
                     color = {r: 230, g: 0, b: 0};
                 }
-                // } else if (godObservation.visibles[x][y] === 0) {
-                //     color = {r: 0, g: 0, b: 0};
-                // }
                 this._godTds[x][y].style
                     .backgroundColor = 'rgb(' + color.r + ',' + color.g + ',' + color.b + ')';
             }
         }
 
-        this._previousPositions[godObservation.position[0] + ',' + godObservation.position[1]] = true;
+        this._previousPositions[godObservation.position[0]][godObservation.position[1]] = true;
     };
 }

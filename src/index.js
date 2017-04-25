@@ -121,7 +121,7 @@ function setupInterval() {
         } else {
             //Normal ticking takes 3ms between ticks which is not fast enough, so tick 100 times
             intervalReference = setInterval(function () {
-                for (let i = 0; i < 100; i++) {
+                for (let i = 0; i < 200; i++) {
                     gameRunner.tick();
                 }
             }, 0);

@@ -22,13 +22,13 @@ var gaussRandom = function () {
     v_val = v * c; // cache this
     return_v = true;
     return u * c;
-}
+};
 var randi = function (a, b) {
     return Math.floor(Math.random() * (b - a) + a);
-}
+};
 var randn = function (mu, std) {
     return mu + gaussRandom() * std;
-}
+};
 
 // Mat holds a matrix
 var Mat = function (n, d) {
@@ -37,7 +37,7 @@ var Mat = function (n, d) {
     this.d = d;
     this.w = new Float64Array(n * d);
     this.dw = new Float64Array(n * d);
-}
+};
 Mat.prototype = {
     setFrom: function (arr) {
         for (var i = 0, n = arr.length; i < n; i++) {
@@ -60,13 +60,13 @@ Mat.prototype = {
             this.w[i] = json.w[i]; // copy over weights
         }
     }
-}
+};
 
 var copyMat = function (b) {
     var a = new Mat(b.n, b.d);
     a.setFrom(b.w);
     return a;
-}
+};
 
 var copyNet = function (net) {
     // nets are (k,v) pairs with k = string key, v = Mat()
@@ -77,7 +77,7 @@ var copyNet = function (net) {
         }
     }
     return new_net;
-}
+};
 
 var updateMat = function (m, alpha) {
     // updates in place
@@ -87,7 +87,7 @@ var updateMat = function (m, alpha) {
             m.dw[i] = 0;
         }
     }
-}
+};
 
 var updateNet = function (net, alpha) {
     for (var p in net) {
@@ -95,7 +95,7 @@ var updateNet = function (net, alpha) {
             updateMat(net[p], alpha);
         }
     }
-}
+};
 
 var netToJSON = function (net) {
     var j = {};
@@ -105,7 +105,7 @@ var netToJSON = function (net) {
         }
     }
     return j;
-}
+};
 var netFromJSON = function (j) {
     var net = {};
     for (var p in j) {
@@ -115,7 +115,7 @@ var netFromJSON = function (j) {
         }
     }
     return net;
-}
+};
 
 // return Mat but filled with random numbers from gaussian
 var RandMat = function (n, d, mu, std) {
@@ -123,7 +123,7 @@ var RandMat = function (n, d, mu, std) {
     fillRandn(m, mu, std);
     //fillRand(m,-std,std); // kind of :P
     return m;
-}
+};
 
 // Mat utils
 // fill matrix with random gaussian numbers
@@ -131,20 +131,17 @@ var fillRandn = function (m, mu, std) {
     for (var i = 0, n = m.w.length; i < n; i++) {
         m.w[i] = randn(mu, std);
     }
-}
+};
 
 // Transformer definitions
 var Graph = function (needs_backprop) {
-    if (typeof needs_backprop === 'undefined') {
-        needs_backprop = true;
-    }
     this.needs_backprop = needs_backprop;
 
     // this will store a list of functions that perform backprop,
     // in their forward pass order. So in backprop we will go
     // backwards and evoke each one
     this.backprop = [];
-}
+};
 Graph.prototype = {
     backward: function () {
         for (var i = this.backprop.length - 1; i >= 0; i--) {
@@ -165,7 +162,7 @@ Graph.prototype = {
                 for (var i = 0, n = d; i < n; i++) {
                     m.dw[d * ix + i] += out.dw[i];
                 }
-            }
+            };
             this.backprop.push(backward);
         }
         return out;
@@ -185,7 +182,7 @@ Graph.prototype = {
                     var mwi = out.w[i];
                     m.dw[i] += (1.0 - mwi * mwi) * out.dw[i];
                 }
-            }
+            };
             this.backprop.push(backward);
         }
         return out;
@@ -205,7 +202,7 @@ Graph.prototype = {
                     var mwi = out.w[i];
                     m.dw[i] += mwi * (1.0 - mwi) * out.dw[i];
                 }
-            }
+            };
             this.backprop.push(backward);
         }
         return out;
@@ -238,7 +235,7 @@ Graph.prototype = {
                         }
                     }
                 }
-            }
+            };
             this.backprop.push(backwardMul);
         }
         return out;
@@ -256,7 +253,7 @@ Graph.prototype = {
                     m1.dw[i] += out.dw[i];
                     m2.dw[i] += out.dw[i];
                 }
-            }
+            };
             this.backprop.push(backward);
         }
         return out;
@@ -276,7 +273,7 @@ Graph.prototype = {
                     m1.dw[i] += m2.w[i] * out.dw[0];
                     m2.dw[i] += m1.w[i] * out.dw[0];
                 }
-            }
+            };
             this.backprop.push(backward);
         }
         return out;
@@ -294,17 +291,17 @@ Graph.prototype = {
                     m1.dw[i] += m2.w[i] * out.dw[i];
                     m2.dw[i] += m1.w[i] * out.dw[i];
                 }
-            }
+            };
             this.backprop.push(backward);
         }
         return out;
     },
-}
+};
 
 var sig = function (x) {
     // helper function for computing sigmoid
     return 1.0 / (1 + Math.exp(-x));
-}
+};
 
 var maxi = function (w) {
     // argmax of array w
@@ -318,7 +315,7 @@ var maxi = function (w) {
         }
     }
     return maxix;
-}
+};
 
 // various utils
 var R = {};

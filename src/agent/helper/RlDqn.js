@@ -86,10 +86,11 @@ function renderActionResponse(actionResponse) {
     if (actionResponse.wasRandom) {
         // randomElement.innerHTML = 100;
         randomActionElement.style.width = (100 * 3 + 50) + 'px';
-        actionElements.forEach((element)=> {
+        for (i = 0; i < actionElements.length; i++) {
+            var element = actionElements[i];
             element.innerHTML = 0;
             element.style.width = '50px';
-        });
+        }
     } else {
         // randomElement.innerHTML = 0;
         randomActionElement.style.width = '10px';
