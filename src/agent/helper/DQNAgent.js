@@ -143,14 +143,14 @@ DQNAgent.prototype = {
 
         // compute the target Q value
         var tmat = this.forwardQ(this.net, s1, false);
-        var qmax = r0 + this.gamma * tmat.w[R.maxi(tmat.w)];
+        var qmax = r0 + this.gamma * tmat.w[R.maxi(tmat.w)];//@TODO ROD NOTE - should we look more than one step ahead?
 
         // now predict
         var pred = this.forwardQ(this.net, s0, true);
 
         var tderror = pred.w[a0] - qmax;
         var clamp = this.tderror_clamp;
-        if (Math.abs(tderror) > clamp) {  // huber loss to robustify
+        if (Math.abs(tderror) > clamp) {  // huber loss to robustify //@TODO ROD NOTE - Does this IF do anything?
             if (tderror > clamp) tderror = clamp;
             if (tderror < -clamp) tderror = -clamp;
         }
