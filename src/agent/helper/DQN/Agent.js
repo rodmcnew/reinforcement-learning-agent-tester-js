@@ -10,7 +10,7 @@ var getopt = function (opt, field_name, default_value) {
 
 var randi = R.randi;
 
-export const DQNAgent = function (numberOfStates, maxNumberOfActions, opt) {
+export default function Agent(numberOfStates, maxNumberOfActions, opt) {
     this.gamma = getopt(opt, 'gamma', 0.75); // future reward discount factor
     this.epsilon = getopt(opt, 'epsilon', 0.1); // for epsilon-greedy policy
     this.alpha = getopt(opt, 'alpha', 0.01); // value function learning rate
@@ -27,7 +27,7 @@ export const DQNAgent = function (numberOfStates, maxNumberOfActions, opt) {
 
     this.reset();
 };
-DQNAgent.prototype = {
+Agent.prototype = {
     reset: function () {
         this.nh = this.num_hidden_units; // number of hidden units
 

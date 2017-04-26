@@ -1,4 +1,4 @@
-import {DQNAgent} from './DQNAgent'
+import Agent from './DQN/Agent'
 import {userSettings} from '../../index' //@TODO use DI instead for this
 
 function getMinimumVectorIndex(w) {
@@ -130,7 +130,7 @@ export default class RlDqn {
     constructor(learningEnabled, numberOfStates, previousSavedData) {
         // create the DQN agent
         var spec = {alpha: 0.01}; // see full options on DQN page
-        this._agent = new DQNAgent(numberOfStates, 4, spec);
+        this._agent = new Agent(numberOfStates, 4, spec);
         if (typeof previousSavedData !== 'undefined') {
             this._agent.fromJSON(previousSavedData);
         }
