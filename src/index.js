@@ -12,8 +12,10 @@ import GameRunner from './GameRunner'
 // import ReinforcementLearnerDeepQNetworkPreTrained from './agent/ReinforcementLearnerDeepQNetworkPreTrained'
 import './style.css'
 
-export const userSettings = {
-    renderingEnabled: true
+export const settings = {
+    renderingEnabled: true,
+    speed: 250,
+    ticksPerIntervalWhenNotRendering: 10,//100 is good for speed, 10 is good for precise "actions per second" readout
 };
 
 document.body.innerHTML =
@@ -23,7 +25,7 @@ document.body.innerHTML =
     '<option value="0">0ms</option>' +
     '<option value="100">100ms</option>' +
     '<option value="200">200ms</option>' +
-    '<option value="250" selected>250ms</option>' +
+    '<option value="250">250ms</option>' +
     '<option value="500">500ms</option>' +
     '<option value="1000">1000ms</option>' +
     '<option value="paused">Paused</option>' +
@@ -43,7 +45,6 @@ document.body.innerHTML =
 const scoreElement = document.getElementById('score');
 
 let autoPlay = true;
-let speed = 250;
 let intervalReference = null;
 let agent;
 let currentAgentName;
@@ -71,6 +72,7 @@ function handleGameRunnerStatusChange(stats) {
         'Agent: ' + currentAgentName +
         '\nCurrent Score: ' + stats.currentScore +
         '\nLast Game Final Score: ' + stats.lastGameScore +
+        '\nActions per second: ' + stats.actionsPerSecond +
         '\nAvg Final Score: ' + (Math.round(stats.scoreSum / stats.gameCount) || 0) +
         '\nGame Count: ' + stats.gameCount;
 }
@@ -89,21 +91,30 @@ agentSelectorElement.addEventListener('change', (event) => {
     newGame()
 });
 
-document.getElementById('interval').addEventListener('change', (event) => {
+let intervalSelectElement = document.getElementById('interval');
+
+//Display the default setting in the UI select box
+if (!settings.renderingEnabled) {
+    intervalSelectElement.value = 'no-render';
+} else {
+    intervalSelectElement.value = settings.speed;
+}
+
+intervalSelectElement.addEventListener('change', (event) => {
     const value = event.target.value;
     let newEnableRenderingValue = true;
     autoPlay = true;
     if (value === 'no-render') {
         newEnableRenderingValue = false;
-        speed = 0;
+        settings.speed = 0;
         renderer.clear();
     } else if (value === 'paused') {
         autoPlay = false;
     } else {
-        speed = value;
+        settings.speed = value;
     }
-    if (newEnableRenderingValue != userSettings.renderingEnabled) {
-        userSettings.renderingEnabled = newEnableRenderingValue;
+    if (newEnableRenderingValue != settings.renderingEnabled) {
+        settings.renderingEnabled = newEnableRenderingValue;
         newGame();
     }
     setupInterval();
@@ -112,12 +123,12 @@ document.getElementById('interval').addEventListener('change', (event) => {
 function setupInterval() {
     clearInterval(intervalReference);
     if (autoPlay) {
-        if (userSettings.renderingEnabled) {
-            intervalReference = setInterval(gameRunner.tick, speed);
+        if (settings.renderingEnabled) {
+            intervalReference = setInterval(gameRunner.tick, settings.speed);
         } else {
             //Normal ticking takes 3ms between ticks which is not fast enough, so tick 100 times
             intervalReference = setInterval(function () {
-                for (let i = 0; i < 200; i++) {
+                for (let i = 0; i < settings.ticksPerIntervalWhenNotRendering; i++) {
                     gameRunner.tick();
                 }
             }, 0);
@@ -127,14 +138,14 @@ function setupInterval() {
 
 document.body.addEventListener('keydown', function (event) {
     gameRunner.takeAction(event.key);
-    // if (userSettings.renderingEnabled) {
+    // if (settings.renderingEnabled) {
     //     const agentObservation = environment.getAgentObservation();
     //     renderer.render(agentObservation, environment.getGodObservation());
     // }
 });
 
 function newGame() {
-    gameRunner.newGame(agents[currentAgentName], userSettings.renderingEnabled);
+    gameRunner.newGame(agents[currentAgentName], settings.renderingEnabled);
 }
 
 newGame();

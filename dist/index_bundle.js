@@ -4113,6 +4113,7 @@ function Graph(needs_backprop) {
 Graph.prototype = {
     backward: function () {
         for (var i = this.backprop.length - 1; i >= 0; i--) {
+            console.log(i);
             this.backprop[i](); // tick!
         }
     },

@@ -1,5 +1,6 @@
-import Agent from './DQN/Agent'
-import {userSettings} from '../../index' //@TODO use DI instead for this
+import QNetworkAgent from './DQN/QNetworkAgent'
+import {settings} from '../../index' //@TODO use DI instead for this
+import NeuralNetwork from './DQN/NeuralNetwork'
 
 function getMinimumVectorIndex(w) {
     var minv = w[0];
@@ -31,7 +32,7 @@ let actionElements = null;
 let randomActionElement = null;
 let rewardElements = null;
 
-let currentAgent; //@TODO WARNING IS HUGE HACK
+let currentNeuralNetwork; //@TODO WARNING IS HUGE HACK
 
 function ensureElementsExist() {
     if (document.getElementById('DQNRender')) {
@@ -63,7 +64,7 @@ function ensureElementsExist() {
         document.getElementById('bad'),
     ];
 
-    document.getElementById('dump-agent-internal-data').addEventListener('click', ()=> {
+    document.getElementById('dump-agent-internal-data').addEventListener('click', () => {
         if (!document.getElementById('q-learning-data')) {
             let div = document.createElement('div');
             let label = document.createElement('div');
@@ -76,7 +77,7 @@ function ensureElementsExist() {
             div.appendChild(textArea);
             document.body.appendChild(div);
         }
-        document.getElementById('q-learning-data').innerHTML = JSON.stringify(currentAgent.toJSON());
+        document.getElementById('q-learning-data').innerHTML = JSON.stringify(currentNeuralNetwork.toJSON());
     });
 }
 
@@ -128,30 +129,37 @@ function renderReward(reward) {
 
 export default class RlDqn {
     constructor(learningEnabled, numberOfStates, previousSavedData) {
+        var numberOfActions = 4;
         // create the DQN agent
         var spec = {alpha: 0.01}; // see full options on DQN page
-        this._agent = new Agent(numberOfStates, 4, spec);
+        this._neuralNetwork = new NeuralNetwork(numberOfStates, numberOfActions, 100);
         if (typeof previousSavedData !== 'undefined') {
-            this._agent.fromJSON(previousSavedData);
+            this._neuralNetwork.fromJSON(previousSavedData);
         }
+        this._agent = new QNetworkAgent(
+            numberOfStates,
+            numberOfActions,
+            this._neuralNetwork,
+            spec,
+        );
 
         this._learningEnabled = learningEnabled;
     }
 
     getAction(state, reward) {
-        currentAgent = this._agent;
+        currentNeuralNetwork = this._neuralNetwork;
 
         if (this._learningEnabled) {
             if (reward !== null) {
                 this._agent.learn(reward);
-                if (userSettings.renderingEnabled) {
+                if (settings.renderingEnabled) {
                     renderReward(reward)
                 }
             }
         }
         let actionResponse = this._agent.act(state);
 
-        if (userSettings.renderingEnabled) {
+        if (settings.renderingEnabled) {
             renderActionResponse(actionResponse);
         }
 

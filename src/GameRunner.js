@@ -4,7 +4,10 @@ const defaultStats = {
     currentScore: 0,
     lastGameScore: 0,
     scoreSum: 0,
-    gameCount: 0
+    gameCount: 0,
+    actionCount: 0,
+    actionsPerSecond: 0,
+    lastSecondsActionCount: 0
 };
 
 export default class GameRunner {
@@ -21,6 +24,11 @@ export default class GameRunner {
         this.takeAction = this.takeAction.bind(this);
         this.tick = this.tick.bind(this);
         this.clearStats = this.clearStats.bind(this);
+
+        setInterval(() => {//@TODO accomplish this without an interval
+            this._stats.actionsPerSecond = this._stats.actionCount - this._stats.lastSecondsActionCount;
+            this._stats.lastSecondsActionCount = this._stats.actionCount;
+        }, 1000);
     }
 
     newGame(agentClass, renderingEnabled) {
@@ -61,6 +69,8 @@ export default class GameRunner {
             this._stats.currentScore = this._agentObservation.score;
             this._onStatusChange(this._stats);
         }
+
+        this._stats.actionCount++;
     }
 
     tick() {
