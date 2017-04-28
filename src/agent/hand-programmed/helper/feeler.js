@@ -1,4 +1,4 @@
-import {config} from '../../environment'
+import {config} from '../../../environment'
 
 export const oppositeActions = {
     w: 's',

@@ -1,6 +1,6 @@
 // Matrix utils
 // fill matrix with random gaussian numbers
-import gaussRandom from './gaussRandom'
+import {gaussRandom} from './random'
 
 export function tanH(m, out) {
     // tanh nonlinearity
@@ -35,7 +35,7 @@ export function backwardTanH(m, out) {
  */
 export function mul(m1, m2, out) {//4.7 Float64Array
     if (m1.d !== m2.n) {
-        throw new Error();
+        throw new Error(m1.d + '!==' + m2.n);
     } else if (out.n != m1.n || out.d != m2.d) {
         throw new Error('Out should be ' + m1.n + ' by ' + m2.d + ' but is ' + out.n + ' by ' + out.d);
     }

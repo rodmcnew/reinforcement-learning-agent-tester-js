@@ -1,13 +1,14 @@
-import {matrixToVector} from '../tensorTools'
-import RlDqn from './helper/RlDqn'
-import {config} from '../environment'
+import {matrixToVector} from '../../tensorTools'
+import RlDqn from './helper/deepQNetworkAdaptor'
+import {config} from '../../environment'
+import {data as savedNeuralNetwork} from '../../../data/neural-network-saves/view-port-9-9-0-2/best'
 const actions = ['w', 'a', 's', 'd'];
 
-const numberOfStates = config.viewPortSize[0] * config.viewPortSize[1] + 1;
+const numberOfStates = config.viewPortSize[0] * config.viewPortSize[1];
 
-let rlDqn = new RlDqn(true, numberOfStates);
+let rlDqn = new RlDqn(true, numberOfStates, savedNeuralNetwork);
 
-export default class RL_DQN_InLearningMode {
+export default class RL_DQN_PreTrained {
     constructor() {
         this._lastScore = null;
         this._lastActionIndex = 2; //2='s'
@@ -22,7 +23,7 @@ export default class RL_DQN_InLearningMode {
         const state = matrixToVector(observation.tileTypes);
 
         //Give the agent memory of the last action it took. This may be cheating.
-        state.push(this._lastActionIndex);
+        // state.push(this._lastActionIndex);
 
         let reward = null;
         if (this._lastScore !== null) {

@@ -1,50 +1,27 @@
+import './deep-q-network/runTests'
 import HtmlTableRenderer from './renderer/HtmlTableRenderer'
-import ColumnCompare from './agent/ColumnCompare'
-import LookAheadWide from './agent/LookAheadWide'
-import LookAheadWideAndDeep from './agent/LookAheadWideAndDeep'
-import AlwaysDown from './agent/AlwaysDown'
-import BarelyLookAhead from './agent/BarelyLookAhead'
-import RL_DQN_InLearningMode from './agent/RL_DQN_InLearningMode'
-import RL_DQN_PreTrained from './agent/RL_DQN_PreTrained'
-import {config as environmentConfig} from './environment'
+import LookAheadWide from './agent/hand-programmed/LookAheadWide'
+import LookAheadDeep from './agent/hand-programmed/LookAheadDeep'
+import AlwaysMoveStraightDown from './agent/hand-programmed/AlwaysMoveStraightDown'
+import LookAheadOneMove from './agent/hand-programmed/LookAheadOneMove'
+import RL_DQN_Untrained from './agent/machine-learning/RL_DQN_Untrained'
+import RL_DQN_PreTrained from './agent/machine-learning/RL_DQN_PreTrained'
+import html from './index.html'
 import GameRunner from './GameRunner'
-
-// import ReinforcementLearnerDeepQNetworkPreTrained from './agent/ReinforcementLearnerDeepQNetworkPreTrained'
-import './style.css'
+import SpeedIntervalSelectElement from './SpeedIntervalSelectElement'
 
 export const settings = {
     renderingEnabled: true,
     speed: 250,
-    ticksPerIntervalWhenNotRendering: 10,//100 is good for speed, 10 is good for precise "actions per second" readout
+    // renderingEnabled: true,
+    // speed: 250,
+    ticksPerIntervalWhenNotRendering: 100,//100 is good for speed, 10 is good for precise "actions per second" readout
+    autoPlay: true,
 };
 
-document.body.innerHTML =
-    '<div id="info">Agent: <select id="agentSelector"></select>' +
-    '<br>Speed Interval: <select id="interval">' +
-    '<option value="no-render">0ms with no rendering</option>' +
-    '<option value="0">0ms</option>' +
-    '<option value="100">100ms</option>' +
-    '<option value="200">200ms</option>' +
-    '<option value="250">250ms</option>' +
-    '<option value="500">500ms</option>' +
-    '<option value="1000">1000ms</option>' +
-    '<option value="paused">Paused</option>' +
-    '</select>' +
-    '<pre id="score"></pre>' +
-    '</div>' +
-    '<div id="rendererContainer"></div>' +
-    '<div id="agentRendererContainer"></div>' +
-    '<pre>' +
-    '\nGame Rules:' +
-    // '\n- Gain ' + environmentConfig.pointsForCompletion + ' points for making it to the bottom row' +
-    '\n- Gain ' + environmentConfig.verticalDeltaScore + ' points for every row lower you go' +
-    '\n- Loose ' + environmentConfig.verticalDeltaScore + ' points for every row higher you go' +
-    '\n- Loose ' + -environmentConfig.tileValueMap[1] + ' points when moving into a red square' +
-    '\n- Loose ' + -environmentConfig.tileValueMap[0] + ' points when moving into a grey square' +
-    '</pre>';
+document.body.innerHTML = html;
 const scoreElement = document.getElementById('score');
 
-let autoPlay = true;
 let intervalReference = null;
 let agent;
 let currentAgentName;
@@ -53,13 +30,12 @@ let renderer = new HtmlTableRenderer(document.getElementById('rendererContainer'
 let gameRunner = new GameRunner(renderer, handleGameRunnerStatusChange);
 
 let agents = {
-    'RL_DQN_PreTrained - ranked 192': RL_DQN_PreTrained,
-    'RL_DQN_InLearningMode': RL_DQN_InLearningMode,
-    'LookAheadWideAndDeep - ranked 234': LookAheadWideAndDeep,
-    'LookAheadWide - ranked 230': LookAheadWide,
-    'ColumnCompare - ranked 208': ColumnCompare,
-    'BarelyLookAhead - ranked 192': BarelyLookAhead,
-    'AlwaysDown - ranked 80': AlwaysDown,
+    'MachineLearning - RL_DQN_Untrained': RL_DQN_Untrained,
+    'MachineLearning - RL_DQN_PreTrained - ranked 192': RL_DQN_PreTrained,
+    'HandProgrammed - LookAheadDeep - ranked 234': LookAheadDeep,
+    'HandProgrammed - LookAheadWide - ranked 228': LookAheadWide,
+    'HandProgrammed - LookAheadOneMove - ranked 192': LookAheadOneMove,
+    'HandProgrammed - AlwaysMoveStraightDown - ranked 80': AlwaysMoveStraightDown,
 };
 for (agent in agents) {
     //Select the first agent in the list
@@ -73,7 +49,7 @@ function handleGameRunnerStatusChange(stats) {
         '\nCurrent Score: ' + stats.currentScore +
         '\nLast Game Final Score: ' + stats.lastGameScore +
         '\nActions per second: ' + stats.actionsPerSecond +
-        '\nAvg Final Score: ' + (Math.round(stats.scoreSum / stats.gameCount) || 0) +
+        '\nAvg Final Score: ' + (Math.floor(stats.lastFinalScores.reduce((acc, val) => acc + val, 0) / stats.lastFinalScores.length) || 0) +
         '\nGame Count: ' + stats.gameCount;
 }
 
@@ -91,57 +67,26 @@ agentSelectorElement.addEventListener('change', (event) => {
     newGame()
 });
 
-let intervalSelectElement = document.getElementById('interval');
-
-//Display the default setting in the UI select box
-if (!settings.renderingEnabled) {
-    intervalSelectElement.value = 'no-render';
-} else {
-    intervalSelectElement.value = settings.speed;
-}
-
-intervalSelectElement.addEventListener('change', (event) => {
-    const value = event.target.value;
-    let newEnableRenderingValue = true;
-    autoPlay = true;
-    if (value === 'no-render') {
-        newEnableRenderingValue = false;
-        settings.speed = 0;
-        renderer.clear();
-    } else if (value === 'paused') {
-        autoPlay = false;
-    } else {
-        settings.speed = value;
-    }
-    if (newEnableRenderingValue != settings.renderingEnabled) {
-        settings.renderingEnabled = newEnableRenderingValue;
-        newGame();
-    }
-    setupInterval();
-});
+let speedIntervalSelectElement = new SpeedIntervalSelectElement(setupInterval, newGame, renderer);
 
 function setupInterval() {
     clearInterval(intervalReference);
-    if (autoPlay) {
+    if (settings.autoPlay) {
+        var ticksPerInterval = settings.ticksPerIntervalWhenNotRendering;
         if (settings.renderingEnabled) {
-            intervalReference = setInterval(gameRunner.tick, settings.speed);
-        } else {
-            //Normal ticking takes 3ms between ticks which is not fast enough, so tick 100 times
-            intervalReference = setInterval(function () {
-                for (let i = 0; i < settings.ticksPerIntervalWhenNotRendering; i++) {
-                    gameRunner.tick();
-                }
-            }, 0);
+            ticksPerInterval = 1
         }
+        //Normal ticking takes 3ms between ticks which is not fast enough, so tick 100 times
+        intervalReference = setInterval(function () {
+            for (let i = 0; i < ticksPerInterval; i++) {
+                gameRunner.tick();
+            }
+        }, settings.speed);
     }
 }
 
 document.body.addEventListener('keydown', function (event) {
     gameRunner.takeAction(event.key);
-    // if (settings.renderingEnabled) {
-    //     const agentObservation = environment.getAgentObservation();
-    //     renderer.render(agentObservation, environment.getGodObservation());
-    // }
 });
 
 function newGame() {

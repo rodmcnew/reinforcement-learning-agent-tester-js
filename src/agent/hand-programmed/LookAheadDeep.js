@@ -79,7 +79,7 @@ const feelerPaths = [ //Warning the paths below may not include all possibilitie
     ['d', 'd', 'd', 's', 's', 'a', 'a', 'a', 's'],
 ];
 
-export default class LookAheadWideAndDeep {
+export default class LookAheadDeep {
     constructor() {
         this._state = {lastAction: null};
     }

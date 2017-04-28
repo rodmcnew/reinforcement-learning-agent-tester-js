@@ -3,7 +3,7 @@
  *
  * @constructor
  */
-export default class AlwaysDown {
+export default class AlwaysMoveStraightDown {
     /**
      *
      * @param {AgentObservation} observation

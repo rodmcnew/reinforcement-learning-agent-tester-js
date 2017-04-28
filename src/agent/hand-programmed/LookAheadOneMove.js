@@ -6,7 +6,7 @@ const feelerPaths = [
     ['d', 's']
 ];
 
-export default class BarelyLookAhead {
+export default class LookAheadOneMove {
     /**
      *
      * @param {AgentObservation} observation

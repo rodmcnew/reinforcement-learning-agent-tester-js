@@ -1241,7 +1241,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__agent_LookAheadWideAndDeep__ = __webpack_require__(17);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__agent_AlwaysDown__ = __webpack_require__(13);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__agent_BarelyLookAhead__ = __webpack_require__(14);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__agent_RL_DQN_InLearningMode__ = __webpack_require__(18);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__agent_RL_DQN_Untrained__ = __webpack_require__(18);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__agent_RL_DQN_PreTrained__ = __webpack_require__(19);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__environment__ = __webpack_require__(0);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__GameRunner__ = __webpack_require__(12);
@@ -1305,7 +1305,7 @@ let gameRunner = new __WEBPACK_IMPORTED_MODULE_9__GameRunner__["a" /* default */
 
 let agents = {
     'RL_DQN_PreTrained - ranked 192': __WEBPACK_IMPORTED_MODULE_7__agent_RL_DQN_PreTrained__["a" /* default */],
-    'RL_DQN_InLearningMode': __WEBPACK_IMPORTED_MODULE_6__agent_RL_DQN_InLearningMode__["a" /* default */],
+    'RL_DQN_Untrained': __WEBPACK_IMPORTED_MODULE_6__agent_RL_DQN_Untrained__["a" /* default */],
     'LookAheadWideAndDeep - ranked 234': __WEBPACK_IMPORTED_MODULE_3__agent_LookAheadWideAndDeep__["a" /* default */],
     'LookAheadWide - ranked 230': __WEBPACK_IMPORTED_MODULE_2__agent_LookAheadWide__["a" /* default */],
     'ColumnCompare - ranked 208': __WEBPACK_IMPORTED_MODULE_1__agent_ColumnCompare__["a" /* default */],
@@ -1795,7 +1795,7 @@ const numberOfStates = __WEBPACK_IMPORTED_MODULE_2__environment__["a" /* config 
 
 let rlDqn = new __WEBPACK_IMPORTED_MODULE_1__helper_RlDqn__["a" /* default */](true, numberOfStates);
 
-class RL_DQN_InLearningMode {
+class RL_DQN_Untrained {
     constructor() {
         this._lastScore = null;
         this._lastActionIndex = 2; //2='s'
@@ -1826,7 +1826,7 @@ class RL_DQN_InLearningMode {
         return action;
     }
 }
-/* harmony export (immutable) */ __webpack_exports__["a"] = RL_DQN_InLearningMode;
+/* harmony export (immutable) */ __webpack_exports__["a"] = RL_DQN_Untrained;
 
 
 /***/ }),

@@ -7,7 +7,8 @@ const defaultStats = {
     gameCount: 0,
     actionCount: 0,
     actionsPerSecond: 0,
-    lastSecondsActionCount: 0
+    lastSecondsActionCount: 0,
+    lastFinalScores: []
 };
 
 export default class GameRunner {
@@ -19,6 +20,7 @@ export default class GameRunner {
         this._agentObservation = null;
         this._godObservation = null;
         this._agentClass = null;
+        this._nextAction = 0;
 
         this.newGame = this.newGame.bind(this);
         this.takeAction = this.takeAction.bind(this);
@@ -59,6 +61,10 @@ export default class GameRunner {
         if (this._godObservation.isComplete) {//@Find better way to communicate "isComplete"
             this._agent.getAction(this._agentObservation);//Ask for one more action so the agent can see the observation after its last action
             this._stats.lastGameScore = this._agentObservation.score;
+            this._stats.lastFinalScores.push(this._agentObservation.score);
+            if (this._stats.lastFinalScores.length > 100) {
+                this._stats.lastFinalScores.shift();
+            }
             this._stats.scoreSum += this._agentObservation.score;
             this._stats.gameCount += 1;
             this.newGame(this._agentClass, this._renderingEnabled);
@@ -71,11 +77,12 @@ export default class GameRunner {
         }
 
         this._stats.actionCount++;
+
+        this._nextAction = this._agent.getAction(this._agentObservation);
     }
 
     tick() {
-        const action = this._agent.getAction(this._agentObservation);
-        this.takeAction(action);
+        this.takeAction(this._nextAction);
     }
 
     clearStats() {

@@ -1,6 +1,7 @@
-import QNetworkAgent from './DQN/QNetworkAgent'
-import {settings} from '../../index' //@TODO use DI instead for this
-import NeuralNetwork from './DQN/NeuralNetwork'
+import NeuralNetwork from '../../../deep-q-network/NeuralNetwork'
+import QNetworkAgent from '../../../deep-q-network/QNetworkAgentOneStep'
+import {settings} from '../../../index' //@TODO use DI instead for this
+
 
 function getMinimumVectorIndex(w) {
     var minv = w[0];
@@ -15,19 +16,6 @@ function getMinimumVectorIndex(w) {
     return minix;
 }
 
-// function maxi(w) {
-//     var minv = w[0];
-//     var minix = 0;
-//     for (var i = 1, n = w.length; i < n; i++) {
-//         var v = w[i];
-//         if (v < minv) {
-//             minix = i;
-//             minv = v;
-//         }
-//     }
-//     return minix;
-// }
-
 let actionElements = null;
 let randomActionElement = null;
 let rewardElements = null;
@@ -40,7 +28,7 @@ function ensureElementsExist() {
     }
     document.getElementById('agentRendererContainer').innerHTML =
         `<div id="DQNRender">
-    <br />Action Choice:
+    <br />Predicted expected reward from each action:
     <div style="overflow: auto"><div style="float: left">w:&nbsp;</div> <div id="action0" style="background-color: lightgoldenrodyellow;"></div></div>
     <div style="overflow: auto"><div style="float: left">a:&nbsp;</div> <div id="action1" style="background-color: lightsalmon"></div></div>
     <div style="overflow: auto"><div style="float: left">s:&nbsp;</div> <div id="action2" style="background-color: lightskyblue"></div></div>
@@ -106,7 +94,7 @@ function renderActionResponse(actionResponse) {
             let fixedValue = Math.floor((actionResponse.weights[i] + adder) / (actionResponse.weights[maxAction] + adder) * 100);
 
             actionElements[i].style.width = (fixedValue * 3 + 50) + 'px';
-            actionElements[i].innerHTML = fixedValue;
+            actionElements[i].innerHTML = Math.round(actionResponse.weights[i]), 2;
         }
     }
 }
@@ -131,8 +119,7 @@ export default class RlDqn {
     constructor(learningEnabled, numberOfStates, previousSavedData) {
         var numberOfActions = 4;
         // create the DQN agent
-        var spec = {alpha: 0.01}; // see full options on DQN page
-        this._neuralNetwork = new NeuralNetwork(numberOfStates, numberOfActions, 100);
+        this._neuralNetwork = new NeuralNetwork(numberOfStates, numberOfActions, [100]);
         if (typeof previousSavedData !== 'undefined') {
             this._neuralNetwork.fromJSON(previousSavedData);
         }
@@ -140,7 +127,7 @@ export default class RlDqn {
             numberOfStates,
             numberOfActions,
             this._neuralNetwork,
-            spec,
+            {},
         );
 
         this._learningEnabled = learningEnabled;
@@ -149,20 +136,20 @@ export default class RlDqn {
     getAction(state, reward) {
         currentNeuralNetwork = this._neuralNetwork;
 
-        if (this._learningEnabled) {
-            if (reward !== null) {
-                this._agent.learn(reward);
-                if (settings.renderingEnabled) {
-                    renderReward(reward)
-                }
-            }
+        if (!this._learningEnabled) {
+            reward = null;//Passing null rewards to the agent disables learning inside it
         }
-        let actionResponse = this._agent.act(state);
+
+        let action = this._agent.learnAndAct(reward, state);
+        let actionResponse = this._agent.getLastActionStats();
 
         if (settings.renderingEnabled) {
             renderActionResponse(actionResponse);
+            if (reward !== null) {
+                renderReward(reward)
+            }
         }
 
-        return actionResponse.action;
+        return action;
     }
 }
