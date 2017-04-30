@@ -4891,8 +4891,8 @@ let renderer = new __WEBPACK_IMPORTED_MODULE_1__renderer_HtmlTableRenderer__["a"
 let gameRunner = new __WEBPACK_IMPORTED_MODULE_8__GameRunner__["a" /* default */](renderer, handleGameRunnerStatusChange);
 
 let agents = {
-    'MachineLearning - Tabular_Q_Learner': __WEBPACK_IMPORTED_MODULE_6__agent_machine_learning_Tabular_Q_Learner__["a" /* default */],
-    'MachineLearning - DeepQNetwork_OneStep - ranked 192': __WEBPACK_IMPORTED_MODULE_5__agent_machine_learning_DeepQNetwork_OneStep__["a" /* default */],
+    'MachineLearning - Tabular_Q_Learner - NotPreTrained': __WEBPACK_IMPORTED_MODULE_6__agent_machine_learning_Tabular_Q_Learner__["a" /* default */],
+    'MachineLearning - DeepQNetwork_OneStep - PreTrained - ranked 192': __WEBPACK_IMPORTED_MODULE_5__agent_machine_learning_DeepQNetwork_OneStep__["a" /* default */],
     'HandProgrammed - LookAheadIn9x3Viewport - ranked 241': __WEBPACK_IMPORTED_MODULE_2__agent_hand_programmed_LookAheadIn9x3Viewport__["a" /* default */],
     'HandProgrammed - LookAheadIn5x2Viewport - ranked 224': __WEBPACK_IMPORTED_MODULE_4__agent_hand_programmed_LookAheadIn5x2Viewport__["a" /* default */],
     'HandProgrammed - LookAheadIn3x2Viewport - ranked 208': __WEBPACK_IMPORTED_MODULE_3__agent_hand_programmed_LookAheadIn3x2Viewport__["a" /* default */],
@@ -17474,7 +17474,7 @@ function renderQTableSize(size) {
 
 
 const html = `
-<div id="info">Agent: <select id="agentSelector"></select>&nbsp;<button id="clearBrainButton">Clear Brain and Relearn</button>
+<div id="info">Agent: <select id="agentSelector"></select>&nbsp;<button id="clearBrainButton">Clear Brain and Retrain</button>
 <br>Speed: <select id="interval">
 <option value="no-render">Ludicrous Speed (no rendering)</option>
 <option value="0">Light Speed</option>
