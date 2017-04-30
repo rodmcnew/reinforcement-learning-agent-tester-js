@@ -4791,7 +4791,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__agent_hand_programmed_LookAheadIn9x3Viewport__ = __webpack_require__(132);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__agent_hand_programmed_LookAheadIn3x2Viewport__ = __webpack_require__(130);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__agent_hand_programmed_LookAheadIn5x2Viewport__ = __webpack_require__(131);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__agent_machine_learning_OneStepDeepQNetwork_PreTrained__ = __webpack_require__(133);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__agent_machine_learning_DeepQNetwork_OneStep__ = __webpack_require__(133);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__agent_machine_learning_Tabular_Q_Learner__ = __webpack_require__(134);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__index_html__ = __webpack_require__(136);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__GameRunner__ = __webpack_require__(128);
@@ -4892,7 +4892,7 @@ let gameRunner = new __WEBPACK_IMPORTED_MODULE_8__GameRunner__["a" /* default */
 
 let agents = {
     'MachineLearning - Tabular_Q_Learner': __WEBPACK_IMPORTED_MODULE_6__agent_machine_learning_Tabular_Q_Learner__["a" /* default */],
-    'MachineLearning - OneStepDeepQNetwork_PreTrained - ranked 192': __WEBPACK_IMPORTED_MODULE_5__agent_machine_learning_OneStepDeepQNetwork_PreTrained__["a" /* default */],
+    'MachineLearning - DeepQNetwork_OneStep - ranked 192': __WEBPACK_IMPORTED_MODULE_5__agent_machine_learning_DeepQNetwork_OneStep__["a" /* default */],
     'HandProgrammed - LookAheadIn9x3Viewport - ranked 241': __WEBPACK_IMPORTED_MODULE_2__agent_hand_programmed_LookAheadIn9x3Viewport__["a" /* default */],
     'HandProgrammed - LookAheadIn5x2Viewport - ranked 224': __WEBPACK_IMPORTED_MODULE_4__agent_hand_programmed_LookAheadIn5x2Viewport__["a" /* default */],
     'HandProgrammed - LookAheadIn3x2Viewport - ranked 208': __WEBPACK_IMPORTED_MODULE_3__agent_hand_programmed_LookAheadIn3x2Viewport__["a" /* default */],
@@ -17198,7 +17198,7 @@ const numberOfStates = __WEBPACK_IMPORTED_MODULE_2__environment__["a" /* config 
 let rlDqn = new __WEBPACK_IMPORTED_MODULE_1__helper_deepQNetworkAdaptor__["a" /* default */](true, numberOfStates, __WEBPACK_IMPORTED_MODULE_3__data_neural_network_saves_view_port_9_9_0_2_best__["a" /* data */]);
 let rlDqnHasBeenInitialized = false;
 
-class OneStepDeepQNetwork_PreTrained {
+class DeepQNetwork_OneStep {
     constructor() {
         this._lastScore = null;
         this._lastActionIndex = 2; //2='s'
@@ -17235,7 +17235,7 @@ class OneStepDeepQNetwork_PreTrained {
         rlDqnHasBeenInitialized = false;
     }
 }
-/* harmony export (immutable) */ __webpack_exports__["a"] = OneStepDeepQNetwork_PreTrained;
+/* harmony export (immutable) */ __webpack_exports__["a"] = DeepQNetwork_OneStep;
 
 
 

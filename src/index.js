@@ -5,7 +5,7 @@ import LookAheadIn3x2Viewport from './agent/hand-programmed/LookAheadIn3x2Viewpo
 // import LookAheadDeep from './agent/hand-programmed/LookAheadDeep'
 // import AlwaysMoveStraightDown from './agent/hand-programmed/AlwaysMoveStraightDown'
 import LookAheadIn5x2Viewport from './agent/hand-programmed/LookAheadIn5x2Viewport'
-import OneStepDeepQNetwork_PreTrained from './agent/machine-learning/OneStepDeepQNetwork_PreTrained'
+import DeepQNetwork_OneStep from './agent/machine-learning/DeepQNetwork_OneStep'
 import Tabular_Q_Learner from './agent/machine-learning/Tabular_Q_Learner'
 import './index.html'
 import GameRunner from './GameRunner'
@@ -89,8 +89,8 @@ let renderer = new HtmlTableRenderer(document.getElementById('rendererContainer'
 let gameRunner = new GameRunner(renderer, handleGameRunnerStatusChange);
 
 let agents = {
-    'MachineLearning - Tabular_Q_Learner': Tabular_Q_Learner,
-    'MachineLearning - OneStepDeepQNetwork_PreTrained - ranked 192': OneStepDeepQNetwork_PreTrained,
+    'MachineLearning - Tabular_Q_Learner - NotPreTrained': Tabular_Q_Learner,
+    'MachineLearning - DeepQNetwork_OneStep - PreTrained - ranked 192': DeepQNetwork_OneStep,
     'HandProgrammed - LookAheadIn9x3Viewport - ranked 241': LookAheadIn9x3Viewport,
     'HandProgrammed - LookAheadIn5x2Viewport - ranked 224': LookAheadIn5x2Viewport,
     'HandProgrammed - LookAheadIn3x2Viewport - ranked 208': LookAheadIn3x2Viewport,

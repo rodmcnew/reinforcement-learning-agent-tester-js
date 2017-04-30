@@ -2,7 +2,7 @@ import {config as environmentConfig} from './environment'
 import './style.css'
 
 export const html = `
-<div id="info">Agent: <select id="agentSelector"></select>&nbsp;<button id="clearBrainButton">Clear Brain and Relearn</button>
+<div id="info">Agent: <select id="agentSelector"></select>&nbsp;<button id="clearBrainButton">Clear Brain and Retrain</button>
 <br>Speed: <select id="interval">
 <option value="no-render">Ludicrous Speed (no rendering)</option>
 <option value="0">Light Speed</option>

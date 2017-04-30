@@ -9,7 +9,7 @@ const numberOfStates = config.viewPortSize[0] * config.viewPortSize[1];
 let rlDqn = new RlDqn(true, numberOfStates, savedNeuralNetwork);
 let rlDqnHasBeenInitialized = false;
 
-export default class OneStepDeepQNetwork_PreTrained {
+export default class DeepQNetwork_OneStep {
     constructor() {
         this._lastScore = null;
         this._lastActionIndex = 2; //2='s'
