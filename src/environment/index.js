@@ -1,27 +1,19 @@
 import {shiftAndTrimMatrix} from '../tensorTools'
 import AgentObservation from './AgentObservation'
 import {generateInitialState} from './generateInitialState'
+import {createMatrix} from '../tensorTools'
 // import {getVisibleTiles} from './getVisibleTiles'
 
 export const config = {
+    minTileValue: -100,//Used by some hand-programmed agents //@TODO remove
     size: [31, 31],
 
-    //TINY VIEWPORT
-    // viewPortSize: [5, 5],
-    // viewPortOffset: [0, 1],
-
-    //SMALL VIEWPORT
-    // viewPortSize: [7, 7],
-    // viewPortOffset: [0, 1],
-
-    //NORMAL VIEWPORT
     viewPortSize: [9, 9],
     viewPortOffset: [0, 2],
 
     verticalDeltaScore: 10,//was 10
-    minTileValue: -20,
     tileValueMap: [-1, -20],
-    pointsForCompletion: 0
+    pointsForCompletion: 1000
 };
 
 /**
@@ -35,6 +27,9 @@ export default class Environment {
         this.applyAction = this.applyAction.bind(this);
         this.getAgentObservation = this.getAgentObservation.bind(this);
         this.getGodObservation = this.getGodObservation.bind(this);
+
+        //Cache this instantiated matrix to improve performance
+        this.agentObservationTileMatrixObjectCache = createMatrix(config.viewPortSize, 0);
     }
 
     /**
@@ -92,7 +87,8 @@ export default class Environment {
         ];
         const trimVector = [trimAmount[0], trimAmount[1]];
 
-        let tileTypes = shiftAndTrimMatrix(this._state.tileTypes, shiftVector, 1, trimVector);
+        shiftAndTrimMatrix(this._state.tileTypes, shiftVector, 1, trimVector, this.agentObservationTileMatrixObjectCache);
+        let tileTypes = this.agentObservationTileMatrixObjectCache;
 
 
         //Make the bottom exit row look safe by making its tile not red

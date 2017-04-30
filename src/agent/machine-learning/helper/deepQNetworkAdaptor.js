@@ -15,10 +15,24 @@ function getMinimumVectorIndex(w) {
     }
     return minix;
 }
+function getMaximumVectorIndex(w) {
+    //@TODO fix var names
+    var minv = w[0];
+    var minix = 0;
+    for (var i = 1, n = w.length; i < n; i++) {
+        var v = w[i];
+        if (v > minv) {
+            minix = i;
+            minv = v;
+        }
+    }
+    return minix;
+}
 
 let actionElements = null;
 let randomActionElement = null;
 let rewardElements = null;
+let randomActionValueElement;
 
 let currentNeuralNetwork; //@TODO WARNING IS HUGE HACK
 
@@ -28,17 +42,18 @@ function ensureElementsExist() {
     }
     document.getElementById('agentRendererContainer').innerHTML =
         `<div id="DQNRender">
-    <br />Predicted expected reward from each action:
-    <div style="overflow: auto"><div style="float: left">w:&nbsp;</div> <div id="action0" style="background-color: lightgoldenrodyellow;"></div></div>
+Predicted expected reward from each action:
+    <div style="overflow: auto"><div style="float: left">w:&nbsp;</div> <div id="action0" style="background-color: lightgoldenrodyellow"></div></div>
     <div style="overflow: auto"><div style="float: left">a:&nbsp;</div> <div id="action1" style="background-color: lightsalmon"></div></div>
     <div style="overflow: auto"><div style="float: left">s:&nbsp;</div> <div id="action2" style="background-color: lightskyblue"></div></div>
     <div style="overflow: auto"><div style="float: left">d:&nbsp;</div> <div id="action3" style="background-color: lightseagreen"></div></div>
-        <div style="overflow: auto"><div style="float: left">random action&nbsp;</div> <div id="actionRandom" style="background-color: lightcoral;height: 1em"></div></div>
+        <div style="overflow: auto"><div style="float: left">random action:&nbsp;<span id="actionRandomValue"></span></div><div id="actionRandom" style="background-color: lightcoral;height: 1em"></div></div>
         <br>
-        Reward:
+        Reward from last action:
         <div style="overflow: auto"><div style="float: left">good&nbsp;</div> <div id="good" style="background-color: greenyellow"></div></div>
     <div style="overflow: auto"><div style="float: left">bad&nbsp;</div> <div id="bad" style="background-color: orangered"></div></div>
-<br /><button id="dump-agent-internal-data">Dump Agent Internal Data</button>
+<br />
+<!-- <button id="dump-agent-internal-data">Dump Agent Internal Data</button> -->
 </div>`;
     actionElements = [
         document.getElementById('action0'),
@@ -47,59 +62,67 @@ function ensureElementsExist() {
         document.getElementById('action3'),
     ];
     randomActionElement = document.getElementById('actionRandom');
+    randomActionValueElement = document.getElementById('actionRandomValue');
     rewardElements = [
         document.getElementById('good'),
         document.getElementById('bad'),
     ];
 
-    document.getElementById('dump-agent-internal-data').addEventListener('click', () => {
-        if (!document.getElementById('q-learning-data')) {
-            let div = document.createElement('div');
-            let label = document.createElement('div');
-            label.innerHTML = '<br/>Q Learner Internal State Dump';
-            let textArea = document.createElement("TEXTAREA");
-            textArea.style.width = '100%';
-            textArea.style.height = '10em';
-            textArea.setAttribute('id', 'q-learning-data');
-            div.appendChild(label);
-            div.appendChild(textArea);
-            document.body.appendChild(div);
-        }
-        document.getElementById('q-learning-data').innerHTML = JSON.stringify(currentNeuralNetwork.toJSON());
-    });
+    // document.getElementById('dump-agent-internal-data').addEventListener('click', () => {//@TODO randomly bump again or make generic save button
+    //     if (!document.getElementById('q-learning-data')) {
+    //         let div = document.createElement('div');
+    //         let label = document.createElement('div');
+    //         label.innerHTML = '<br/>Agent Brain Dump:';
+    //         let textArea = document.createElement("TEXTAREA");
+    //         textArea.style.width = '100%';
+    //         textArea.style.height = '10em';
+    //         textArea.setAttribute('id', 'q-learning-data');
+    //         div.appendChild(label);
+    //         div.appendChild(textArea);
+    //         document.body.appendChild(div);
+    //     }
+    //     document.getElementById('q-learning-data').innerHTML = JSON.stringify(currentNeuralNetwork.toJSON());
+    // });
 }
 
-function renderActionResponse(actionResponse) {
+export function renderActionResponse(actionResponse) {//@TODO move out
     ensureElementsExist();
 
-    if (actionResponse.wasRandom) {
-        // randomElement.innerHTML = 100;
-        randomActionElement.style.width = (100 * 3 + 50) + 'px';
-        for (i = 0; i < actionElements.length; i++) {
-            var element = actionElements[i];
-            element.innerHTML = 0;
-            element.style.width = '50px';
-        }
-    } else {
-        // randomElement.innerHTML = 0;
-        randomActionElement.style.width = '10px';
-        const minAction = getMinimumVectorIndex(actionResponse.weights);
-        // const maxA = maxi(actionResponse.weights);
-        const maxAction = actionResponse.action;
-        for (var i = 0, len = actionResponse.weights.length; i < len; i++) {
-            let adder = 0;
-            if (actionResponse.weights[minAction] < 0) {
-                adder = -actionResponse.weights[minAction];
-            }
-            let fixedValue = Math.floor((actionResponse.weights[i] + adder) / (actionResponse.weights[maxAction] + adder) * 100);
+    if (actionResponse.weights === null) {//Make it work with older agents that do not always return weights //@TODO fix
+        return;
+    }
 
-            actionElements[i].style.width = (fixedValue * 3 + 50) + 'px';
-            actionElements[i].innerHTML = Math.round(actionResponse.weights[i]), 2;
+    const minAction = getMinimumVectorIndex(actionResponse.weights);
+    // const maxA = maxi(actionResponse.weights);
+    const maxAction = getMaximumVectorIndex(actionResponse.weights);
+    const barFrontPadding = 50;
+
+    let adder = 0;
+    const maxActionValue = actionResponse.weights[maxAction];
+    for (var i = 0, len = actionResponse.weights.length; i < len; i++) {
+        if (actionResponse.weights[minAction] < 0) {
+            adder = -actionResponse.weights[minAction];
         }
+
+    }
+    for (var i = 0, len = actionResponse.weights.length; i < len; i++) {
+        let fixedValue = Math.floor((actionResponse.weights[i] + adder) / (maxActionValue + adder) * 100);
+
+        actionElements[i].style.width = (fixedValue * 3 + barFrontPadding) + 'px';
+        actionElements[i].innerHTML = actionResponse.weights[i].toFixed(0);
+    }
+
+    if (actionResponse.wasRandom) {
+        randomActionValueElement.innerHTML = 'Infinity';
+        const fixedValueForRandomAction = Math.floor((maxActionValue + adder + 2) / (maxActionValue + adder) * 100);
+        randomActionElement.style.width = (fixedValueForRandomAction * 3 + barFrontPadding) + 'px';
+    } else {
+        randomActionValueElement.innerHTML = '0';
+        randomActionElement.style.width = '10px';
     }
 }
 
-function renderReward(reward) {
+export function renderReward(reward) {//@TODO move out
     let good = 0;
     let bad = 0;
     if (reward < 0) {
@@ -140,7 +163,7 @@ export default class RlDqn {
             reward = null;//Passing null rewards to the agent disables learning inside it
         }
 
-        let action = this._agent.learnAndAct(reward, state);
+        let action = this._agent.learnAndAct(reward, state, reward == null);
         let actionResponse = this._agent.getLastActionStats();
 
         if (settings.renderingEnabled) {

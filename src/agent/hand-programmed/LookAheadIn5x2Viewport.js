@@ -3,10 +3,12 @@ import {getActionViaFeelers} from './helper/feeler'
 const feelerPaths = [
     ['s'],
     ['a', 's'],
-    ['d', 's']
+    ['a', 'a', 's'],
+    ['d', 's'],
+    ['d', 'd', 's']
 ];
 
-export default class LookAheadOneMove {
+export default class LookAheadIn5x2Viewport {
     /**
      *
      * @param {AgentObservation} observation

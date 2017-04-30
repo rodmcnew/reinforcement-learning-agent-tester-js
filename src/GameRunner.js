@@ -87,6 +87,7 @@ export default class GameRunner {
 
     clearStats() {
         this._stats = Object.assign({}, defaultStats);
+        this._stats.lastFinalScores = [];
     }
 
     _updateObservations() {

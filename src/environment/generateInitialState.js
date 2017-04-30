@@ -23,22 +23,12 @@ export const generateInitialState = () => {
  */
 function generateRandomTileTypes(size) {
     const tileTypes = [];
-    const min = 1;
-    const max = 9;
-    for (let xi = 0; xi < size[0]; xi++) {
-        tileTypes[xi] = [];
-        for (let yi = 0; yi < size[1]; yi++) {
-            let randomValue = Math.floor(Math.random() * (max - min + 1)) + min;
-
-            let tileType;
-
-            if (randomValue < 7) {
-                tileType = 0;
-            } else {
-                tileType = 1;
-            }
-
-            tileTypes[xi][yi] = tileType;
+    var xLen = size[0];
+    var yLen = size[1];
+    for (var xi = 0; xi < xLen; xi++) {
+        tileTypes[xi] = new Array(yLen);
+        for (var yi = 0; yi < size[1]; yi++) {
+            tileTypes[xi][yi] = Math.random() < 0.7 ? 0 : 1;
         }
     }
     return tileTypes;

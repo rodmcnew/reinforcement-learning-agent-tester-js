@@ -4,9 +4,9 @@ import {getRandomIntWithZeroMin} from './random'
 export default class Agent {
     constructor(numberOfStates, maxNumberOfActions, neuralNetwork, options) {
         var defaultOptions = {
-            discountFactor: 0.75, // future reward discount factor
+            discountFactor: 0.75, //was .075, future reward discount factor
             randomActionProbability: 0.1,// for epsilon-greedy policy
-            learningRate: 0.01,// value function learning rate
+            learningRate: 0.01,//was 0.01, value function learning rate
             experienceRecordInterval: 25,// number of time steps before we add another experience to replay memory
             experienceSize: 5000,// size of experience replay
             learningStepsPerIteration: 10,
@@ -31,11 +31,11 @@ export default class Agent {
 
         this.t = 0;
 
-        this.r0 = null;
-        this.s0 = null;
-        this.s1 = null;
-        this.a0 = null;
-        this.a1 = null;
+        this.lastReward = null;
+        this.lastObservation = null;
+        this.currentObservation = null;
+        this.lastAction = null;
+        this.currentAction = null;
     }
 
     /**
@@ -71,10 +71,10 @@ export default class Agent {
         }
 
         // shift state memory
-        this.s0 = this.s1;
-        this.a0 = this.a1;
-        this.s1 = state;
-        this.a1 = action;
+        this.lastObservation = this.currentObservation;
+        this.lastAction = this.currentAction;
+        this.currentObservation = state;
+        this.currentAction = action;
 
         var lastActionStats = this._lastActionStats;
         lastActionStats.action = action;
@@ -91,14 +91,14 @@ export default class Agent {
 
     _learn(r1) {
         // perform an update on Q function
-        if (!(this.r0 == null) && this._options.learningRate > 0) {
+        if (!(this.lastReward == null) && this._options.learningRate > 0) {
 
             // learn from this tuple to get a sense of how "surprising" it is to the agent
-            var tdError = this._learnFromExample(this.s0, this.a0, this.r0, this.s1);
+            var tdError = this._learnFromExample(this.lastObservation, this.lastAction, this.lastReward, this.currentObservation);
 
             // decide if we should keep this experience in the replay
             if (this.t % this._options.experienceRecordInterval === 0) {
-                this.exp[this.expi] = [this.s0, this.a0, this.r0, this.s1];
+                this.exp[this.expi] = [this.lastObservation, this.lastAction, this.lastReward, this.currentObservation];
                 this.expi += 1;
                 if (this.expi > this._options.experienceSize) {
                     this.expi = 0;
@@ -113,32 +113,30 @@ export default class Agent {
                 this._learnFromExample(e[0], e[1], e[2], e[3])
             }
         }
-        this.r0 = r1; // store for next update
+        this.lastReward = r1; // store for next update
         return tdError;
     }
 
-    _learnFromExample(s0, a0, r0, s1) {
+    _learnFromExample(lastObservation, lastAction, lastReward, currentObservation) {
 
-        // want: Q(s,a) = r + gamma * max_a' Q(s',a')
+        // goal: Q(s,a) = r + discountFactor * max_a' Q(s',a')
 
-        // compute the target Q value
-        var tmat = this._neuralNetwork.forward(s1, false);
-        var qmax = r0 + this._options.discountFactor * tmat.w[arrayMath.getIndexOfMaxValue(tmat.w)];//@TODO ROD NOTE - should we look more than one step ahead?
+        var actionMatrix = this._neuralNetwork.forward(currentObservation, false);
+        var estimatedFutureReward = actionMatrix.w[arrayMath.getIndexOfMaxValue(actionMatrix.w)];
 
-        // now predict
-        var pred = this._neuralNetwork.forward(s0, true);
+        var prediction = this._neuralNetwork.forward(lastObservation, true);
+        var lastActionPredictedReward = prediction.w[lastAction];
 
-        var tdError = pred.w[a0] - qmax;
-        var clamp = this._options.tdErrorClamp;
+        var tdError = lastActionPredictedReward - lastReward - estimatedFutureReward * this._options.discountFactor;
 
-        if (tdError > clamp) {
-            tdError = clamp
-        } else if (tdError < -clamp) {
-            tdError = -clamp
+        if (tdError > this._options.tdErrorClamp) {
+            tdError = this._options.tdErrorClamp
+        } else if (tdError < -this._options.tdErrorClamp) {
+            tdError = -this._options.tdErrorClamp
         }
 
         var outputError = new Matrix(this.numberOfActions, 1);
-        outputError.w[a0] = tdError;
+        outputError.w[lastAction] = tdError;
 
         this._neuralNetwork.backPropagate(outputError, this._options.learningRate);
 

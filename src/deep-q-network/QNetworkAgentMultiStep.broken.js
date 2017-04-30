@@ -6,7 +6,7 @@ export default class Agent {
         var defaultOptions = {
             discountFactor: 0.75, // future reward discount factor
             randomActionProbability: 0.1,// for epsilon-greedy policy
-            learningRate: 0.01,// value function learning rate
+            learningRate: 0.01,//was 0.01, value function learning rate
             experienceRecordInterval: 25,// number of time steps before we add another experience to replay memory
             experienceSize: 5000,// size of experience replay
             replaysPerIteration: 10, //was 10 before multi q

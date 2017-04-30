@@ -1,21 +1,22 @@
 import './deep-q-network/runTests'
 import HtmlTableRenderer from './renderer/HtmlTableRenderer'
-import LookAheadWide from './agent/hand-programmed/LookAheadWide'
-import LookAheadDeep from './agent/hand-programmed/LookAheadDeep'
-import AlwaysMoveStraightDown from './agent/hand-programmed/AlwaysMoveStraightDown'
-import LookAheadOneMove from './agent/hand-programmed/LookAheadOneMove'
+import LookAheadIn9x3Viewport from './agent/hand-programmed/LookAheadIn9x3Viewport'
+// import LookAheadDeep from './agent/hand-programmed/LookAheadDeep'
+// import AlwaysMoveStraightDown from './agent/hand-programmed/AlwaysMoveStraightDown'
+import LookAheadIn5x2Viewport from './agent/hand-programmed/LookAheadIn5x2Viewport'
 import RL_DQN_Untrained from './agent/machine-learning/RL_DQN_Untrained'
 import RL_DQN_PreTrained from './agent/machine-learning/RL_DQN_PreTrained'
+import Tabular_Q_Learner from './agent/machine-learning/Tabular_Q_Learner'
 import html from './index.html'
 import GameRunner from './GameRunner'
 import SpeedIntervalSelectElement from './SpeedIntervalSelectElement'
 
 export const settings = {
     renderingEnabled: true,
-    speed: 250,
+    speed: 0,
     // renderingEnabled: true,
     // speed: 250,
-    ticksPerIntervalWhenNotRendering: 100,//100 is good for speed, 10 is good for precise "actions per second" readout
+    ticksPerIntervalWhenNotRendering: 100, //100000,//100 is good for speed, 10 is good for precise "actions per second" readout
     autoPlay: true,
 };
 
@@ -30,12 +31,13 @@ let renderer = new HtmlTableRenderer(document.getElementById('rendererContainer'
 let gameRunner = new GameRunner(renderer, handleGameRunnerStatusChange);
 
 let agents = {
+    'MachineLearning - Tabular_Q_Learner': Tabular_Q_Learner,
     'MachineLearning - RL_DQN_Untrained': RL_DQN_Untrained,
-    'MachineLearning - RL_DQN_PreTrained - ranked 192': RL_DQN_PreTrained,
-    'HandProgrammed - LookAheadDeep - ranked 234': LookAheadDeep,
-    'HandProgrammed - LookAheadWide - ranked 228': LookAheadWide,
-    'HandProgrammed - LookAheadOneMove - ranked 192': LookAheadOneMove,
-    'HandProgrammed - AlwaysMoveStraightDown - ranked 80': AlwaysMoveStraightDown,
+    'MachineLearning - RL_DQN_PreTrained - ranked 1192': RL_DQN_PreTrained,
+    // 'HandProgrammed - LookAheadDeep - ranked 1235': LookAheadDeep,
+    'HandProgrammed - LookAheadIn9x3Viewport - ranked 1241': LookAheadIn9x3Viewport,
+    'HandProgrammed - LookAheadIn5x2Viewport - ranked 1224': LookAheadIn5x2Viewport,
+    // 'HandProgrammed - AlwaysMoveStraightDown - ranked 1080': AlwaysMoveStraightDown,
 };
 for (agent in agents) {
     //Select the first agent in the list

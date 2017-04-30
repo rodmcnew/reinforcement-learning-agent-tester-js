@@ -1,8 +1,8 @@
 import {getActionViaFeelers} from './helper/feeler'
-import {config} from '../../environment'
+// import {config} from '../../environment'
 
 const feelerPaths = [];
-var lookToSideCount = Math.floor(config.viewPortSize[0] / 2);
+var lookToSideCount = 4;//Math.floor(config.viewPortSize[0] / 2);
 var leftPrepend = [];
 var rightPrepend = [];
 var append = ['s', 's'];
@@ -13,7 +13,7 @@ for (let sideWaysAmount = 1; sideWaysAmount <= lookToSideCount; sideWaysAmount++
     feelerPaths.push([...leftPrepend, ...append]);
     feelerPaths.push([...rightPrepend, ...append]);
 }
-export default class LookAheadWide {
+export default class LookAheadIn9x3Viewport {
     constructor() {
         this._state = {lastAction: null};
     }

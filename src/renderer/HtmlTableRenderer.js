@@ -1,6 +1,7 @@
 import './HtmlTableRenderer.css'
 import {getMatrixDimensions} from '../tensorTools'
 import {config as environmentConfig} from '../environment'
+import * as viewportConverstions from './viewportConversions'
 
 function generateTableHtml(size, tableClassName) {
     var html = '';
@@ -62,30 +63,8 @@ export default class HtmlTableRenderer {
      */
     render(agentObservation, godObservation) {
         //Render the agent view
-        var agentViewPortSize = [
-            agentObservation.tileTypes.length,
-            agentObservation.tileTypes[0].length
-        ];
-
-        var xLength = agentViewPortSize[0];
-        var yLength = agentViewPortSize[1];
-        for (var x = 0; x < xLength; x++) {
-            for (var y = 0; y < yLength; y++) {
-                var color = {r: 50, g: 50, b: 50};
-                // if (agentObservation.visibles[x][y] === 0) {
-                //     color = {r: 0, g: 0, b: 0};
-                // } else
-                if (x == agentObservation.position[0] && y == agentObservation.position[1] && agentObservation.tileTypes[x][y] !== 0) {
-                    color = {r: 255, g: 255, b: 0};
-                } else if (x == agentObservation.position[0] && y == agentObservation.position[1]) {
-                    color = {r: 0, g: 255, b: 0};
-                } else if (agentObservation.tileTypes[x][y] !== 0) {
-                    color = {r: 230, g: 0, b: 0};
-                }
-                this._agentTds[x][y].style
-                    .backgroundColor = 'rgb(' + color.r + ',' + color.g + ',' + color.b + ')';
-            }
-        }
+        // this._renderAgentViewport(agentObservation.tileTypes, agentObservation.position);
+        this._renderAgentViewport(viewportConverstions.convert9x9to5x2(agentObservation.tileTypes), [2, 0]);
 
         //Render the god view
         var xLength = environmentConfig.size[0];
@@ -112,4 +91,31 @@ export default class HtmlTableRenderer {
 
         this._previousPositions[godObservation.position[0]][godObservation.position[1]] = true;
     };
+
+    _renderAgentViewport(tileTypes, position) {
+        var agentViewPortSize = [
+            tileTypes.length,
+            tileTypes[0].length
+        ];
+
+        var xLength = agentViewPortSize[0];
+        var yLength = agentViewPortSize[1];
+        for (var x = 0; x < xLength; x++) {
+            for (var y = 0; y < yLength; y++) {
+                var color = {r: 50, g: 50, b: 50};
+                // if (visibles[x][y] === 0) {
+                //     color = {r: 0, g: 0, b: 0};
+                // } else
+                if (x == position[0] && y == position[1] && tileTypes[x][y] !== 0) {
+                    color = {r: 255, g: 255, b: 0};
+                } else if (x == position[0] && y == position[1]) {
+                    color = {r: 0, g: 255, b: 0};
+                } else if (tileTypes[x][y] !== 0) {
+                    color = {r: 230, g: 0, b: 0};
+                }
+                this._agentTds[x][y].style
+                    .backgroundColor = 'rgb(' + color.r + ',' + color.g + ',' + color.b + ')';
+            }
+        }
+    }
 }
