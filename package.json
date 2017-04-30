@@ -4,6 +4,9 @@
   "description": "",
   "main": "webpack.config.js",
   "dependencies": {
+    "chart.js": "^2.5.0",
+    "install": "^0.8.9",
+    "npm": "^4.5.0",
     "style-loader": "^0.16.1"
   },
   "devDependencies": {

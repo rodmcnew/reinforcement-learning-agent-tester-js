@@ -35,10 +35,14 @@
 }
 
 .InfectionGameHtmlTableRender .renderer-table-canvas-agent td {
-    height: 22px;
-    width: 22px;
+    height: 20px;
+    width: 20px;
 }
 
 #agentRendererContainer {
     margin-top: 1em;
+}
+
+#score{
+    margin-top: 0;
 }

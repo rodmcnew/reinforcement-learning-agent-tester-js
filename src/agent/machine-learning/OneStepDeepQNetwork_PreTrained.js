@@ -1,13 +1,15 @@
 import {matrixToVector} from '../../tensorTools'
 import RlDqn from './helper/deepQNetworkAdaptor'
 import {config} from '../../environment'
+import {data as savedNeuralNetwork} from '../../../data/neural-network-saves/view-port-9-9-0-2/best'
 const actions = ['w', 'a', 's', 'd'];
 
 const numberOfStates = config.viewPortSize[0] * config.viewPortSize[1];
 
-let rlDqn = new RlDqn(true, numberOfStates);
+let rlDqn = new RlDqn(true, numberOfStates, savedNeuralNetwork);
+let rlDqnHasBeenInitialized = false;
 
-export default class RL_DQN_Untrained {
+export default class OneStepDeepQNetwork_PreTrained {
     constructor() {
         this._lastScore = null;
         this._lastActionIndex = 2; //2='s'
@@ -25,7 +27,7 @@ export default class RL_DQN_Untrained {
         // state.push(this._lastActionIndex);
 
         let reward = null;
-        if (this._lastScore !== null) {
+        if (this._lastScore !== null && rlDqnHasBeenInitialized) {
             reward = observation.score - this._lastScore;
         }
 
@@ -35,6 +37,12 @@ export default class RL_DQN_Untrained {
 
         this._lastScore = observation.score;
         this._lastActionIndex = actionIndex;
+        rlDqnHasBeenInitialized = true;
         return action;
+    }
+
+    clearBrain() {
+        rlDqn = new RlDqn(true, numberOfStates);
+        rlDqnHasBeenInitialized = false;
     }
 }

@@ -8,7 +8,10 @@ const defaultStats = {
     actionCount: 0,
     actionsPerSecond: 0,
     lastSecondsActionCount: 0,
-    lastFinalScores: []
+    lastFinalScores: [],
+    gameCountToScore: [],
+    gameCountToAverageScore: [],
+    averageFinalScore: 0
 };
 
 export default class GameRunner {
@@ -26,6 +29,7 @@ export default class GameRunner {
         this.takeAction = this.takeAction.bind(this);
         this.tick = this.tick.bind(this);
         this.clearStats = this.clearStats.bind(this);
+        this.setRenderingEnabled = this.setRenderingEnabled.bind(this);
 
         setInterval(() => {//@TODO accomplish this without an interval
             this._stats.actionsPerSecond = this._stats.actionCount - this._stats.lastSecondsActionCount;
@@ -33,10 +37,10 @@ export default class GameRunner {
         }, 1000);
     }
 
-    newGame(agentClass, renderingEnabled) {
+    newGame(agentClass) {
         this._agentClass = agentClass;
         this._agent = new this._agentClass();
-        this._renderingEnabled = renderingEnabled;
+        // this._renderingEnabled = renderingEnabled;
         this._environment = new Environment();
         this._stats.currentScore = 0;//@TODO get from environment?
         if (this._renderingEnabled) {
@@ -49,36 +53,49 @@ export default class GameRunner {
         this._updateObservations();
     }
 
+    clearCurrentAgentBrain() {
+        this._agent.clearBrain();
+    }
+
     /**
      *
      * @param actionCode
      */
     takeAction(actionCode) {
+        var stats = this._stats;
         //Apply the action and get the next observation
         this._environment.applyAction(actionCode);
         this._updateObservations();
 
         if (this._godObservation.isComplete) {//@Find better way to communicate "isComplete"
             this._agent.getAction(this._agentObservation);//Ask for one more action so the agent can see the observation after its last action
-            this._stats.lastGameScore = this._agentObservation.score;
-            this._stats.lastFinalScores.push(this._agentObservation.score);
-            if (this._stats.lastFinalScores.length > 100) {
-                this._stats.lastFinalScores.shift();
+            stats.lastGameScore = this._agentObservation.score;
+            stats.lastFinalScores.push(this._agentObservation.score);
+            if (stats.lastFinalScores.length > 100) {
+                stats.lastFinalScores.shift();
             }
-            this._stats.scoreSum += this._agentObservation.score;
-            this._stats.gameCount += 1;
+            var totalScoreFinaleScore = stats.lastFinalScores.reduce((acc, val) => acc + val, 0);
+            stats.averageFinalScore = Math.floor(totalScoreFinaleScore / stats.lastFinalScores.length) || 0;
+            stats.scoreSum += this._agentObservation.score;
+            stats.gameCountToScore[stats.gameCount] = stats.lastGameScore;
+            stats.gameCountToAverageScore[stats.gameCount] = stats.averageFinalScore;
+            stats.gameCount += 1;
             this.newGame(this._agentClass, this._renderingEnabled);
         }
 
         if (this._renderingEnabled) {
             this._renderer.render(this._agentObservation, this._godObservation);
-            this._stats.currentScore = this._agentObservation.score;
-            this._onStatusChange(this._stats);
+            stats.currentScore = this._agentObservation.score;
+            this._onStatusChange(stats);
         }
 
-        this._stats.actionCount++;
+        stats.actionCount++;
 
         this._nextAction = this._agent.getAction(this._agentObservation);
+    }
+
+    setRenderingEnabled(renderingEnabled) {
+        this._renderingEnabled = renderingEnabled;
     }
 
     tick() {
@@ -88,6 +105,8 @@ export default class GameRunner {
     clearStats() {
         this._stats = Object.assign({}, defaultStats);
         this._stats.lastFinalScores = [];
+        this._stats.gameCountToScore = [];
+        this._stats.gameCountToAverageScore = [];
     }
 
     _updateObservations() {

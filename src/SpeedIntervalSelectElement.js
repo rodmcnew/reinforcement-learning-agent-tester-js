@@ -1,7 +1,7 @@
 import {settings} from './index'
 
 export default class SpeedIntervalSelectElement {
-    constructor(setupInterval, newGame, renderer) {
+    constructor(setupInterval, setRenderingEnabled, renderer) {
         let intervalSelectElement = document.getElementById('interval');
 
         //Display the default setting in the UI select box
@@ -26,7 +26,7 @@ export default class SpeedIntervalSelectElement {
             }
             if (newEnableRenderingValue != settings.renderingEnabled) {
                 settings.renderingEnabled = newEnableRenderingValue;
-                newGame();
+                setRenderingEnabled(settings.renderingEnabled);
             }
             setupInterval();
         });

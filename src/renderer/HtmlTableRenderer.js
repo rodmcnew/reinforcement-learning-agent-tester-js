@@ -63,8 +63,9 @@ export default class HtmlTableRenderer {
      */
     render(agentObservation, godObservation) {
         //Render the agent view
-        // this._renderAgentViewport(agentObservation.tileTypes, agentObservation.position);
-        this._renderAgentViewport(viewportConverstions.convert9x9to5x2(agentObservation.tileTypes), [2, 0]);
+        this._renderAgentViewport(agentObservation.tileTypes, agentObservation.position);
+        // this._renderAgentViewport(viewportConverstions.convert9x9to5x2(agentObservation.tileTypes), [2, 0]);
+        // this._renderAgentViewport(viewportConverstions.convert9x9to3x2(agentObservation.tileTypes), [1, 0]);
 
         //Render the god view
         var xLength = environmentConfig.size[0];

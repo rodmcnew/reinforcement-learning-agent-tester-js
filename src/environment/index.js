@@ -13,7 +13,7 @@ export const config = {
 
     verticalDeltaScore: 10,//was 10
     tileValueMap: [-1, -20],
-    pointsForCompletion: 1000
+    pointsForCompletion: 0
 };
 
 /**

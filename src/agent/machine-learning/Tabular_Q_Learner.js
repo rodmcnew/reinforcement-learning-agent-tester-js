@@ -126,6 +126,7 @@ export class Tabular_Q_Learner {
 
 
 var tabularQLearner = new Tabular_Q_Learner(4);
+var tabularQLearnerHasBeenInititalized = false;
 export default class Tabular_Q_Learner_Adaptor {
     constructor() {
         this._lastScore = null;
@@ -133,7 +134,7 @@ export default class Tabular_Q_Learner_Adaptor {
 
     _observationToKey(observation) {
         return arrayOfBinariesToInt(matrixToVector(
-            viewportConversions.convert9x9to5x2(observation.tileTypes)
+            viewportConversions.convert9x9to3x2(observation.tileTypes)
         ));
     }
 
@@ -145,12 +146,22 @@ export default class Tabular_Q_Learner_Adaptor {
     getAction(observation) {
         let reward = null;
 
-        if (this._lastScore !== null) {
+        if (this._lastScore !== null && tabularQLearnerHasBeenInititalized) {
             reward = observation.score - this._lastScore;
         }
         this._lastScore = observation.score;
         const observationKey = this._observationToKey(observation);
+        tabularQLearnerHasBeenInititalized = true;
         return actions[tabularQLearner.getAction(reward, observationKey)];
+    }
+
+    newGame() {
+
+    }
+
+    clearBrain() {
+        tabularQLearner = new Tabular_Q_Learner(4);
+        tabularQLearnerHasBeenInititalized = false;
     }
 }
 
