@@ -3,7 +3,7 @@ import HtmlTableRenderer from './renderer/HtmlTableRenderer'
 import LookAheadIn9x3Viewport from './agent/hand-programmed/LookAheadIn9x3Viewport'
 import LookAheadIn3x2Viewport from './agent/hand-programmed/LookAheadIn3x2Viewport'
 // import LookAheadDeep from './agent/hand-programmed/LookAheadDeep'
-// import AlwaysMoveStraightDown from './agent/hand-programmed/AlwaysMoveStraightDown'
+import AlwaysMoveStraightDown from './agent/hand-programmed/AlwaysMoveStraightDown'
 import LookAheadIn5x2Viewport from './agent/hand-programmed/LookAheadIn5x2Viewport'
 import DeepQNetwork_OneStep from './agent/machine-learning/DeepQNetwork_OneStep'
 import Tabular_Q_Learner from './agent/machine-learning/Tabular_Q_Learner'
@@ -56,8 +56,8 @@ let learningChart = new Chart(ctx, {
             yAxes: [{
                 ticks: {
                     // beginAtZero: true
-                    min:0,
-                    max:300
+                    min: 200,
+                    max: 300
                 }
             }],
             xAxes: [{
@@ -89,13 +89,13 @@ let renderer = new HtmlTableRenderer(document.getElementById('rendererContainer'
 let gameRunner = new GameRunner(renderer, handleGameRunnerStatusChange);
 
 let agents = {
-    'MachineLearning - Tabular_Q_Learner - NotPreTrained': Tabular_Q_Learner,
-    'MachineLearning - DeepQNetwork_OneStep - PreTrained - ranked 192': DeepQNetwork_OneStep,
-    'HandProgrammed - LookAheadIn9x3Viewport - ranked 241': LookAheadIn9x3Viewport,
-    'HandProgrammed - LookAheadIn5x2Viewport - ranked 224': LookAheadIn5x2Viewport,
-    'HandProgrammed - LookAheadIn3x2Viewport - ranked 208': LookAheadIn3x2Viewport,
+    'MachineLearning - Tabular_Q_Learner - UnTrained - ranked 212': Tabular_Q_Learner,
+    'MachineLearning - DeepQNetwork_OneStep - PreTrained - ranked 250': DeepQNetwork_OneStep,
+    'HandProgrammed - LookAheadIn9x3Viewport - ranked 291': LookAheadIn9x3Viewport,
+    'HandProgrammed - LookAheadIn5x2Viewport - ranked 280': LookAheadIn5x2Viewport,
+    'HandProgrammed - LookAheadIn3x2Viewport - ranked 274': LookAheadIn3x2Viewport,
     // 'HandProgrammed - LookAheadDeep - ranked 235': LookAheadDeep,
-    // 'HandProgrammed - AlwaysMoveStraightDown - ranked 80': AlwaysMoveStraightDown,
+    'HandProgrammed - AlwaysMoveStraightDown - ranked 219': AlwaysMoveStraightDown,
 };
 for (agent in agents) {
     //Select the first agent in the list
@@ -106,14 +106,14 @@ for (agent in agents) {
 let gameCountToScore = [];
 
 function handleGameRunnerStatusChange(stats) {
-
     scoreElement.innerHTML =
         // 'Agent: ' + currentAgentName +
         '\nCurrent Score: ' + stats.currentScore +
         '\nLast Game Final Score: ' + stats.lastGameScore +
         '\nActions per second: ' + stats.actionsPerSecond +
         '\nAvg Final Moving Average: ' + stats.averageFinalScore +
-        '\nFinal Score Average: ' + Math.floor(stats.scoreSum / stats.gameCount) +
+        '\nFinal Score Average: ' + (Math.floor(stats.scoreSum / stats.gameCount) || 0) +
+        '\nAverage Reward: ' + (stats.totalReward / stats.actionCount).toFixed(2) +
         '\nGame Count: ' + stats.gameCount;
 
     // if (stats.gameCount < chartGameCount) {

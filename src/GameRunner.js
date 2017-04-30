@@ -11,7 +11,10 @@ const defaultStats = {
     lastFinalScores: [],
     gameCountToScore: [],
     gameCountToAverageScore: [],
-    averageFinalScore: 0
+    averageFinalScore: 0,
+    rewards: [],
+    lastActionScore: 0,
+    totalReward: 0,
 };
 
 export default class GameRunner {
@@ -90,6 +93,10 @@ export default class GameRunner {
         }
 
         stats.actionCount++;
+        var reward = this._agentObservation.score - stats.lastActionScore;
+        stats.lastActionScore = this._agentObservation.score;
+        stats.totalReward += reward;
+        stats.rewards.push(reward);
 
         this._nextAction = this._agent.getAction(this._agentObservation);
     }
@@ -107,6 +114,7 @@ export default class GameRunner {
         this._stats.lastFinalScores = [];
         this._stats.gameCountToScore = [];
         this._stats.gameCountToAverageScore = [];
+        this._stats.rewards = [];
     }
 
     _updateObservations() {

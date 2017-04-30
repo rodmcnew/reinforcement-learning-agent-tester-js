@@ -53,7 +53,6 @@ Predicted expected reward from each action:
         <div style="overflow: auto"><div style="float: left">good&nbsp;</div> <div id="good" style="background-color: greenyellow"></div></div>
     <div style="overflow: auto"><div style="float: left">bad&nbsp;</div> <div id="bad" style="background-color: orangered"></div></div>
 <br />
-<!-- <button id="dump-agent-internal-data">Dump Agent Internal Data</button> -->
 </div>`;
     actionElements = [
         document.getElementById('action0'),
@@ -67,22 +66,6 @@ Predicted expected reward from each action:
         document.getElementById('good'),
         document.getElementById('bad'),
     ];
-
-    // document.getElementById('dump-agent-internal-data').addEventListener('click', () => {//@TODO randomly bump again or make generic save button
-    //     if (!document.getElementById('q-learning-data')) {
-    //         let div = document.createElement('div');
-    //         let label = document.createElement('div');
-    //         label.innerHTML = '<br/>Agent Brain Dump:';
-    //         let textArea = document.createElement("TEXTAREA");
-    //         textArea.style.width = '100%';
-    //         textArea.style.height = '10em';
-    //         textArea.setAttribute('id', 'q-learning-data');
-    //         div.appendChild(label);
-    //         div.appendChild(textArea);
-    //         document.body.appendChild(div);
-    //     }
-    //     document.getElementById('q-learning-data').innerHTML = JSON.stringify(currentNeuralNetwork.toJSON());
-    // });
 }
 
 export function renderActionResponse(actionResponse) {//@TODO move out
@@ -138,6 +121,8 @@ export function renderReward(reward) {//@TODO move out
     rewardElements[1].innerHTML = bad;
 }
 
+var dumpCounter = 0;
+
 export default class RlDqn {
     constructor(learningEnabled, numberOfStates, previousSavedData) {
         var numberOfActions = 4;
@@ -171,6 +156,25 @@ export default class RlDqn {
             if (reward !== null) {
                 renderReward(reward)
             }
+        }
+
+        //Dump the agent brain state every so often so it can be saved //@TODO only do this upon request
+        dumpCounter++;
+        if (dumpCounter === 10000) {
+            dumpCounter = 0;
+            if (!document.getElementById('q-learning-data')) {
+                let div = document.createElement('div');
+                let label = document.createElement('div');
+                label.innerHTML = '<br/>Agent Brain Dump:';
+                let textArea = document.createElement("TEXTAREA");
+                textArea.style.width = '100%';
+                textArea.style.height = '10em';
+                textArea.setAttribute('id', 'q-learning-data');
+                div.appendChild(label);
+                div.appendChild(textArea);
+                document.body.appendChild(div);
+            }
+            document.getElementById('q-learning-data').innerHTML = JSON.stringify(currentNeuralNetwork.toJSON());
         }
 
         return action;
