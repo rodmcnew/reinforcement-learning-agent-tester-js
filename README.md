@@ -1,3 +1,3 @@
-This is a game where agents compete cross an infected zone with the most health remaining.
+The contains a path finding game and a few different machine-learning agents that attempt to play the game. All written in ES6.
 
-Try the demo at http://rodmcnew.github.io/easy-way-game-for-intelligent-agents/dist/
+Try the demo at http://rodmcnew.github.io/js-path-finding-machine-learning-experiment/dist/
