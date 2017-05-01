@@ -2,13 +2,14 @@ import {renderActionResponse, renderReward} from './helper/deepQNetworkAdaptor'
 import * as viewportConversions from '../../renderer/viewportConversions'
 import {matrixToVector} from '../../tensorTools'
 import {settings} from '../../index' //@TODO use DI instead for this
+import {data as savedBrain} from '../../../data/saves/tabular-q'
 
 const actions = ['w', 'a', 's', 'd'];
 
 export function getIndexOfMaxValue(array) {
     var maxValue = array[0];
     var maxIndex = 0;
-    for (var i = 1, length = array.length; i < length; i++) {
+    for (var i = 1, length = 4 /*array.length*/; i < length; i++) {//@TODO unhardcode 4 (fix save to save as array instead of object)
         var v = array[i];
         if (v > maxValue) {
             maxIndex = i;
@@ -39,20 +40,40 @@ export function arrayOfBinariesToInt(vector) {
 export class Tabular_Q_Learner {
     constructor(possibleActionCount) {
         var defaultOptions = {
-            discountFactor: 0.90,
-            randomActionProbability: 0.1,
-            learningRate: 0.1,
+            discountFactor: 0.75,
+            randomActionProbability: 0.05,
+            learningRate: 0.5,
+            replaysPerAction: 0,
             // tdErrorClamp: 1.0,
         };
+
+        this._replayMemory = [];//@TODO trim this, don't store all
 
         this._possibleActionCount = possibleActionCount;
         this._options = Object.assign(defaultOptions/*, options*/);
 
         this._lastScore = null;
 
-        this._q = [];//new Array(Math.pow(2, 5 * 3));//@TODO allow state count as arg for higher performance?
+        this._q = savedBrain; //[];//new Array(Math.pow(2, 5 * 3));//@TODO allow state count as arg for higher performance?
 
         this.lastStep = {};
+    }
+
+    _learnFromStep(state, action, reward, nextState) {
+        var adjustment = 0;
+        var qValues = this._q[state];
+        var nextQValues = this._q[nextState];
+        var maxNextQValue = getIndexOfMaxValue(nextQValues);
+        var learnedValue = reward + this._options.discountFactor * maxNextQValue;
+        var tdError = learnedValue - qValues[action];
+        // if (tdError > this._options.tdErrorClamp) {
+        //     tdError = this._options.tdErrorClamp;
+        // }
+        // if (tdError < -this._options.tdErrorClamp) {
+        //     tdError = -this._options.tdErrorClamp;
+        // }
+        var adjustment = this._options.learningRate * tdError;
+        qValues[action] += adjustment;
     }
 
     /**
@@ -69,20 +90,26 @@ export class Tabular_Q_Learner {
     getAction(lastReward, state) {
         if (!this._q[state]) {
             this._q[state] = new Float64Array(this._possibleActionCount);
-            for (var i = 0; i < this._possibleActionCount; i++) {
-                this._q[state][i] = Math.random();//@TODO use gaussian distribution?
-            }
+            // for (var i = 0; i < this._possibleActionCount; i++) {
+            //     this._q[state][i] = Math.random();//@TODO use gaussian distribution?
+            // }
         }
 
         var currentQ = this._q[state];
         var currentMaxQ = getIndexOfMaxValue(currentQ);
 
-        let adjustment = 0;
         if (lastReward !== null) {
-            var lastQ = this._q[this.lastStep.state];
-            const learnedValue = lastReward + this._options.discountFactor * currentMaxQ;
-            adjustment = this._options.learningRate * (learnedValue - lastQ[this.lastStep.action]);
-            lastQ[this.lastStep.action] += adjustment;
+            this._learnFromStep(this.lastStep.state, this.lastStep.action, lastReward, state);
+
+            var replayMemoryLength = this._replayMemory.length;
+            if (replayMemoryLength > this._options.replaysPerAction) {
+                for (var i = 0; i < this._options.replaysPerAction; i++) {
+                    var replay = this._replayMemory[getRandomIntWithZeroMin(replayMemoryLength)];
+                    this._learnFromStep(replay[0], replay[1], replay[2], replay[3]);
+                }
+            }
+
+            this._replayMemory.push([this.lastStep.state, this.lastStep.action, lastReward, state]);
         }
 
         var action = currentMaxQ;
@@ -134,7 +161,7 @@ export default class Tabular_Q_Learner_Adaptor {
 
     _observationToKey(observation) {
         return arrayOfBinariesToInt(matrixToVector(
-            viewportConversions.convert9x9to3x2(observation.tileTypes)
+            viewportConversions.convert9x9to5x3(observation.tileTypes)
         ));
     }
 
@@ -162,6 +189,10 @@ export default class Tabular_Q_Learner_Adaptor {
     clearBrain() {
         tabularQLearner = new Tabular_Q_Learner(4);
         tabularQLearnerHasBeenInititalized = false;
+    }
+
+    getBrain() {
+        return JSON.stringify(tabularQLearner._q);
     }
 }
 

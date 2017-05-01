@@ -14,10 +14,10 @@ import Chart from 'chart.js'
 let chartGameCount = 200;
 
 export const settings = {
+    // renderingEnabled: false,
+    // speed: 0,
     renderingEnabled: true,
-    speed: 0,
-    // renderingEnabled: true,
-    // speed: 250,
+    speed: 250,
     ticksPerIntervalWhenNotRendering: 100, //100000,//100 is good for speed, 10 is good for precise "actions per second" readout
     autoPlay: true,
 };
@@ -56,8 +56,8 @@ let learningChart = new Chart(ctx, {
             yAxes: [{
                 ticks: {
                     // beginAtZero: true
-                    min: 200,
-                    max: 300
+                    min: 0,
+                    max: 100
                 }
             }],
             xAxes: [{
@@ -89,13 +89,13 @@ let renderer = new HtmlTableRenderer(document.getElementById('rendererContainer'
 let gameRunner = new GameRunner(renderer, handleGameRunnerStatusChange);
 
 let agents = {
-    'MachineLearning - Tabular_Q_Learner - UnTrained - ranked 212': Tabular_Q_Learner,
-    'MachineLearning - DeepQNetwork_OneStep - PreTrained - ranked 250': DeepQNetwork_OneStep,
-    'HandProgrammed - LookAheadIn9x3Viewport - ranked 291': LookAheadIn9x3Viewport,
-    'HandProgrammed - LookAheadIn5x2Viewport - ranked 280': LookAheadIn5x2Viewport,
-    'HandProgrammed - LookAheadIn3x2Viewport - ranked 274': LookAheadIn3x2Viewport,
+    'MachineLearning - Tabular_Q_Learner - UnTrained - ranked 73': Tabular_Q_Learner,
+    'MachineLearning - DeepQNetwork_OneStep - PreTrained - ranked 80': DeepQNetwork_OneStep,
+    'HandProgrammed - LookAheadIn9x3Viewport - ranked 87': LookAheadIn9x3Viewport,
+    'HandProgrammed - LookAheadIn5x2Viewport - ranked 81': LookAheadIn5x2Viewport,
+    'HandProgrammed - LookAheadIn3x2Viewport - ranked 74': LookAheadIn3x2Viewport,
+    'HandProgrammed - AlwaysMoveStraightDown - ranked 0': AlwaysMoveStraightDown,
     // 'HandProgrammed - LookAheadDeep - ranked 235': LookAheadDeep,
-    'HandProgrammed - AlwaysMoveStraightDown - ranked 219': AlwaysMoveStraightDown,
 };
 for (agent in agents) {
     //Select the first agent in the list
@@ -105,28 +105,59 @@ for (agent in agents) {
 
 let gameCountToScore = [];
 
+var maxAverage = 0;
+
+var lastStatusRenderTime = 0;
+var lastStatusChartRenderTime = 0;
 function handleGameRunnerStatusChange(stats) {
-    scoreElement.innerHTML =
-        // 'Agent: ' + currentAgentName +
-        '\nCurrent Score: ' + stats.currentScore +
-        '\nLast Game Final Score: ' + stats.lastGameScore +
-        '\nActions per second: ' + stats.actionsPerSecond +
-        '\nAvg Final Moving Average: ' + stats.averageFinalScore +
-        '\nFinal Score Average: ' + (Math.floor(stats.scoreSum / stats.gameCount) || 0) +
-        '\nAverage Reward: ' + (stats.totalReward / stats.actionCount).toFixed(2) +
-        '\nGame Count: ' + stats.gameCount;
+    var nowMilliseconds = (new Date).getTime();
+    if (nowMilliseconds > lastStatusRenderTime + 250) {//Refuse to render status html faster than 4fps
+        lastStatusRenderTime = nowMilliseconds;
+        scoreElement.innerHTML =
+            // 'Agent: ' + currentAgentName +
+            '\nCurrent Score: ' + stats.currentScore +
+            '\nLast Game Final Score: ' + stats.lastGameScore +
+            '\nActions per second: ' + stats.actionsPerSecond +
+            '\nAvg Final Moving Average: ' + stats.averageFinalScore +
+            '\nFinal Score Average: ' + (Math.floor(stats.scoreSum / stats.gameCount) || 0) +
+            '\nAverage Reward: ' + (stats.totalReward / stats.actionCount).toFixed(2) +
+            '\nGame Count: ' + stats.gameCount;
+    }
+
+    if (nowMilliseconds > lastStatusChartRenderTime + 50) {//Refuse to render status chart faster than 20fps
+        lastStatusChartRenderTime = nowMilliseconds;
+        learningChart.data.datasets[0].data = stats.gameCountToAverageScore.slice(-1 * chartGameCount);
+        learningChart.data.datasets[1].data = stats.gameCountToScore.slice(-1 * chartGameCount);
+        learningChart.data.labels = Object.keys(stats.gameCountToScore).slice(-1 * chartGameCount);
+        for (var i = 0, len = learningChart.data.labels.length; i < len; i++) {
+            if (i % 10 != 0) {
+                learningChart.data.labels[i] = '';
+            }
+        }
+        learningChart.update();
+    }
+    // }
+    // if(stats.gameCount>200){
+    //     gameRunner.clearCurrentAgentBrain();
+    //     clearStatsAndNewGame();
+    // }
+
+    // if (stats.averageFinalScore < maxAverage - 5 || stats.gameCount > 3000) {
+    //     maxAverage = 0;
+    //     gameRunner.clearCurrentAgentBrain();
+    //     clearStatsAndNewGame();
+    // }
+    // if (stats.averageFinalScore > maxAverage) {
+    //     maxAverage = stats.averageFinalScore;
+    // }
+    //
+    // if (stats.averageFinalScore > 128) {
+    //     settings.renderingEnabled = true;
+    //     clearInterval(intervalReference);
+    //     document.body.innerHTML = gameRunner.getCurrentAgentInstance().getBrain();
+    // }
 
     // if (stats.gameCount < chartGameCount) {
-    learningChart.data.datasets[0].data = stats.gameCountToAverageScore.slice(-1 * chartGameCount);
-    learningChart.data.datasets[1].data = stats.gameCountToScore.slice(-1 * chartGameCount);
-    learningChart.data.labels = Object.keys(stats.gameCountToScore).slice(-1 * chartGameCount);
-    for (var i = 0, len = learningChart.data.labels.length; i < len; i++) {
-        if (i % 10 != 0) {
-            learningChart.data.labels[i] = '';
-        }
-    }
-    learningChart.update();
-    // }
 }
 
 let agentSelectorElement = document.getElementById('agentSelector');

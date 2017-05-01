@@ -28,7 +28,8 @@ function generateRandomTileTypes(size) {
     for (var xi = 0; xi < xLen; xi++) {
         tileTypes[xi] = new Array(yLen);
         for (var yi = 0; yi < size[1]; yi++) {
-            tileTypes[xi][yi] = Math.random() < 0.7 ? 0 : 1;
+            // tileTypes[xi][yi] = Math.random() < 0.7 ? 0 : 1;
+            tileTypes[xi][yi] = Math.random() < 0.2 ? 1 : 0;
         }
     }
     return tileTypes;

@@ -21,11 +21,12 @@ export const html = `
 <div id="agentRendererContainer"></div>
 <pre>
 Game Rules:
-` + (environmentConfig.pointsForCompletion !== 0 ? `- Gain ` + environmentConfig.pointsForCompletion + ` points for getting to the bottom row` : '') + `
 - Gain ` + environmentConfig.verticalDeltaScore + ` points for every row lower you go
 - Loose ` + environmentConfig.verticalDeltaScore + ` points for every row higher you go
 - Loose ` + -environmentConfig.tileValueMap[1] + ` points when moving into a red square
-` + (environmentConfig.tileValueMap[0] !== 0 ? `- Loose ` + -environmentConfig.tileValueMap[0] + ` points when moving into a grey square` : '') + `
 </pre>`;
+// ` + (environmentConfig.pointsForCompletion !== 0 ? `- Gain ` + environmentConfig.pointsForCompletion + ` points for getting to the bottom row` : '') + `
+// ` + (environmentConfig.tileValueMap[0] !== 0 ? `- Loose ` + -environmentConfig.tileValueMap[0] + ` points when moving into a grey square` : '') + `
+
 
 document.body.innerHTML = html;

@@ -57,7 +57,9 @@ export default class GameRunner {
     }
 
     clearCurrentAgentBrain() {
-        this._agent.clearBrain();
+        if (this._agent.clearBrain) {
+            this._agent.clearBrain();
+        }
     }
 
     /**
@@ -103,6 +105,10 @@ export default class GameRunner {
 
     setRenderingEnabled(renderingEnabled) {
         this._renderingEnabled = renderingEnabled;
+    }
+
+    getCurrentAgentInstance() {
+        return this._agent;
     }
 
     tick() {

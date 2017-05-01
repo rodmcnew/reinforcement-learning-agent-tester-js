@@ -11,8 +11,8 @@ export const config = {
     viewPortSize: [9, 9],
     viewPortOffset: [0, 2],
 
-    verticalDeltaScore: 10,
-    tileValueMap: [0, -9],
+    verticalDeltaScore: 3,
+    tileValueMap: [0, -15],
     pointsForCompletion: 0
 };
 

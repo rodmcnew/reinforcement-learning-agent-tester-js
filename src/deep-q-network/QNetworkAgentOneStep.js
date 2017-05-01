@@ -5,7 +5,7 @@ export default class Agent {
     constructor(numberOfStates, maxNumberOfActions, neuralNetwork, options) {
         var defaultOptions = {
             discountFactor: 0.75, //was .075, future reward discount factor
-            randomActionProbability: 0.1,// for epsilon-greedy policy
+            randomActionProbability: 0.05,// for epsilon-greedy policy
             learningRate: 0.01,//was 0.01, value function learning rate
             experienceRecordInterval: 25,// number of time steps before we add another experience to replay memory
             experienceSize: 5000,// size of experience replay
