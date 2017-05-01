@@ -4832,7 +4832,7 @@ let learningChart = new __WEBPACK_IMPORTED_MODULE_11_chart_js___default.a(ctx, {
         labels: [],
         datasets: [
             {
-                label: 'Average Score',
+                label: 'Average Final Score',
                 data: [],
                 backgroundColor: 'transparent',
                 borderColor: 'blue',
@@ -4840,7 +4840,7 @@ let learningChart = new __WEBPACK_IMPORTED_MODULE_11_chart_js___default.a(ctx, {
                 lineTension: 0
             },
             {
-                label: 'Score',
+                label: 'Final Score',
                 data: [],
                 backgroundColor: 'transparent',
                 borderColor: 'lightgrey',
@@ -4853,28 +4853,15 @@ let learningChart = new __WEBPACK_IMPORTED_MODULE_11_chart_js___default.a(ctx, {
         animation: {
             duration: 0
         },
-        // maintainAspectRatio: false,
         elements: {point: {radius: 0}},
         scales: {
             yAxes: [{
                 ticks: {
-                    // beginAtZero: true
                     min: 0,
                     max: 100
                 }
             }],
             xAxes: [{
-                // afterTickToLabelConversion: function (data) {
-                //
-                //
-                //     var xLabels = data.ticks;
-                //
-                //     xLabels.forEach(function (labels, i) {
-                //         if (i % (chartGameCount / 10) !== 0) {
-                //             xLabels[i] = null;
-                //         }
-                //     });
-                // },
                 display: false
             }]
         }
@@ -4921,13 +4908,25 @@ function handleGameRunnerStatusChange(stats) {
             '\nCurrent Score: ' + stats.currentScore +
             '\nLast Game Final Score: ' + stats.lastGameScore +
             '\nActions per second: ' + stats.actionsPerSecond +
-            '\nAvg Final Moving Average: ' + stats.averageFinalScore +
-            '\nFinal Score Average: ' + (Math.floor(stats.scoreSum / stats.gameCount) || 0) +
-            '\nAverage Reward: ' + (stats.totalReward / stats.actionCount).toFixed(2) +
+            '\nFinal Score Moving Average: ' + stats.averageFinalScore +
+            // '\nFinal Score Average: ' + (Math.floor(stats.scoreSum / stats.gameCount) || 0) +
+            // '\nAverage Reward: ' + (stats.totalReward / stats.actionCount).toFixed(2) +
             '\nGame Count: ' + stats.gameCount;
     }
 
     if (nowMilliseconds > lastStatusChartRenderTime + 50) {//Refuse to render status chart faster than 20fps
+
+        if (settings.renderingEnabled) {//@TODO mode this somewhere else and do with less getElementById() calls
+            document.getElementById('learningChart').style.display = 'none';
+            document.getElementById('rendererContainer').style.display = 'block';
+            document.getElementById('agentRendererContainer').style.display = 'block';
+            return;
+        } else {
+            document.getElementById('learningChart').style.display = 'block';
+            document.getElementById('rendererContainer').style.display = 'none';
+            document.getElementById('agentRendererContainer').style.display = 'none';
+        }
+
         lastStatusChartRenderTime = nowMilliseconds;
         learningChart.data.datasets[0].data = stats.gameCountToAverageScore.slice(-1 * chartGameCount);
         learningChart.data.datasets[1].data = stats.gameCountToScore.slice(-1 * chartGameCount);
@@ -5008,6 +5007,33 @@ function clearStatsAndNewGame() {
 document.getElementById('clearBrainButton').addEventListener('click', ()=> {
     gameRunner.clearCurrentAgentBrain();
     clearStatsAndNewGame();
+});
+
+document.getElementById('exportAgentBrain').addEventListener('click', ()=> {
+    if (!gameRunner.getCurrentAgentInstance().exportBrain) {
+        alert('Current agent has no exportBrain() function.');
+        return;
+    }
+
+    if (!document.getElementById('q-learning-data')) {
+        let div = document.createElement('div');
+        let label = document.createElement('div');
+        label.innerHTML = '<br/>Exported Agent Brain Data:';
+        let textArea = document.createElement("TEXTAREA");
+        textArea.style.width = '100%';
+        textArea.style.height = '10em';
+        textArea.setAttribute('id', 'q-learning-data');
+        div.appendChild(label);
+        div.appendChild(textArea);
+        document.body.appendChild(div);
+    }
+    var textAreaElement = document.getElementById('q-learning-data');
+    textAreaElement.innerHTML =
+        'export const data = JSON.parse(\'' +
+        JSON.stringify(gameRunner.getCurrentAgentInstance().exportBrain()) +
+        '\');';
+
+    textAreaElement.focus();
 });
 
 clearStatsAndNewGame();
@@ -16728,8 +16754,6 @@ function renderReward(reward) {//@TODO move out
     rewardElements[1].innerHTML = bad;
 }
 
-var dumpCounter = 0;
-
 class RlDqn {
     constructor(learningEnabled, numberOfStates, previousSavedData) {
         var numberOfActions = 4;
@@ -16765,26 +16789,11 @@ class RlDqn {
             }
         }
 
-        //Dump the agent brain state every so often so it can be saved //@TODO only do this upon request
-        dumpCounter++;
-        if (dumpCounter === 10000) {
-            dumpCounter = 0;
-            if (!document.getElementById('q-learning-data')) {
-                let div = document.createElement('div');
-                let label = document.createElement('div');
-                label.innerHTML = '<br/>Agent Brain Dump:';
-                let textArea = document.createElement("TEXTAREA");
-                textArea.style.width = '100%';
-                textArea.style.height = '10em';
-                textArea.setAttribute('id', 'q-learning-data');
-                div.appendChild(label);
-                div.appendChild(textArea);
-                document.body.appendChild(div);
-            }
-            document.getElementById('q-learning-data').innerHTML = JSON.stringify(currentNeuralNetwork.toJSON());
-        }
-
         return action;
+    }
+
+    exportBrain() {
+        return this._neuralNetwork.toJSON();
     }
 }
 /* harmony export (immutable) */ __webpack_exports__["a"] = RlDqn;
@@ -17310,6 +17319,10 @@ class DeepQNetwork_OneStep {
         rlDqn = new __WEBPACK_IMPORTED_MODULE_1__helper_deepQNetworkAdaptor__["a" /* default */](true, numberOfStates);
         rlDqnHasBeenInitialized = false;
     }
+
+    exportBrain(){
+        return rlDqn.exportBrain();
+    }
 }
 /* harmony export (immutable) */ __webpack_exports__["a"] = DeepQNetwork_OneStep;
 
@@ -17387,14 +17400,20 @@ class Tabular_Q_Learner {
 
         this._q = []; //[];//new Array(Math.pow(2, 5 * 3));//@TODO allow state count as arg for higher performance?
 
+        this.lastStep = {};
+    }
+
+    fromJson(json) {
         //Saved brains are currently saving as objects instead of arrays so fix this. //@TODO save properly instead
-        __WEBPACK_IMPORTED_MODULE_4__data_saves_tabular_q__["a" /* data */].forEach((val, i)=> {
-            if(val){
+        json.forEach((val, i)=> {
+            if (val) {
                 this._q[i] = Object.keys(val).map(key => val[key]);//@TODO make Float64Arrays again when loading a save
             }
         });
+    }
 
-        this.lastStep = {};
+    toJson() {
+        return this._q;
     }
 
     _learnFromStep(state, action, reward, nextState) {
@@ -17467,22 +17486,6 @@ class Tabular_Q_Learner {
             renderQTableSize(Object.keys(this._q).length);
             // renderObservationKey(state);
             // renderAdjustmentValue(adjustment.toFixed(2));
-
-            if (Math.random() < .001) {
-                if (!document.getElementById('q-learning-data')) {
-                    let div = document.createElement('div');
-                    let label = document.createElement('div');
-                    label.innerHTML = '<br/>Agent Brain Dump:';
-                    let textArea = document.createElement("TEXTAREA");
-                    textArea.style.width = '100%';
-                    textArea.style.height = '10em';
-                    textArea.setAttribute('id', 'q-learning-data');
-                    div.appendChild(label);
-                    div.appendChild(textArea);
-                    document.body.appendChild(div);
-                }
-                document.getElementById('q-learning-data').innerHTML = JSON.stringify(this._q);
-            }
         }
 
         return action;
@@ -17493,6 +17496,7 @@ class Tabular_Q_Learner {
 
 
 var tabularQLearner = new Tabular_Q_Learner(4);
+tabularQLearner.fromJson(__WEBPACK_IMPORTED_MODULE_4__data_saves_tabular_q__["a" /* data */]);
 var tabularQLearnerHasBeenInititalized = false;
 class Tabular_Q_Learner_Adaptor {
     constructor() {
@@ -17531,8 +17535,8 @@ class Tabular_Q_Learner_Adaptor {
         tabularQLearnerHasBeenInititalized = false;
     }
 
-    getBrain() {
-        return JSON.stringify(tabularQLearner._q);
+    exportBrain() {
+        return tabularQLearner.toJson();
     }
 }
 /* harmony export (immutable) */ __webpack_exports__["a"] = Tabular_Q_Learner_Adaptor;
@@ -17593,10 +17597,10 @@ const html = `
 <div id="info">Agent: <select id="agentSelector"></select>&nbsp;<button id="clearBrainButton">Clear Brain and Retrain</button>
 <br>Speed: <select id="interval">
 <option value="no-render">Ludicrous Speed (no rendering)</option>
-<option value="0">Light Speed</option>
-<option value="100">Fast (10 actions per second)</option>
-<option value="250">Medium (4 actions per second)</option>
-<option value="500">Slow (2 actions per second)</option>
+<option value="0">Very Fast</option>
+<option value="100">Fast</option>
+<option value="250">Medium</option>
+<option value="500">Slow</option>
 <!--<option value="1000">Slow - 1000ms</option>-->
 <option value="paused">Paused</option>
 </select>
@@ -17609,10 +17613,11 @@ const html = `
 <div id="agentRendererContainer"></div>
 <pre>
 Game Rules:
+- Get to the bottom row to finish the game
 - Gain ` + __WEBPACK_IMPORTED_MODULE_0__environment__["a" /* config */].verticalDeltaScore + ` points for every row lower you go
 - Loose ` + __WEBPACK_IMPORTED_MODULE_0__environment__["a" /* config */].verticalDeltaScore + ` points for every row higher you go
 - Loose ` + -__WEBPACK_IMPORTED_MODULE_0__environment__["a" /* config */].tileValueMap[1] + ` points when moving into a red square
-</pre>`;
+</pre><button id="exportAgentBrain">Export Agent Brain</button>`;
 /* unused harmony export html */
 
 // ` + (environmentConfig.pointsForCompletion !== 0 ? `- Gain ` + environmentConfig.pointsForCompletion + ` points for getting to the bottom row` : '') + `
