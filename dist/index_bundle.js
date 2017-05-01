@@ -4893,12 +4893,9 @@ for (agent in agents) {
     break;
 }
 
-let gameCountToScore = [];
-
-var maxAverage = 0;
-
 var lastStatusRenderTime = 0;
 var lastStatusChartRenderTime = 0;
+var statsRenderingEnabledMode = null;
 function handleGameRunnerStatusChange(stats) {
     var nowMilliseconds = (new Date).getTime();
     if (nowMilliseconds > lastStatusRenderTime + 250) {//Refuse to render status html faster than 4fps
@@ -4916,15 +4913,17 @@ function handleGameRunnerStatusChange(stats) {
 
     if (nowMilliseconds > lastStatusChartRenderTime + 50) {//Refuse to render status chart faster than 20fps
 
-        if (settings.renderingEnabled) {//@TODO mode this somewhere else and do with less getElementById() calls
+        if (settings.renderingEnabled && !statsRenderingEnabledMode) {//@TODO mode this somewhere else
             document.getElementById('learningChart').style.display = 'none';
             document.getElementById('rendererContainer').style.display = 'block';
             document.getElementById('agentRendererContainer').style.display = 'block';
+            statsRenderingEnabledMode=settings.renderingEnabled;
             return;
-        } else {
+        } else if(!settings.renderingEnabled && statsRenderingEnabledMode){
             document.getElementById('learningChart').style.display = 'block';
             document.getElementById('rendererContainer').style.display = 'none';
             document.getElementById('agentRendererContainer').style.display = 'none';
+            statsRenderingEnabledMode=settings.renderingEnabled;
         }
 
         lastStatusChartRenderTime = nowMilliseconds;
@@ -4938,28 +4937,6 @@ function handleGameRunnerStatusChange(stats) {
         }
         learningChart.update();
     }
-    // }
-    // if(stats.gameCount>200){
-    //     gameRunner.clearCurrentAgentBrain();
-    //     clearStatsAndNewGame();
-    // }
-
-    // if (stats.averageFinalScore < maxAverage - 5 || stats.gameCount > 3000) {
-    //     maxAverage = 0;
-    //     gameRunner.clearCurrentAgentBrain();
-    //     clearStatsAndNewGame();
-    // }
-    // if (stats.averageFinalScore > maxAverage) {
-    //     maxAverage = stats.averageFinalScore;
-    // }
-    //
-    // if (stats.averageFinalScore > 128) {
-    //     settings.renderingEnabled = true;
-    //     clearInterval(intervalReference);
-    //     document.body.innerHTML = gameRunner.getCurrentAgentInstance().getBrain();
-    // }
-
-    // if (stats.gameCount < chartGameCount) {
 }
 
 let agentSelectorElement = document.getElementById('agentSelector');
