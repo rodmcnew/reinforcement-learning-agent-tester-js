@@ -29,7 +29,7 @@ let learningChart = new Chart(ctx, {
         labels: [],
         datasets: [
             {
-                label: 'Average Score',
+                label: 'Average Final Score',
                 data: [],
                 backgroundColor: 'transparent',
                 borderColor: 'blue',
@@ -37,7 +37,7 @@ let learningChart = new Chart(ctx, {
                 lineTension: 0
             },
             {
-                label: 'Score',
+                label: 'Final Score',
                 data: [],
                 backgroundColor: 'transparent',
                 borderColor: 'lightgrey',
@@ -50,28 +50,15 @@ let learningChart = new Chart(ctx, {
         animation: {
             duration: 0
         },
-        // maintainAspectRatio: false,
         elements: {point: {radius: 0}},
         scales: {
             yAxes: [{
                 ticks: {
-                    // beginAtZero: true
                     min: 0,
                     max: 100
                 }
             }],
             xAxes: [{
-                // afterTickToLabelConversion: function (data) {
-                //
-                //
-                //     var xLabels = data.ticks;
-                //
-                //     xLabels.forEach(function (labels, i) {
-                //         if (i % (chartGameCount / 10) !== 0) {
-                //             xLabels[i] = null;
-                //         }
-                //     });
-                // },
                 display: false
             }]
         }
@@ -118,13 +105,25 @@ function handleGameRunnerStatusChange(stats) {
             '\nCurrent Score: ' + stats.currentScore +
             '\nLast Game Final Score: ' + stats.lastGameScore +
             '\nActions per second: ' + stats.actionsPerSecond +
-            '\nAvg Final Moving Average: ' + stats.averageFinalScore +
-            '\nFinal Score Average: ' + (Math.floor(stats.scoreSum / stats.gameCount) || 0) +
-            '\nAverage Reward: ' + (stats.totalReward / stats.actionCount).toFixed(2) +
+            '\nFinal Score Moving Average: ' + stats.averageFinalScore +
+            // '\nFinal Score Average: ' + (Math.floor(stats.scoreSum / stats.gameCount) || 0) +
+            // '\nAverage Reward: ' + (stats.totalReward / stats.actionCount).toFixed(2) +
             '\nGame Count: ' + stats.gameCount;
     }
 
     if (nowMilliseconds > lastStatusChartRenderTime + 50) {//Refuse to render status chart faster than 20fps
+
+        if (settings.renderingEnabled) {//@TODO mode this somewhere else and do with less getElementById() calls
+            document.getElementById('learningChart').style.display = 'none';
+            document.getElementById('rendererContainer').style.display = 'block';
+            document.getElementById('agentRendererContainer').style.display = 'block';
+            return;
+        } else {
+            document.getElementById('learningChart').style.display = 'block';
+            document.getElementById('rendererContainer').style.display = 'none';
+            document.getElementById('agentRendererContainer').style.display = 'none';
+        }
+
         lastStatusChartRenderTime = nowMilliseconds;
         learningChart.data.datasets[0].data = stats.gameCountToAverageScore.slice(-1 * chartGameCount);
         learningChart.data.datasets[1].data = stats.gameCountToScore.slice(-1 * chartGameCount);
@@ -205,6 +204,33 @@ function clearStatsAndNewGame() {
 document.getElementById('clearBrainButton').addEventListener('click', ()=> {
     gameRunner.clearCurrentAgentBrain();
     clearStatsAndNewGame();
+});
+
+document.getElementById('exportAgentBrain').addEventListener('click', ()=> {
+    if (!gameRunner.getCurrentAgentInstance().exportBrain) {
+        alert('Current agent has no exportBrain() function.');
+        return;
+    }
+
+    if (!document.getElementById('q-learning-data')) {
+        let div = document.createElement('div');
+        let label = document.createElement('div');
+        label.innerHTML = '<br/>Exported Agent Brain Data:';
+        let textArea = document.createElement("TEXTAREA");
+        textArea.style.width = '100%';
+        textArea.style.height = '10em';
+        textArea.setAttribute('id', 'q-learning-data');
+        div.appendChild(label);
+        div.appendChild(textArea);
+        document.body.appendChild(div);
+    }
+    var textAreaElement = document.getElementById('q-learning-data');
+    textAreaElement.innerHTML =
+        'export const data = JSON.parse(\'' +
+        JSON.stringify(gameRunner.getCurrentAgentInstance().exportBrain()) +
+        '\');';
+
+    textAreaElement.focus();
 });
 
 clearStatsAndNewGame();

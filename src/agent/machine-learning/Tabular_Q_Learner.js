@@ -57,14 +57,20 @@ export class Tabular_Q_Learner {
 
         this._q = []; //[];//new Array(Math.pow(2, 5 * 3));//@TODO allow state count as arg for higher performance?
 
+        this.lastStep = {};
+    }
+
+    fromJson(json) {
         //Saved brains are currently saving as objects instead of arrays so fix this. //@TODO save properly instead
-        savedBrain.forEach((val, i)=> {
-            if(val){
+        json.forEach((val, i)=> {
+            if (val) {
                 this._q[i] = Object.keys(val).map(key => val[key]);//@TODO make Float64Arrays again when loading a save
             }
         });
+    }
 
-        this.lastStep = {};
+    toJson() {
+        return this._q;
     }
 
     _learnFromStep(state, action, reward, nextState) {
@@ -137,22 +143,6 @@ export class Tabular_Q_Learner {
             renderQTableSize(Object.keys(this._q).length);
             // renderObservationKey(state);
             // renderAdjustmentValue(adjustment.toFixed(2));
-
-            if (Math.random() < .001) {
-                if (!document.getElementById('q-learning-data')) {
-                    let div = document.createElement('div');
-                    let label = document.createElement('div');
-                    label.innerHTML = '<br/>Agent Brain Dump:';
-                    let textArea = document.createElement("TEXTAREA");
-                    textArea.style.width = '100%';
-                    textArea.style.height = '10em';
-                    textArea.setAttribute('id', 'q-learning-data');
-                    div.appendChild(label);
-                    div.appendChild(textArea);
-                    document.body.appendChild(div);
-                }
-                document.getElementById('q-learning-data').innerHTML = JSON.stringify(this._q);
-            }
         }
 
         return action;
@@ -161,6 +151,7 @@ export class Tabular_Q_Learner {
 
 
 var tabularQLearner = new Tabular_Q_Learner(4);
+tabularQLearner.fromJson(savedBrain);
 var tabularQLearnerHasBeenInititalized = false;
 export default class Tabular_Q_Learner_Adaptor {
     constructor() {
@@ -199,8 +190,8 @@ export default class Tabular_Q_Learner_Adaptor {
         tabularQLearnerHasBeenInititalized = false;
     }
 
-    getBrain() {
-        return JSON.stringify(tabularQLearner._q);
+    exportBrain() {
+        return tabularQLearner.toJson();
     }
 }
 

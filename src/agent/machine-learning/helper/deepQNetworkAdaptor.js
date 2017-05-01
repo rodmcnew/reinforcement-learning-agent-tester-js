@@ -121,8 +121,6 @@ export function renderReward(reward) {//@TODO move out
     rewardElements[1].innerHTML = bad;
 }
 
-var dumpCounter = 0;
-
 export default class RlDqn {
     constructor(learningEnabled, numberOfStates, previousSavedData) {
         var numberOfActions = 4;
@@ -158,25 +156,10 @@ export default class RlDqn {
             }
         }
 
-        //Dump the agent brain state every so often so it can be saved //@TODO only do this upon request
-        dumpCounter++;
-        if (dumpCounter === 10000) {
-            dumpCounter = 0;
-            if (!document.getElementById('q-learning-data')) {
-                let div = document.createElement('div');
-                let label = document.createElement('div');
-                label.innerHTML = '<br/>Agent Brain Dump:';
-                let textArea = document.createElement("TEXTAREA");
-                textArea.style.width = '100%';
-                textArea.style.height = '10em';
-                textArea.setAttribute('id', 'q-learning-data');
-                div.appendChild(label);
-                div.appendChild(textArea);
-                document.body.appendChild(div);
-            }
-            document.getElementById('q-learning-data').innerHTML = JSON.stringify(currentNeuralNetwork.toJSON());
-        }
-
         return action;
+    }
+
+    exportBrain() {
+        return this._neuralNetwork.toJSON();
     }
 }

@@ -46,4 +46,8 @@ export default class DeepQNetwork_OneStep {
         rlDqn = new RlDqn(true, numberOfStates);
         rlDqnHasBeenInitialized = false;
     }
+
+    exportBrain(){
+        return rlDqn.exportBrain();
+    }
 }
