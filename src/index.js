@@ -89,7 +89,7 @@ let renderer = new HtmlTableRenderer(document.getElementById('rendererContainer'
 let gameRunner = new GameRunner(renderer, handleGameRunnerStatusChange);
 
 let agents = {
-    'MachineLearning - Tabular_Q_Learner - UnTrained - ranked 73': Tabular_Q_Learner,
+    'MachineLearning - Tabular_Q_Learner - PreTrained - ranked 73': Tabular_Q_Learner,
     'MachineLearning - DeepQNetwork_OneStep - PreTrained - ranked 80': DeepQNetwork_OneStep,
     'HandProgrammed - LookAheadIn9x3Viewport - ranked 87': LookAheadIn9x3Viewport,
     'HandProgrammed - LookAheadIn5x2Viewport - ranked 81': LookAheadIn5x2Viewport,

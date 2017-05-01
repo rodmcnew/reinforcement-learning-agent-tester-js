@@ -54,7 +54,15 @@ export class Tabular_Q_Learner {
 
         this._lastScore = null;
 
-        this._q = savedBrain; //[];//new Array(Math.pow(2, 5 * 3));//@TODO allow state count as arg for higher performance?
+
+        this._q = []; //[];//new Array(Math.pow(2, 5 * 3));//@TODO allow state count as arg for higher performance?
+
+        //Saved brains are currently saving as objects instead of arrays so fix this. //@TODO save properly instead
+        savedBrain.forEach((val, i)=> {
+            if(val){
+                this._q[i] = Object.keys(val).map(key => val[key]);//@TODO make Float64Arrays again when loading a save
+            }
+        });
 
         this.lastStep = {};
     }

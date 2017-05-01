@@ -4892,7 +4892,7 @@ let renderer = new __WEBPACK_IMPORTED_MODULE_1__renderer_HtmlTableRenderer__["a"
 let gameRunner = new __WEBPACK_IMPORTED_MODULE_9__GameRunner__["a" /* default */](renderer, handleGameRunnerStatusChange);
 
 let agents = {
-    'MachineLearning - Tabular_Q_Learner - UnTrained - ranked 73': __WEBPACK_IMPORTED_MODULE_7__agent_machine_learning_Tabular_Q_Learner__["a" /* default */],
+    'MachineLearning - Tabular_Q_Learner - PreTrained - ranked 73': __WEBPACK_IMPORTED_MODULE_7__agent_machine_learning_Tabular_Q_Learner__["a" /* default */],
     'MachineLearning - DeepQNetwork_OneStep - PreTrained - ranked 80': __WEBPACK_IMPORTED_MODULE_6__agent_machine_learning_DeepQNetwork_OneStep__["a" /* default */],
     'HandProgrammed - LookAheadIn9x3Viewport - ranked 87': __WEBPACK_IMPORTED_MODULE_2__agent_hand_programmed_LookAheadIn9x3Viewport__["a" /* default */],
     'HandProgrammed - LookAheadIn5x2Viewport - ranked 81': __WEBPACK_IMPORTED_MODULE_5__agent_hand_programmed_LookAheadIn5x2Viewport__["a" /* default */],
@@ -17384,7 +17384,15 @@ class Tabular_Q_Learner {
 
         this._lastScore = null;
 
-        this._q = __WEBPACK_IMPORTED_MODULE_4__data_saves_tabular_q__["a" /* data */]; //[];//new Array(Math.pow(2, 5 * 3));//@TODO allow state count as arg for higher performance?
+
+        this._q = []; //[];//new Array(Math.pow(2, 5 * 3));//@TODO allow state count as arg for higher performance?
+
+        //Saved brains are currently saving as objects instead of arrays so fix this. //@TODO save properly instead
+        __WEBPACK_IMPORTED_MODULE_4__data_saves_tabular_q__["a" /* data */].forEach((val, i)=> {
+            if(val){
+                this._q[i] = Object.keys(val).map(key => val[key]);//@TODO make Float64Arrays again when loading a save
+            }
+        });
 
         this.lastStep = {};
     }
