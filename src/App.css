@@ -1,0 +1,48 @@
+#info {
+  margin-right: 2em;
+  /*float: left*/
+}
+
+.InfectionGameHtmlTableRender {
+  /*float: left;*/
+  overflow: auto;
+}
+
+.InfectionGameHtmlTableRender table {
+  padding-right: 2em;
+  border-spacing: 0;
+  border-collapse:collapse;
+}
+
+.InfectionGameHtmlTableRender table td {
+  border: 0; /*For iphones*/
+}
+
+.InfectionGameHtmlTableRender > div {
+  float: left;
+  border-spacing: 0;
+  margin-right: 2em;
+}
+
+/*.InfectionGameHtmlTableRender table.renderer-table-canvas-agent {*/
+/*padding: 10px;*/
+/*background-color: black;*/
+/*}*/
+
+.InfectionGameHtmlTableRender .renderer-table-canvas-god td {
+  height: 5px;
+  width: 5px;
+}
+
+.InfectionGameHtmlTableRender .renderer-table-canvas-agent td {
+  height: 20px;
+  width: 20px;
+}
+
+#agentRendererContainer {
+  margin-top: 1em;
+}
+
+#score{
+  margin-top: 0;
+}

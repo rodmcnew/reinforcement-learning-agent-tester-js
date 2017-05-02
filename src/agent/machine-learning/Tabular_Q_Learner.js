@@ -1,8 +1,8 @@
 import {renderActionResponse, renderReward} from './helper/deepQNetworkAdaptor'
 import * as viewportConversions from '../../renderer/viewportConversions'
 import {matrixToVector} from '../../tensorTools'
-import {settings} from '../../index' //@TODO use DI instead for this
-import {data as savedBrain} from '../../../data/saves/tabular-q'
+import {settings} from '../../App' //@TODO use DI instead for this
+import {data as savedBrain} from '../../data/saves/tabular-q-5x3'
 
 const actions = ['w', 'a', 's', 'd'];
 
@@ -43,11 +43,14 @@ export class Tabular_Q_Learner {
             discountFactor: 0.75,
             randomActionProbability: 0.05,
             learningRate: 0.5,
-            replaysPerAction: 0,
+            replaysPerAction: 10,
+            replayCountToStore: 5000,
+            actionsBetweenRecordingNewReplays: 25,
             // tdErrorClamp: 1.0,
         };
 
         this._replayMemory = [];//@TODO trim this, don't store all
+        this._actionsTillNextReplayRecording = 0;
 
         this._possibleActionCount = possibleActionCount;
         this._options = Object.assign(defaultOptions/*, options*/);
@@ -62,7 +65,7 @@ export class Tabular_Q_Learner {
 
     fromJson(json) {
         //Saved brains are currently saving as objects instead of arrays so fix this. //@TODO save properly instead
-        json.forEach((val, i)=> {
+        json.forEach((val, i) => {
             if (val) {
                 this._q[i] = Object.keys(val).map(key => val[key]);//@TODO make Float64Arrays again when loading a save
             }
@@ -74,7 +77,7 @@ export class Tabular_Q_Learner {
     }
 
     _learnFromStep(state, action, reward, nextState) {
-        var adjustment = 0;
+        // var adjustment = 0;
         var qValues = this._q[state];
         var nextQValues = this._q[nextState];
         var maxNextQValue = getIndexOfMaxValue(nextQValues);
@@ -123,7 +126,17 @@ export class Tabular_Q_Learner {
                 }
             }
 
-            this._replayMemory.push([this.lastStep.state, this.lastStep.action, lastReward, state]);
+            this._actionsTillNextReplayRecording--;
+            if (this._actionsTillNextReplayRecording < 1) {
+                this._actionsTillNextReplayRecording = this._options.actionsBetweenRecordingNewReplays;
+                //Trim down the replay memory any time it gets 20% larger than its allowed size
+                if (this._replayMemory.length > this._options.replayCountToStore * 1.2) {
+                    this._replayMemory = this._replayMemory.slice(-1 * this._options.replayCountToStore);
+                }
+
+                //@TODO only store replayes every so often
+                this._replayMemory.push([this.lastStep.state, this.lastStep.action, lastReward, state]);
+            }
         }
 
         var action = currentMaxQ;
@@ -196,25 +209,25 @@ export default class Tabular_Q_Learner_Adaptor {
 }
 
 
-var adjustmentValueElement;
-function renderAdjustmentValue(value) {
-    if (!adjustmentValueElement) {
-        adjustmentValueElement = document.createElement('DIV');
-        adjustmentValueElement.id = 'adjustmentValue';
-        document.getElementById('agentRendererContainer').appendChild(adjustmentValueElement);
-    }
-    adjustmentValueElement.innerHTML = 'Q adjustment value: ' + value;
-}
-
-var observationKeyElement;
-function renderObservationKey(key) {
-    if (!observationKeyElement) {
-        observationKeyElement = document.createElement('DIV');
-        observationKeyElement.id = 'observationKey';
-        document.getElementById('agentRendererContainer').appendChild(observationKeyElement);
-    }
-    observationKeyElement.innerHTML = 'Q table key: ' + key;
-}
+// var adjustmentValueElement;
+// function renderAdjustmentValue(value) {
+//     if (!adjustmentValueElement) {
+//         adjustmentValueElement = document.createElement('DIV');
+//         adjustmentValueElement.id = 'adjustmentValue';
+//         document.getElementById('agentRendererContainer').appendChild(adjustmentValueElement);
+//     }
+//     adjustmentValueElement.innerHTML = 'Q adjustment value: ' + value;
+// }
+//
+// var observationKeyElement;
+// function renderObservationKey(key) {
+//     if (!observationKeyElement) {
+//         observationKeyElement = document.createElement('DIV');
+//         observationKeyElement.id = 'observationKey';
+//         document.getElementById('agentRendererContainer').appendChild(observationKeyElement);
+//     }
+//     observationKeyElement.innerHTML = 'Q table key: ' + key;
+// }
 
 var qTableSizeElement;
 function renderQTableSize(size) {

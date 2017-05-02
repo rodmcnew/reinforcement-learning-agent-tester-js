@@ -18,15 +18,16 @@ const defaultStats = {
 };
 
 export default class GameRunner {
-    constructor(renderer, onStatusChange) {
+    constructor(onRender, onStatusChange) {
+        this._universalGameNumber = 0;
         this._renderingEnabled = false;
-        this._renderer = renderer;
+        this._onRender = onRender;
         this._stats = Object.assign({}, defaultStats);
         this._onStatusChange = onStatusChange;
         this._agentObservation = null;
         this._godObservation = null;
         this._agentClass = null;
-        this._nextAction = 0;
+        this._nextAction = null;
 
         this.newGame = this.newGame.bind(this);
         this.takeAction = this.takeAction.bind(this);
@@ -41,6 +42,7 @@ export default class GameRunner {
     }
 
     newGame(agentClass) {
+        this._universalGameNumber++;
         this._agentClass = agentClass;
         this._agent = new this._agentClass();
         // this._renderingEnabled = renderingEnabled;
@@ -48,8 +50,12 @@ export default class GameRunner {
         this._stats.currentScore = 0;//@TODO get from environment?
         if (this._renderingEnabled) {
             //@TODO have this render make the table its self inside a given div
-            this._renderer.clear();
-            this._renderer.render(this._environment.getAgentObservation(), this._environment.getGodObservation());
+            // this._onRender.clear();
+            this._onRender(
+                this._environment.getAgentObservation(),
+                this._environment.getGodObservation(),
+                this._universalGameNumber
+            );
         } else {
             this._onStatusChange(this._stats);
         }
@@ -69,7 +75,9 @@ export default class GameRunner {
     takeAction(actionCode) {
         var stats = this._stats;
         //Apply the action and get the next observation
-        this._environment.applyAction(actionCode);
+        if (actionCode !== null) {
+            this._environment.applyAction(actionCode);
+        }
         this._updateObservations();
 
         if (this._godObservation.isComplete) {//@Find better way to communicate "isComplete"
@@ -89,7 +97,7 @@ export default class GameRunner {
         }
 
         if (this._renderingEnabled) {
-            this._renderer.render(this._agentObservation, this._godObservation);
+            this._onRender(this._agentObservation, this._godObservation, this._universalGameNumber);
             stats.currentScore = this._agentObservation.score;
             this._onStatusChange(stats);
         }

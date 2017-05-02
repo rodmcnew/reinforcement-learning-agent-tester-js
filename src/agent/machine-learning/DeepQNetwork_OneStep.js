@@ -1,7 +1,7 @@
 import {matrixToVector} from '../../tensorTools'
 import RlDqn from './helper/deepQNetworkAdaptor'
-import {config} from '../../environment'
-import {data as savedNeuralNetwork} from '../../../data/neural-network-saves/5x3'
+// import {config} from '../../environment'
+import {data as savedNeuralNetwork} from '../../data/saves/deep-q-5x3'
 const actions = ['w', 'a', 's', 'd'];
 import * as viewportConversions from '../../renderer/viewportConversions'
 

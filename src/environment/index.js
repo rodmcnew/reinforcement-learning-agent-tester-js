@@ -11,10 +11,13 @@ export const config = {
     viewPortSize: [9, 9],
     viewPortOffset: [0, 2],
 
-    verticalDeltaScore: 3,
-    tileValueMap: [0, -15],
-    pointsForCompletion: 0
+    verticalDeltaScore: 10,
+    deltaScorePerAction: -1,
+    tileValueMap: [0, -50],
+    pointsForCompletion: 0,
 };
+
+export const actions = ['w', 'a', 's', 'd'];
 
 /**
  * The main environment class for this game. This is the public interface for the game.
@@ -42,27 +45,37 @@ export default class Environment {
             case "w":
                 if (this._state.position[1] > 0) {
                     this._state.position[1]--;
+                    this._state.score -= config.verticalDeltaScore;
+                } else {
+                    this._state.score += config.tileValueMap[1];//Edges are red
                 }
-                this._state.score = this._state.score - config.verticalDeltaScore;
                 break;
             case "a":
                 if (this._state.position[0] > 0) {
                     this._state.position[0]--;
+                } else {
+                    this._state.score += config.tileValueMap[1];//Edges are red
                 }
                 break;
             case "s":
-                if (this._state.position[1] < config.size[1] - 1) {
-                    this._state.position[1]++;
-                }
+                // if (this._state.position[1] < config.size[1] - 1) {
+                this._state.position[1]++;
                 this._state.score = this._state.score + config.verticalDeltaScore;
+                // }
                 break;
             case "d":
                 if (this._state.position[0] < config.size[0] - 1) {
                     this._state.position[0]++;
+                } else {
+                    this._state.score += config.tileValueMap[1];//Edges are red
                 }
                 break;
+            default:
+                throw new Error('Unknown action: ' + actionCode)
         }
-        this._state.isComplete = this._state.position[1] == config.size[1] - 1;// || this._state.score < -100;
+        this._state.score += config.deltaScorePerAction;
+
+        this._state.isComplete = this._state.position[1] === config.size[1] - 1;// || this._state.score < -100;
 
         this._state.score = this._state.score + config.tileValueMap[this._state.tileTypes[this._state.position[0]][this._state.position[1]]];
 

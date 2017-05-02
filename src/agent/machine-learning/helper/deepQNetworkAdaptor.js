@@ -1,6 +1,6 @@
 import NeuralNetwork from '../../../deep-q-network/NeuralNetwork'
 import QNetworkAgent from '../../../deep-q-network/QNetworkAgentOneStep'
-import {settings} from '../../../index' //@TODO use DI instead for this
+import {settings} from '../../../App' //@TODO use DI instead for this
 
 
 function getMinimumVectorIndex(w) {
@@ -34,7 +34,7 @@ let randomActionElement = null;
 let rewardElements = null;
 let randomActionValueElement;
 
-let currentNeuralNetwork; //@TODO WARNING IS HUGE HACK
+// let currentNeuralNetwork; //@TODO WARNING IS HUGE HACK
 
 function ensureElementsExist() {
     if (document.getElementById('DQNRender')) {
@@ -88,7 +88,7 @@ export function renderActionResponse(actionResponse) {//@TODO move out
         }
 
     }
-    for (var i = 0, len = actionResponse.weights.length; i < len; i++) {
+    for (i = 0, len = actionResponse.weights.length; i < len; i++) {
         let fixedValue = Math.floor((actionResponse.weights[i] + adder) / (maxActionValue + adder) * 100);
 
         actionElements[i].style.width = (fixedValue * 3 + barFrontPadding) + 'px';
@@ -140,7 +140,7 @@ export default class RlDqn {
     }
 
     getAction(state, reward) {
-        currentNeuralNetwork = this._neuralNetwork;
+        // currentNeuralNetwork = this._neuralNetwork;
 
         if (!this._learningEnabled) {
             reward = null;//Passing null rewards to the agent disables learning inside it

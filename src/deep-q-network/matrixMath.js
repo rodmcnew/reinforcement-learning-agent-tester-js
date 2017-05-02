@@ -5,7 +5,7 @@ import {gaussRandom} from './random'
 export function tanH(m, out) {
     // tanh nonlinearity
     // var out = new Matrix(m.n, m.d);
-    if (out.n != m.n || out.d != m.d) {
+    if (out.n !== m.n || out.d !== m.d) {
         throw new Error('Out should be ' + m.n + ' by ' + m.d + ' but is ' + out.n + ' by ' + out.d);
     }
 
@@ -36,7 +36,7 @@ export function backwardTanH(m, out) {
 export function mul(m1, m2, out) {//4.7 Float64Array
     if (m1.d !== m2.n) {
         throw new Error(m1.d + '!==' + m2.n);
-    } else if (out.n != m1.n || out.d != m2.d) {
+    } else if (out.n !== m1.n || out.d !== m2.d) {
         throw new Error('Out should be ' + m1.n + ' by ' + m2.d + ' but is ' + out.n + ' by ' + out.d);
     }
 
@@ -71,7 +71,7 @@ export function add(m1, m2, out) {
         throw new Error();
     }
 
-    if (out.n != m1.n || out.d != m1.d) {
+    if (out.n !== m1.n || out.d !== m1.d) {
         throw new Error('Out should be ' + m1.n + ' by ' + m1.d + ' but is ' + out.n + ' by ' + out.d);
     }
 
