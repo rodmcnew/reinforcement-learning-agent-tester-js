@@ -172,6 +172,7 @@ export class TabularSARSA {
         } else {
             var currentStateKeyPrepend = state * this._actionCount;
             var maxQofNextStateAction = this._q[currentStateKeyPrepend];
+            this._lastActionWeights[0] = maxQofNextStateAction;//The loop below skips the first one so do it here
             var indexOfMaxQofNextStateAction = 0;
             var index = 0;
             for (var key = currentStateKeyPrepend + 1, max = currentStateKeyPrepend + this._actionCount; key < max; key++) {
