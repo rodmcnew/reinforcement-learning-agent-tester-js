@@ -7,7 +7,7 @@ import TabularSARSA_5x3Viewport from './agent/machine-learning/TabularSARSA_5x3V
 
 export default [
     {
-        name: 'MachineLearning - TabularSARSA_5x3Viewport_32768States - PreTrained - ranked 164',
+        name: 'MachineLearning - TabularSARSA_5x3Viewport_32768States - PreTrained - ranked 210',
         class: TabularSARSA_5x3Viewport,
         ticksPerInterval: 20000 //This agent runs fast but needs many games to learn
     },
