@@ -204,11 +204,11 @@ export default class App extends Component {
                     <StatsDisplay stats={this.state.statsToDisplay}/>
                     <br/>
                 </div>
-                {/*{!this._settings.renderingEnabled && this.state.scoreHistoryChartData &&*/}
-                {/*<div style={{width: '30em'}}>*/}
-                    {/*<ScoreHistoryChart stats={this.state.scoreHistoryChartData}/>*/}
-                {/*</div>*/}
-                {/*}*/}
+                {!this._settings.renderingEnabled && this.state.scoreHistoryChartData &&
+                <div style={{width: '30em'}}>
+                    <ScoreHistoryChart stats={this.state.scoreHistoryChartData}/>
+                </div>
+                }
                 {this._settings.renderingEnabled && this.state.agentObservation &&
                 <div>
                     <ObservationRenderer
