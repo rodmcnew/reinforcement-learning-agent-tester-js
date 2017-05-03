@@ -23,12 +23,12 @@ export function getFeelerValue(observation, feelerSteps) {
         position = [position[0] + vector[0], position[1] + vector[1]];
         let cost;
         if (typeof observation.tileTypes[position[0]] === 'undefined' || typeof observation.tileTypes[position[0]][position[1]] === 'undefined') {
-            cost = config.minTileValue * 2; //If going off map, make look very expensive
+            cost = config.tileTypeToDeltaScore[1]; //If going off map, make look very expensive
             // } else
             //     if (observation.visibles[position[0]][position[1]] === 0) {
             //     cost = 1;//config.maxTileCost / 2; //@TODO there must be a better way to deal with unknown tiles
         } else {
-            cost = config.tileValueMap[observation.tileTypes[position[0]][position[1]]]
+            cost = config.tileTypeToDeltaScore[observation.tileTypes[position[0]][position[1]]]
         }
         value = value + vector[2] + cost;
     });

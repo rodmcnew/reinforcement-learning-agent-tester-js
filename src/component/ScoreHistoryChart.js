@@ -5,7 +5,6 @@ import Chart from 'chart.js'
 const chartGameCount = 200;
 
 export default class ScoreHistoryChart extends Component {
-
     componentDidMount() {
         let chartCanvas = this.refs.chart;
 
@@ -58,19 +57,19 @@ export default class ScoreHistoryChart extends Component {
         return {
             datasets: [
                 {
-                    data: stats.gameCountToAverageScore.slice(-1 * chartGameCount),
+                    data: stats.gameCountToAverageScore.slice(-chartGameCount),
                 },
                 {
-                    data: stats.gameCountToScore.slice(-1 * chartGameCount),
+                    data: stats.gameCountToScore.slice(-chartGameCount),
                 },
             ],
-            labels: Object.keys(stats.gameCountToScore).slice(-1 * chartGameCount)
+            labels: Object.keys(stats.gameCountToScore).slice(-chartGameCount)
         }
     }
 
     componentDidUpdate() {
-        let chart = this.state.chart;
-        let data = this.mapStatsToChartData(this.props.stats);
+        const chart = this.state.chart;
+        const data = this.mapStatsToChartData(this.props.stats);
 
         data.datasets.forEach((dataset, i) => chart.data.datasets[i].data = dataset.data);
 

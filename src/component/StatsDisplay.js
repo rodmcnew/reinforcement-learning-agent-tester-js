@@ -3,7 +3,7 @@ import PropTypes from 'prop-types'
 
 export default class StatsDisplay extends Component {
     render() {
-        let stats = this.props.stats;
+        const stats = this.props.stats;
         return (
             <table>
                 <tbody>

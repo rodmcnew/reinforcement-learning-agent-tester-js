@@ -9,7 +9,7 @@ export default class BrainExportButton extends Component {
     }
 
     onExportButtonClick() {
-        var gameRunner = this.props.gameRunner;
+        const gameRunner = this.props.gameRunner;
         if (!gameRunner.getCurrentAgentInstance().exportBrain) {
             alert('Current agent has no exportBrain() function.');
             return;
@@ -30,7 +30,11 @@ export default class BrainExportButton extends Component {
                 <div>
                     <br/>
                     <div>Exported Agent Brain Data:</div>
-                    <textarea autoFocus style={{width: '100%', height: '10em'}} defaultValue={this.state.exportData}/>
+                    <textarea
+                        autoFocus
+                        readOnly
+                        style={{width: '100%', height: '10em'}}
+                        value={this.state.exportData}/>
                 </div>
                 }
             </div>

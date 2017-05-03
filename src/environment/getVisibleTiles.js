@@ -1,4 +1,4 @@
-// import {createMatrix} from '../tensorTools'
+// import {createMatrix} from '../nestedFloatMatrixMath'
 // import {config} from './index'
 //
 // const rayVectors = [

@@ -3,17 +3,17 @@
 import AlwaysMoveStraightDown from './agent/hand-programmed/AlwaysMoveStraightDown'
 import LookAheadIn5x3Viewport from './agent/hand-programmed/LookAheadIn5x3Viewport'
 import DeepQNetwork_OneStep from './agent/machine-learning/DeepQNetwork_OneStep'
-import Tabular_Q_Learner from './agent/machine-learning/Tabular_Q_Learner'
+import TabularSARSA_5x3Viewport from './agent/machine-learning/TabularSARSA_5x3Viewport'
 
 export default [
     {
-        name: 'MachineLearning - DeepQNetwork_OneStep - PreTrained - ranked 226',
-        class: DeepQNetwork_OneStep
+        name: 'MachineLearning - TabularSARSA_5x3Viewport_32768States - PreTrained - ranked 164',
+        class: TabularSARSA_5x3Viewport,
+        ticksPerInterval: 20000 //This agent runs fast but needs many games to learn
     },
     {
-        name: 'MachineLearning - Tabular_Q_Learner - PreTrained - ranked 164',
-        class: Tabular_Q_Learner,
-        ticksPerInterval: 10000 //This agent runs fast but needs many games to learn
+        name: 'MachineLearning - DeepQNetwork_OneStep - PreTrained - ranked 226',
+        class: DeepQNetwork_OneStep
     },
     // {
     //     name: 'HandProgrammed - LookAheadIn9x3Viewport - ranked 87',

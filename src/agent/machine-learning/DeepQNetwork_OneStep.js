@@ -1,9 +1,9 @@
-import {matrixToVector} from '../../tensorTools'
+import {matrixToFlatArray} from '../../environment/nestedFloatMatrixMath'
 import RlDqn from './helper/deepQNetworkAdaptor'
 // import {config} from '../../environment'
 import {data as savedNeuralNetwork} from '../../data/saves/deep-q-5x3'
 const actions = ['w', 'a', 's', 'd'];
-import * as viewportConversions from '../../renderer/viewportConversions'
+import * as viewportConversions from '../../environment/viewportConversions'
 
 const numberOfStates = 5 * 3;//config.viewPortSize[0] * config.viewPortSize[1];
 
@@ -22,7 +22,7 @@ export default class DeepQNetwork_OneStep {
      * @return {string} action code
      */
     getAction(observation) {
-        const state = matrixToVector(viewportConversions.convert9x9to5x3(observation.tileTypes));
+        const state = matrixToFlatArray(viewportConversions.convert9x9to5x3(observation.tileTypes));
 
         //Give the agent memory of the last action it took. This may be cheating.
         // state.push(this._lastActionIndex);

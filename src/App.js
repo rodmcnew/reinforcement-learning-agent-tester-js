@@ -1,17 +1,12 @@
-import React, {Component} from 'react';
 import './App.css';
-
+import React, {Component} from 'react';
 import {config as environmentConfig, actions} from './environment'
-import './deep-q-network/runTests'
-import HtmlTableRenderer from './renderer/HtmlTableRenderer'
+import ObservationRenderer from './component/ObservationRenderer'
 import BrainExportButton from './component/BrainExportButton'
 import ScoreHistoryChart from './component/ScoreHistoryChart'
 import GameRulesDisplay from './component/GameRulesDisplay'
 import agents from './agents'
-// import './index.html'
 import GameRunner from './GameRunner'
-// import Chart from 'chart.js'
-
 import StatsDisplay from './component/StatsDisplay'
 
 export const settings = {//@TODO move out of global?
@@ -23,7 +18,7 @@ export const settings = {//@TODO move out of global?
     autoPlay: true,
 };
 
-class App extends Component {
+export default class App extends Component {
     constructor() {
         super();
         this.setupInterval = this.setupInterval.bind(this);
@@ -88,7 +83,7 @@ class App extends Component {
 
         if (nowMilliseconds > this.state.lastStatusChartRenderTime + 50) {//Refuse to render status chart faster than 20fps
 
-            if (settings.renderingEnabled) {//Dont draw chart if rendering games
+            if (settings.renderingEnabled) {//Don't draw chart if rendering games
                 return;
             }
 
@@ -96,12 +91,6 @@ class App extends Component {
                 scoreHistoryChartData: stats,
                 lastStatusChartRenderTime: nowMilliseconds
             });
-
-            // for (var i = 0, len = learningChart.data.labels.length; i < len; i++) {
-            //     if (i % 10 != 0) {
-            //         learningChart.data.labels[i] = '';
-            //     }
-            // }
         }
 
     }
@@ -130,7 +119,6 @@ class App extends Component {
     clearStatsAndNewGame() {
         this._gameRunner.setRenderingEnabled(this._settings.renderingEnabled);
         this._gameRunner.clearStats();
-        // this._gameRunner.newGame(agents[currentAgentName], this._settings.renderingEnabled);
         this._gameRunner.newGame(this._agents[this.state.currentAgentIndex].class, this._settings.renderingEnabled);
     }
 
@@ -187,7 +175,7 @@ class App extends Component {
 
     render() {
         return (
-            <div className="App">
+            <div>
                 <div id="info">Agent:
                     <select onChange={this.handleAgentSelectorChange}>
                         {this._agents.map(((agent, index) =>
@@ -216,15 +204,14 @@ class App extends Component {
                     <StatsDisplay stats={this.state.statsToDisplay}/>
                     <br/>
                 </div>
-                {!this._settings.renderingEnabled && this.state.scoreHistoryChartData &&
-                <div style={{width: '30em'}}>
-                    <ScoreHistoryChart stats={this.state.scoreHistoryChartData}/>
-                    {/*<canvas id="learningChart" height="100"/>*/}
-                </div>
-                }
+                {/*{!this._settings.renderingEnabled && this.state.scoreHistoryChartData &&*/}
+                {/*<div style={{width: '30em'}}>*/}
+                    {/*<ScoreHistoryChart stats={this.state.scoreHistoryChartData}/>*/}
+                {/*</div>*/}
+                {/*}*/}
                 {this._settings.renderingEnabled && this.state.agentObservation &&
                 <div>
-                    <HtmlTableRenderer
+                    <ObservationRenderer
                         agentObservation={this.state.agentObservation}
                         godObservation={this.state.godObservation}
                         gameNumber={this.state.universalGameNumber}
@@ -240,5 +227,3 @@ class App extends Component {
         );
     }
 }
-
-export default App;

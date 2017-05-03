@@ -1,5 +1,7 @@
 import Environment from './environment'
 
+const historyLength = 1000;
+
 const defaultStats = {
     currentScore: 0,
     lastGameScore: 0,
@@ -12,7 +14,6 @@ const defaultStats = {
     gameCountToScore: [],
     gameCountToAverageScore: [],
     averageFinalScore: 0,
-    rewards: [],
     lastActionScore: 0,
     totalReward: 0,
 };
@@ -90,9 +91,16 @@ export default class GameRunner {
             var totalScoreFinaleScore = stats.lastFinalScores.reduce((acc, val) => acc + val, 0);
             stats.averageFinalScore = Math.floor(totalScoreFinaleScore / stats.lastFinalScores.length) || 0;
             stats.scoreSum += this._agentObservation.score;
-            stats.gameCountToScore[stats.gameCount] = stats.lastGameScore;
-            stats.gameCountToAverageScore[stats.gameCount] = stats.averageFinalScore;
+            stats.gameCountToScore.push(stats.lastGameScore);
+            stats.gameCountToAverageScore.push(stats.averageFinalScore);
             stats.gameCount += 1;
+
+            //If the history arrays get twice as large as the preferred history length, slice them off.
+            if (stats.gameCountToScore.length > historyLength * 2) {
+                stats.gameCountToScore = stats.gameCountToScore.slice(-historyLength);
+                stats.gameCountToAverageScore = stats.gameCountToAverageScore.slice(-historyLength);
+            }
+
             this.newGame(this._agentClass, this._renderingEnabled);
         }
 
@@ -106,7 +114,6 @@ export default class GameRunner {
         var reward = this._agentObservation.score - stats.lastActionScore;
         stats.lastActionScore = this._agentObservation.score;
         stats.totalReward += reward;
-        stats.rewards.push(reward);
 
         this._nextAction = this._agent.getAction(this._agentObservation);
     }
@@ -128,7 +135,6 @@ export default class GameRunner {
         this._stats.lastFinalScores = [];
         this._stats.gameCountToScore = [];
         this._stats.gameCountToAverageScore = [];
-        this._stats.rewards = [];
     }
 
     _updateObservations() {

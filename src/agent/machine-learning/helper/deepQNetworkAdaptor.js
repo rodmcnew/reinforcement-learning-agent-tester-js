@@ -1,5 +1,6 @@
-import NeuralNetwork from '../../../deep-q-network/NeuralNetwork'
-import QNetworkAgent from '../../../deep-q-network/QNetworkAgentOneStep'
+import '../deep-q-network/runTests'
+import NeuralNetwork from '../deep-q-network/NeuralNetwork'
+import QNetworkAgent from '../deep-q-network/QNetworkAgentOneStep'
 import {settings} from '../../../App' //@TODO use DI instead for this
 
 
