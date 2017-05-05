@@ -2,109 +2,78 @@ import * as viewportConversions from '../../environment/viewportConversions'
 import {matrixToFlatArray} from '../../environment/nestedFloatMatrixMath'
 import {data as savedBrain} from '../../data/saves/tabular-sarsa-5x3'
 import {Agent} from 'tabular-sarsa'
-import {renderActionResponse,renderReward} from './helper/deepQNetworkAdaptor'
+import {renderActionResponse, renderReward} from './helper/deepQNetworkAdaptor'
 import {settings} from '../../App'
-
-const actions = ['w', 'a', 's', 'd'];
+import {actions} from '../../environment'
 
 /**
- * Takes an array of 0s and 1s and converts them to an int
+ * Takes an array of 0s and 1s and converts the whole thing to a single int
  *
- * @param vector
+ * @param array
  * @returns {number}
  */
-export function arrayOfBinariesToInt(vector) {
+export function arrayOfBinariesToInt(array) {
     var output = 0;
-    for (var i = 0, len = vector.length; i < len; i++) {
-        output += vector[i] * Math.pow(2, i);
+    for (var i = 0, len = array.length; i < len; i++) {
+        output += array[i] * Math.pow(2, i);
     }
     return output;
 }
 
-const actionCount = 4;
-// const stateCount = Math.pow(2, 5 * 4);
-const stateCount = Math.pow(2, 5 * 3);
-var tabularQLearner = new Agent(stateCount, actionCount);
-tabularQLearner.loadFromJson(savedBrain);//Load previously saved brain
-var tabularQLearnerHasBeenInititalized = false;
-export default class Agent_5x3Viewport_Adaptor {
+/**
+ * Take an observation object and returns an int that represents the given observation state
+ *
+ * @param {AgentObservation} observation
+ * @returns {number}
+ */
+function observationToInt(observation) {
+    return arrayOfBinariesToInt(
+        matrixToFlatArray(
+            viewportConversions.convert9x9to5x3(//Trim down the viewport to reduce the combinatorial explosion
+                observation.tileTypes
+            )
+        )
+    );
+}
+
+const stateCount = Math.pow(2, 5 * 3);//There are 5x3 binary pixels in the viewport
+
+var agent = new Agent(stateCount, actions.length);
+var agentHasBeenInitialized = false;
+
+agent.loadFromJson(savedBrain);//Load the previously saved brain
+
+export default class TabularSARSA_5x3Viewport {
     constructor() {
         this._lastScore = null;
     }
 
-    _observationToKey(observation) {
-        return arrayOfBinariesToInt(matrixToFlatArray(
-            // viewportConversions.convert9x9to7x5(//Trim down the viewport to reduce the combinatorial explosion
-            viewportConversions.convert9x9to5x3(//Trim down the viewport to reduce the combinatorial explosion
-                observation.tileTypes
-            )
-        ));
-    }
-
     /**
-     *
      * @param {AgentObservation} observation
      * @return {string} action code
      */
     getAction(observation) {
         let reward = null;
-
-        if (this._lastScore !== null && tabularQLearnerHasBeenInititalized) {
+        if (this._lastScore !== null && agentHasBeenInitialized) {
             reward = observation.score - this._lastScore;
         }
         this._lastScore = observation.score;
-        const observationKey = this._observationToKey(observation);
-        tabularQLearnerHasBeenInititalized = true;
-        var action = actions[tabularQLearner.decide(reward, observationKey)];
-        var lastActionStat = tabularQLearner.getLastActionStats();
-        if(settings.renderingEnabled){
-            renderActionResponse({weights:lastActionStat.weights, wasRandom:lastActionStat.wasRandomlyChosen});
+        agentHasBeenInitialized = true;
+        var action = actions[agent.decide(reward, observationToInt(observation))];
+        var lastActionStat = agent.getLastActionStats();
+        if (settings.renderingEnabled) {
+            renderActionResponse({weights: lastActionStat.weights, wasRandom: lastActionStat.wasRandomlyChosen});
             renderReward(reward);
         }
         return action;
     }
 
-    newGame() {
-
-    }
-
     clearBrain() {
-        tabularQLearner = new Agent(stateCount, actionCount);
-        tabularQLearnerHasBeenInititalized = false;
+        agent = new Agent(stateCount, actions.length);
+        agentHasBeenInitialized = false;
     }
 
     exportBrain() {
-        return tabularQLearner.saveToJson();
+        return agent.saveToJson();
     }
 }
-
-
-// var adjustmentValueElement;
-// function renderAdjustmentValue(value) {
-//     if (!adjustmentValueElement) {
-//         adjustmentValueElement = document.createElement('DIV');
-//         adjustmentValueElement.id = 'adjustmentValue';
-//         document.getElementById('agentRendererContainer').appendChild(adjustmentValueElement);
-//     }
-//     adjustmentValueElement.innerHTML = 'Q adjustment value: ' + value;
-// }
-//
-// var observationKeyElement;
-// function renderObservationKey(key) {
-//     if (!observationKeyElement) {
-//         observationKeyElement = document.createElement('DIV');
-//         observationKeyElement.id = 'observationKey';
-//         document.getElementById('agentRendererContainer').appendChild(observationKeyElement);
-//     }
-//     observationKeyElement.innerHTML = 'Q table key: ' + key;
-// }
-//
-// var qTableSizeElement;
-// function renderQTableSize(size) {
-//     if (!qTableSizeElement) {
-//         qTableSizeElement = document.createElement('DIV');
-//         qTableSizeElement.id = 'qTableSize';
-//         document.getElementById('agentRendererContainer').appendChild(qTableSizeElement);
-//     }
-//     qTableSizeElement.innerHTML = 'Unique observations seen: ' + size;
-// }
