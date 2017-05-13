@@ -6,7 +6,6 @@ import {renderActionResponse, renderReward} from './helper/deepQNetworkAdaptor'
 import {settings} from '../../App'
 import {actions} from '../../environment'
 
-
 /**
  * This controls whether we make the agent aware of what it's last action was. Setting this to true causes the agent
  * to get stuck in "back and forth" loops much less often but it also unfortunately makes it impossible to load saved
