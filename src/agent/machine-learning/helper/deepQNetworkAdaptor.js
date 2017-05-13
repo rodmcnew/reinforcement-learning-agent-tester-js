@@ -1,6 +1,6 @@
-import '../deep-q-network/runTests'
-import NeuralNetwork from '../deep-q-network/NeuralNetwork'
-import QNetworkAgent from '../deep-q-network/QNetworkAgentOneStep'
+// import '../deep-q-network/runTests'
+import EasyNetworkForQLearning from '../../../modules/fast-deep-net/network-templates/EasyNetworkForQLearning'
+import QNetworkAgent from '../../../modules/deep-q-network/QNetworkAgentOneStep'
 import {settings} from '../../../App' //@TODO use DI instead for this
 
 
@@ -126,9 +126,12 @@ export default class RlDqn {
     constructor(learningEnabled, numberOfStates, previousSavedData) {
         var numberOfActions = 4;
         // create the DQN agent
-        this._neuralNetwork = new NeuralNetwork(numberOfStates, numberOfActions, [100]);
+        // this._neuralNetwork = new NeuralNetwork(numberOfStates, numberOfActions, [100]);
+
+        this._neuralNetwork = new EasyNetworkForQLearning(numberOfStates, 100, numberOfActions);//@TODO use state count rather than 100?
+
         if (typeof previousSavedData !== 'undefined') {
-            this._neuralNetwork.fromJSON(previousSavedData);
+            // this._neuralNetwork.fromJSON(previousSavedData);
         }
         this._agent = new QNetworkAgent(
             numberOfStates,
@@ -145,6 +148,10 @@ export default class RlDqn {
 
         if (!this._learningEnabled) {
             reward = null;//Passing null rewards to the agent disables learning inside it
+        }
+
+        if (reward) {
+            reward = reward / 100;//Squash the reward to be between -1 and 1
         }
 
         let action = this._agent.learnAndAct(reward, state, reward == null);

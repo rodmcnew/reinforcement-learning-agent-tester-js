@@ -7,13 +7,13 @@ import TabularSARSA_5x3Viewport from './agent/machine-learning/TabularSARSA_5x3V
 
 export default [
     {
+        name: 'MachineLearning - DeepQNetwork_OneStep - PreTrained - ranked 226',
+        class: DeepQNetwork_OneStep
+    },
+    {
         name: 'MachineLearning - TabularSARSA_5x3Viewport_32768States - PreTrained - ranked 224',
         class: TabularSARSA_5x3Viewport,
         ticksPerInterval: 20000 //This agent runs fast but needs many games to learn
-    },
-    {
-        name: 'MachineLearning - DeepQNetwork_OneStep - PreTrained - ranked 226',
-        class: DeepQNetwork_OneStep
     },
     // {
     //     name: 'HandProgrammed - LookAheadIn9x3Viewport - ranked 87',
