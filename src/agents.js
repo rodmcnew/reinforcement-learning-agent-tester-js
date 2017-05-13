@@ -13,7 +13,7 @@ export default [
         ticksPerInterval: 20000 //This agent runs fast but needs many games to learn
     },
     {
-        name: 'ReinforcementLearning - DeepQNetwork_OneStep - PreTrained - ranked 226',
+        name: 'CURRENTLY BROKEN - ReinforcementLearning - DeepQNetwork_OneStep - PreTrained - ranked 226',
         class: DeepQNetwork_OneStep
     },
     // {
