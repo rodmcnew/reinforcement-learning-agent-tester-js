@@ -9,7 +9,7 @@
   "devDependencies": {
     "chart.js": "^2.5.0",
     "react-scripts": "0.9.5",
-    "tabular-sarsa": "^1.0.4"
+    "tabular-sarsa": "^1.0.6"
   },
   "scripts": {
     "start": "react-scripts start",

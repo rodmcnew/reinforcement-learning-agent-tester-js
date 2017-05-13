@@ -216,6 +216,12 @@ export default class App extends Component {
                         godObservation={this.state.godObservation}
                         gameNumber={this.state.universalGameNumber}
                     />
+                    {this._agents[this.state.currentAgentIndex].description &&
+                    <div>
+                        <br/>
+                        {this._agents[this.state.currentAgentIndex].description}
+                    </div>
+                    }
                     <div id="agentRendererContainer"></div>
                 </div>
                 }
