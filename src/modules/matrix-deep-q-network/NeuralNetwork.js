@@ -37,7 +37,7 @@ function buildOuts(outputSize, hiddenLayerSizes) {
 }
 
 export default class NeuralNetwork {
-    constructor(inputSize, outputSize, hiddenLayerSizes) {
+    constructor(inputSize, hiddenLayerSizes, outputSize) {
         this.forward = this.forward.bind(this);
         this.backPropagate = this.backPropagate.bind(this);
 

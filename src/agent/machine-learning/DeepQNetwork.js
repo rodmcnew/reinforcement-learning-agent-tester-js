@@ -13,7 +13,6 @@ let rlDqnHasBeenInitialized = false;
 export default class DeepQNetwork_OneStep {
     constructor() {
         this._lastScore = null;
-        this._lastActionIndex = 2; //2='s'
     }
 
     /**
@@ -23,9 +22,6 @@ export default class DeepQNetwork_OneStep {
      */
     getAction(observation) {
         const state = matrixToFlatArray(viewportConversions.convert9x9to5x3(observation.tileTypes));
-
-        //Give the agent memory of the last action it took. This may be cheating.
-        // state.push(this._lastActionIndex);
 
         let reward = null;
         if (this._lastScore !== null && rlDqnHasBeenInitialized) {
@@ -37,7 +33,6 @@ export default class DeepQNetwork_OneStep {
         let action = actions[actionIndex];
 
         this._lastScore = observation.score;
-        this._lastActionIndex = actionIndex;
         rlDqnHasBeenInitialized = true;
         return action;
     }

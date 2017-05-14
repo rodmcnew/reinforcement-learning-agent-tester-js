@@ -1,10 +1,9 @@
-import DeepNetwork from './network/DeepNetwork'
-import LogisticSigmoid from './activation-function/LogisticSigmoid'
-import LeakyRelu from './activation-function/LogisticSigmoid'
-import ShallowNetwork from './network/ShallowNetwork'
-import EasyNetworkForQLearning from './network-templates/EasyNetworkForQLearning'
-import shuffleTrain from './trainer/shuffleTrain'
-
+// import DeepNetwork from './network/DeepNetwork'
+// import LogisticSigmoid from './activation-function/LogisticSigmoid'
+// import LeakyRelu from './activation-function/LogisticSigmoid'
+// import ShallowNetwork from './network/ShallowNetwork'
+// import shuffleTrain from './trainer/shuffleTrain'
+// import '../deep-q-network/neural-network/networkTest'
 
 // var network = new ShallowNetwork(2, 1, new LogisticSigmoid(), 0.5);
 // var trainingSets = [ //"AND Gate" Behaviour
@@ -31,17 +30,18 @@ import shuffleTrain from './trainer/shuffleTrain'
 //         }
 //     ],
 // );
-var trainingSets = [ //"XOR Gate" Behaviour
-    [[0, 0], [0]],
-    [[0, 1], [1]],
-    [[1, 0], [1]],
-    [[1, 1], [0]],
-];
+// var trainingSets = [ //"XOR Gate" Behaviour
+//     [[0, 0], [0]],
+//     [[0, 1], [1]],
+//     [[1, 0], [1]],
+//     [[1, 1], [0]],
+// ];
 
-var network = new EasyNetworkForQLearning(2, 5, 1);
+// var network = new DeepNetwork(2, 5, 1);
 
-
-it('tworks!', () => {
-    shuffleTrain(network, trainingSets, 20000);
-    // shuffleTrain(network, trainingSets, 10);
-});
+// console.log('hi');
+//
+// it('tworks!', () => {
+//     // shuffleTrain(network, trainingSets, 20000);
+//     // shuffleTrain(network, trainingSets, 10);
+// });

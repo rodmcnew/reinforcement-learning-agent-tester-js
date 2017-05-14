@@ -1,13 +1,5 @@
 import {gaussRandom} from '../math/random'
-
-function assertIsNumber(value, valueLabel) {
-    if (typeof value === 'undefined') {
-        throw new Error(valueLabel + ' is undefined');
-    }
-    if (isNaN(value)) {
-        throw new Error(valueLabel + ' is NaN');
-    }
-}
+import {assertIsNumber} from '../assert/assert'
 
 function logWeightUpdate(description, update, oldValue, newValue, gradient) {
     console.log(

@@ -11,7 +11,7 @@ import StatsDisplay from './component/StatsDisplay'
 
 export const settings = {//@TODO move out of global?
     // renderingEnabled: false,
-    // speed: 0,
+    // speed: 10000000000,
     renderingEnabled: true,
     speed: 250,//250,
     ticksPerIntervalWhenNotRendering: 100, //100 is good for speed, 10 is good for precise "actions per second" readout
@@ -216,13 +216,12 @@ export default class App extends Component {
                         godObservation={this.state.godObservation}
                         gameNumber={this.state.universalGameNumber}
                     />
+                    <div id="agentRendererContainer"></div>
                     {this._agents[this.state.currentAgentIndex].description &&
                     <div>
-                        <br/>
                         {this._agents[this.state.currentAgentIndex].description}
                     </div>
                     }
-                    <div id="agentRendererContainer"></div>
                 </div>
                 }
                 <br/>

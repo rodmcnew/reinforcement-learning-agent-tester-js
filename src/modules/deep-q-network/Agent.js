@@ -1,8 +1,10 @@
 // import Matrix from './Matrix'
+import './neural-network/networkTest'
 import * as arrayMath from './math/arrayMath'
 import {getRandomIntWithZeroMin} from './math/random'
+import NeuralNetwork from './neural-network/NeuralNetwork'
 export default class Agent {
-    constructor(numberOfStates, maxNumberOfActions, neuralNetwork, options) {
+    constructor(numberOfStates, numberOfActions, options) {
         var defaultOptions = {
             discountFactor: 0.75, //was .075, future reward discount factor
             randomActionProbability: 0.05,// for epsilon-greedy policy
@@ -15,14 +17,15 @@ export default class Agent {
 
         this._options = Object.assign(defaultOptions, options);
 
-        this.numberOfInputs = numberOfStates;
-        this.numberOfActions = maxNumberOfActions;
+        this._neuralNetwork = new NeuralNetwork(numberOfStates, 100, numberOfActions);//@TODO use state count rather than 100?
 
-        this._neuralNetwork = neuralNetwork;
+        this.numberOfInputs = numberOfStates;
+        this.numberOfActions = numberOfActions;
+
         this._lastActionStats = {
             action: 0,
             wasRandom: false,
-            weights: new Float64Array(maxNumberOfActions),
+            weights: new Float64Array(numberOfActions),
             tdError: 0
         };
 
@@ -61,16 +64,18 @@ export default class Agent {
         let action;
 
         // epsilon greedy policy
-        if (Math.random() < this._options.randomActionProbability) {
-            action = getRandomIntWithZeroMin(this.numberOfActions);
-            actionWasRandom = true;
-        } else {
-            // greedy wrt Q function
-            var actionMatrix = this._neuralNetwork.invoke(state);
+        // if (Math.random() < this._options.randomActionProbability) {
+        //     action = getRandomIntWithZeroMin(this.numberOfActions);
+        //     actionWasRandom = true;
+        // } else {
+        //     // greedy wrt Q function
+        //     var actionMatrix = this._neuralNetwork.invoke(state);
+        //
+        //     actionWeights = actionMatrix;
+        //     action = arrayMath.getIndexOfMaxValue(actionMatrix); // returns index of argmax action
+        // }
 
-            actionWeights = actionMatrix;
-            action = arrayMath.getIndexOfMaxValue(actionMatrix); // returns index of argmax action
-        }
+        action = 0;
 
         // console.log(actionWeights);
 
@@ -100,7 +105,7 @@ export default class Agent {
             // learn from this tuple to get a sense of how "surprising" it is to the agent
             var tdError = this._learnFromExample(this.lastObservation, this.lastAction, this.lastReward, this.currentObservation);
 
-            // decide if we should keep this experience in the replay
+            // decide if we should keep this experience in the replay //@TODO don't use this.t for replays
             if (this.t % this._options.experienceRecordInterval === 0) {
                 this.exp[this.expi] = [this.lastObservation, this.lastAction, this.lastReward, this.currentObservation];
                 this.expi += 1;
@@ -110,12 +115,12 @@ export default class Agent {
             }
             this.t += 1;
 
-            // sample some additional experience from replay memory and learn from it
-            for (var k = 0; k < this._options.learningStepsPerIteration; k++) {
-                var ri = getRandomIntWithZeroMin(this.exp.length); // todo: priority sweeps?
-                var e = this.exp[ri];
-                this._learnFromExample(e[0], e[1], e[2], e[3])
-            }
+            // // sample some additional experience from replay memory and learn from it//@TODO re-enable
+            // for (var k = 0; k < this._options.learningStepsPerIteration; k++) {
+            //     var ri = getRandomIntWithZeroMin(this.exp.length);
+            //     var e = this.exp[ri];
+            //     this._learnFromExample(e[0], e[1], e[2], e[3])
+            // }
         }
         this.lastReward = r1; // store for next update
         return tdError;
@@ -146,7 +151,7 @@ export default class Agent {
         console.log('pred', prediction);
         console.log('targ', target);
         this._neuralNetwork.learn(target);
-        console.log('npre',this._neuralNetwork.invoke(lastObservation));
+        console.log('npre', this._neuralNetwork.invoke(lastObservation));
         console.log('-');
 //@TODO learn only from error output and not others?
         var error = (prediction[lastAction] - targetActionValue);

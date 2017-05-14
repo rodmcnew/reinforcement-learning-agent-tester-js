@@ -9,12 +9,11 @@ export const oppositeActions = {
 
 const actionVectors = {
     //[dX, dY, dScore]
-    w: [0, -1, -config.verticalDeltaScore],
-    a: [-1, 0, 0],
-    s: [0, 1, config.verticalDeltaScore],
-    d: [1, 0, 0],
+    w: [0, -1, config.deltaScorePerAction - config.verticalDeltaScore],
+    a: [-1, 0, config.deltaScorePerAction],
+    s: [0, 1, config.deltaScorePerAction + config.verticalDeltaScore],
+    d: [1, 0, config.deltaScorePerAction],
 };
-
 export function getFeelerValue(observation, feelerSteps) {
     let position = [observation.position[0], observation.position[1]];
     let value = 0;
@@ -24,9 +23,6 @@ export function getFeelerValue(observation, feelerSteps) {
         let cost;
         if (typeof observation.tileTypes[position[0]] === 'undefined' || typeof observation.tileTypes[position[0]][position[1]] === 'undefined') {
             cost = config.tileTypeToDeltaScore[1]; //If going off map, make look very expensive
-            // } else
-            //     if (observation.visibles[position[0]][position[1]] === 0) {
-            //     cost = 1;//config.maxTileCost / 2; //@TODO there must be a better way to deal with unknown tiles
         } else {
             cost = config.tileTypeToDeltaScore[observation.tileTypes[position[0]][position[1]]]
         }

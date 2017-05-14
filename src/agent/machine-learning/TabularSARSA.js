@@ -2,7 +2,7 @@ import * as viewportConversions from '../../environment/viewportConversions'
 import {matrixToFlatArray} from '../../environment/nestedFloatMatrixMath'
 import {data as savedBrain} from '../../data/saves/tabular-sarsa'
 import {Agent} from 'tabular-sarsa'
-import {renderActionResponse, renderReward} from './helper/deepQNetworkAdaptor'
+import {renderActionResponse, renderReward} from './helper/qStateRenderer'
 import {settings} from '../../App'
 import {actions} from '../../environment'
 

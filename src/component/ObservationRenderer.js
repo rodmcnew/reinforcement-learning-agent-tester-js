@@ -1,4 +1,4 @@
-import * as viewportConversions from './../environment/viewportConversions'
+// import * as viewportConversions from './../environment/viewportConversions'
 import React, {Component} from 'react';
 import PropTypes from 'prop-types'
 
@@ -33,8 +33,10 @@ export default class ObservationRenderer extends Component {
 
     render() {
         const agentTileColors = calculateAgentTileColors(
-            viewportConversions.convert9x9to5x3(this.props.agentObservation.tileTypes),
-            [2, 0]
+            // viewportConversions.convert9x9to5x3(this.props.agentObservation.tileTypes),
+            this.props.agentObservation.tileTypes,
+            // [2, 0]
+            this.props.agentObservation.position
         );
         const godTileColors = calculateGodTileColors(
             this.props.godObservation.tileTypes,

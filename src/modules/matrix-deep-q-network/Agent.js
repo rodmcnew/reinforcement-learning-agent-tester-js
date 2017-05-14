@@ -1,8 +1,9 @@
 import Matrix from './Matrix'
 import * as arrayMath from './arrayMath'
 import {getRandomIntWithZeroMin} from './random'
+import NeuralNetwork from './NeuralNetwork'
 export default class Agent {
-    constructor(numberOfStates, maxNumberOfActions, neuralNetwork, options) {
+    constructor(numberOfStates, maxNumberOfActions, options) {
         var defaultOptions = {
             discountFactor: 0.75, //was .075, future reward discount factor
             randomActionProbability: 0.05,// for epsilon-greedy policy
@@ -10,15 +11,15 @@ export default class Agent {
             experienceRecordInterval: 25,// number of time steps before we add another experience to replay memory
             experienceSize: 5000,// size of experience replay
             learningStepsPerIteration: 10,
-            tdErrorClamp: 1.0
+            tdErrorClamp: 1.0,
+            hiddenNeuronLayerSizes: [100]// [numberOfStates]
         };
 
         this._options = Object.assign(defaultOptions, options);
 
         this.numberOfInputs = numberOfStates;
         this.numberOfActions = maxNumberOfActions;
-
-        this._neuralNetwork = neuralNetwork;
+        this._neuralNetwork = new NeuralNetwork(numberOfStates, this._options.hiddenNeuronLayerSizes, maxNumberOfActions);
         this._lastActionStats = {
             action: 0,
             wasRandom: false,
@@ -141,5 +142,13 @@ export default class Agent {
         this._neuralNetwork.backPropagate(outputError, this._options.learningRate);
 
         return tdError;
+    }
+
+    loadFromJson(json) {
+        this._neuralNetwork.fromJSON(json);
+    }
+
+    saveToJson() {
+        return this._neuralNetwork.toJSON();
     }
 };
