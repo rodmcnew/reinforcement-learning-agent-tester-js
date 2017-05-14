@@ -1,4 +1,4 @@
-// import LookAheadIn9x3Viewport from './agent/hand-programmed/LookAheadIn9x3Viewport'
+import LookAhead from './agent/hand-programmed/LookAhead'
 // import LookAheadIn3x2Viewport from './agent/hand-programmed/LookAheadIn3x2Viewport'
 // import AlwaysMoveStraightDown from './agent/hand-programmed/AlwaysMoveStraightDown'
 import LookAheadIn5x3Viewport from './agent/hand-programmed/LookAheadIn5x3Viewport'
@@ -16,10 +16,10 @@ export default [
         description: TabularSARSA.getDescription(),
         ticksPerInterval: 20000 //This agent runs fast but needs many games to learn
     },
-    // {
-    //     name: 'HandProgrammed - LookAheadIn9x3Viewport - ranked 87',
-    //     class: LookAheadIn9x3Viewport
-    // },
+    {
+        name: 'HandProgrammed - LookAhead - ranked 255',
+        class: LookAhead
+    },
     {
         name: 'HandProgrammed - LookAheadIn5x3Viewport - ranked 247',
         class: LookAheadIn5x3Viewport
