@@ -2,9 +2,10 @@ import * as viewportConversions from '../../environment/viewportConversions'
 import {matrixToFlatArray} from '../../environment/nestedFloatMatrixMath'
 import {data as savedBrain} from '../../data/saves/tabular-sarsa'
 import {Agent} from 'tabular-sarsa'
-import {renderActionResponse, renderReward} from './helper/qStateRenderer'
+import {renderActionResponse, renderReward} from '../../agent/machine-learning/helper/qStateRenderer'
 import {settings} from '../../App'
 import {actions} from '../../environment'
+import RewardCalculator from '../../agent/machine-learning/helper/RewardCalculator'
 
 /**
  * This controls whether we make the agent aware of what it's last action was. Setting this to true causes the agent
@@ -18,7 +19,7 @@ const viewportPixelCount = 5 * 3;
 export const stateCount = Math.pow(2, viewportPixelCount) * (rememberLastAction ? actions.length : 1);
 
 var agent = new Agent(stateCount, actions.length);
-var agentHasBeenInitialized = false;
+let rewardCalculator = new RewardCalculator();
 
 agent.loadFromJson(savedBrain);//Load the previously saved brain
 /**
@@ -62,6 +63,7 @@ export default class TabularSARSA {
     constructor() {
         this._lastScore = null;
         this._lastAction = 0;
+        rewardCalculator = new RewardCalculator();
     }
 
     /**
@@ -70,12 +72,7 @@ export default class TabularSARSA {
      * @return {string} action code
      */
     getAction(observation) {
-        let reward = null;
-        if (this._lastScore !== null && agentHasBeenInitialized) {
-            reward = observation.score - this._lastScore;
-        }
-        this._lastScore = observation.score;
-        agentHasBeenInitialized = true;
+        let reward = rewardCalculator.calcLastReward(observation);
         var state = observationToInt(observation, this._lastAction);
         var actionIndex = agent.decide(reward, state);
         var action = actions[actionIndex];
@@ -90,7 +87,7 @@ export default class TabularSARSA {
 
     clearBrain() {
         agent = new Agent(stateCount, actions.length);
-        agentHasBeenInitialized = false;
+        rewardCalculator = new RewardCalculator();
     }
 
     exportBrain() {
