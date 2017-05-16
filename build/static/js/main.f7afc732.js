@@ -11112,8 +11112,8 @@
 	        var fixedValue = actionResponse.weights[i] - minActionValue;
 	        if (fixedValue < minActionValue) {
 	            fixedValue = 0;
-	        } else if (fixedValue > maxActionValue) {
-	            fixedValue = maxActionValue;
+	        } else if (fixedValue > maxActionValue * 2) {
+	            fixedValue = maxActionValue * 2;
 	        }
 	        actionElements[i].style.width = fixedValue * 150 + barFrontPadding + 'px';
 	        actionElements[i].innerHTML = (actionResponse.weights[i] * 100).toFixed(0);
@@ -52945,4 +52945,4 @@
 
 /***/ }
 /******/ ])));
-//# sourceMappingURL=main.720cf4a2.js.map
+//# sourceMappingURL=main.f7afc732.js.map
