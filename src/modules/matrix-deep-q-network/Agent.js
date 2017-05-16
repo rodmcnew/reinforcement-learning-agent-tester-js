@@ -59,16 +59,16 @@ export default class Agent {
         let actionWeights = null;
         let action;
 
+        // greedy wrt Q function
+        var actionMatrix = this._neuralNetwork.forward(state, false);
+
+        actionWeights = actionMatrix.w;
+        action = arrayMath.getIndexOfMaxValue(actionMatrix.w); // returns index of argmax action
+
         // epsilon greedy policy
         if (Math.random() < this._options.randomActionProbability) {
             action = getRandomIntWithZeroMin(this.numberOfActions);
             actionWasRandom = true;
-        } else {
-            // greedy wrt Q function
-            var actionMatrix = this._neuralNetwork.forward(state, false);
-
-            actionWeights = actionMatrix.w;
-            action = arrayMath.getIndexOfMaxValue(actionMatrix.w); // returns index of argmax action
         }
 
         // shift state memory

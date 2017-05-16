@@ -1,12 +1,15 @@
 import arrayShuffle from '../math/arrayShuffle'
 
-function log(inputs, targetOutputs, outputs) {
+function log(epoch, setNumber, inputs, targetOutputs, outputs) {
     // console.log('inputs:', inputs);
+    var errors = new Array(outputs.length);
+    for (var i = 0, len = outputs.length; i < len; i++) {
+        errors[i] = (targetOutputs[i] - outputs[i]).toFixed(4);
+    }
     console.log(
-        inputs, targetOutputs, outputs,
-        'error: ' + [Math.round((outputs[0] - targetOutputs[0]) * 100) /100, Math.round((outputs[1] - targetOutputs[1]) * 100)/100],
-        'output: ' + Math.round((outputs[0]) * 100) + '%',
-        'targetOutput ' + Math.round((targetOutputs[0]) * 100) + '%',
+        epoch + ':' + setNumber,
+        'errors', errors,
+        // 'input', inputs, 'targetOutput', targetOutputs, 'output', outputs
     );
 }
 
@@ -15,11 +18,14 @@ export default function shuffleTrain(neuralNetwork, trainingSets, maxEpochs) {
         trainingSets = arrayShuffle(trainingSets);
 
         for (var setI = 0, setCount = trainingSets.length; setI < setCount; setI++) {
+
             var set = trainingSets[setI];
-            // console.log(set);
+
             var outputs = neuralNetwork.invoke(set[0]);
+
             neuralNetwork.learn(set[1]);
-            log(set[0],set[1],outputs);
+
+            log(epoch, setI, set[0], set[1], outputs);
         }
     }
 }

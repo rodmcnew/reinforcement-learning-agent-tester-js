@@ -1,13 +1,13 @@
-import {gaussRandom} from '../math/random'
-import {assertIsNumber} from '../assert/assert'
+// import {gaussRandom} from '../math/random'
+// import {assertIsNumber} from '../assert/assert'
 
-function logWeightUpdate(description, update, oldValue, newValue, gradient) {
-    console.log(
-        'Updating neuron ' + description + ' by: ' + update,
-        'weight:' + oldValue + '->' + newValue,
-        'gradient:' + gradient
-    )
-}
+// function logWeightUpdate(description, update, oldValue, newValue, gradient) {
+//     console.log(
+//         'Updating weight ' + description + ' by: ' + update,
+//         'weight:' + oldValue + '->' + newValue,
+//         'gradient:' + gradient
+//     )
+// }
 
 export default class OutputLayer {
     constructor(nodeCount, inputLayer, activationFunction, learningRate) {
@@ -16,55 +16,70 @@ export default class OutputLayer {
         this.inputNodeCount = this.inputCount + 1;//Add 1 for the bias node
         this.weights = new Float64Array(nodeCount * this.inputNodeCount);
         for (var weightI = 0, weightLen = this.weights.length; weightI < weightLen; weightI++) {
-            this.weights[weightI] = gaussRandom();
+            this.weights[weightI] = Math.random() - 0.5; //gaussRandom(); //@TODO do better?
         }
         this.outputs = new Float64Array(nodeCount);
-        this.activationFunction = activationFunction.invoke;
-        this.activationFunctionDerivative = activationFunction.invokeDerivative;
+        this.activationFunction = activationFunction.xToY;
+        this.activationFunctionDerivative = activationFunction.yToSlope;
         this.errorGradients = new Float64Array(nodeCount);
         this.learningRate = learningRate;
         this.inputLayer = inputLayer;
-        // this.inputs = new Float64Array(inputLayer.nodeCount + 1)
     }
 
     feedForward() {
         this.inputs = this.inputLayer.outputs;
 
-        // if (this.inputs.length == this.inputCount)
-        // // console.log('b', this.inputs);
-        //     this.inputs[this.inputCount] = 1;//Add a bias node that always outputs "1"
-        // // console.log('a', this.inputs);
+        //Defining these locally speeds up the loop below by reducing object property access
+        var inputNodeCount = this.inputNodeCount;
+        var weights = this.weights;
+        var inputs = this.inputs;
+        var activationFunction = this.activationFunction;
+        var outputs = this.outputs;
+        var nodeCount = this.nodeCount;
+        var inputCount = this.inputCount;
 
-        for (var neuronI = 0; neuronI < this.nodeCount; neuronI++) {
+        for (var neuronI = 0; neuronI < nodeCount; neuronI++) {
             var sum = 0;
-            for (var inputI = 0; inputI < this.inputCount; inputI++) {
-                assertIsNumber(this.inputs[inputI], 'Input');
-
-                sum += this.inputs[inputI] * this.weights[neuronI * this.inputNodeCount + inputI];
-                // console.log('adder', inputI, this.inputs[inputI], this.weights[neuronI * this.inputNodeCount + inputI])
+            for (var inputI = 0; inputI < inputCount; inputI++) {
+                // assertIsNumber(this.inputs[inputI], 'Input');
+                sum += inputs[inputI] * weights[neuronI * inputNodeCount + inputI];
             }
-            // console.log('adder', inputI, 1, this.weights[neuronI * this.inputNodeCount + inputI]);
-            sum += this.weights[neuronI * this.inputNodeCount + this.inputCount];//Bias node that always inputs "1"
+            sum += weights[neuronI * inputNodeCount + inputCount];//Bias node that always inputs "1"
 
-            this.outputs[neuronI] = this.activationFunction(sum);
+            outputs[neuronI] = activationFunction(sum);
 
-            assertIsNumber(this.outputs[neuronI], 'Neuron output');
+            // assertIsNumber(this.outputs[neuronI], 'Neuron output');
         }
 
-        return this.outputs;
+        return outputs;
     }
 
     backPropagateCalculateErrorGradient(targetOutputs) {
-        for (var neuronI = 0; neuronI < this.nodeCount; neuronI++) {
-            this.errorGradients[neuronI] = this.outputs[neuronI] - targetOutputs[neuronI];
-            // console.log(neuronI, this.errorGradients[neuronI], this.outputs[neuronI], targetOutputs[neuronI]);
-            assertIsNumber(this.errorGradients[neuronI], 'Error gradient');
+        //Defining these locally speeds up the loop below by reducing object property access
+        var nodeCount = this.nodeCount;
+        var errorGradients = this.errorGradients;
+        var outputs = this.outputs;
+        var activationFunctionDerivative = this.activationFunctionDerivative;
+
+        for (var neuronI = 0; neuronI < nodeCount; neuronI++) {
+            errorGradients[neuronI] = (outputs[neuronI] - targetOutputs[neuronI])
+                * activationFunctionDerivative(outputs[neuronI]);
+            // assertIsNumber(this.errorGradients[neuronI], 'Error gradient');
         }
     }
 
     backPropagateOptimize() {
-        for (var neuronI = 0; neuronI < this.nodeCount; neuronI++) {
-            for (var inputI = 0; inputI < this.inputCount; inputI++) {
+        //Defining these locally speeds up the loop below by reducing object property access
+        var inputNodeCount = this.inputNodeCount;
+        var weights = this.weights;
+        var nodeCount = this.nodeCount;
+        var inputCount = this.inputCount;
+        var inputs = this.inputs;
+        var learningRate = this.learningRate;
+        var errorGradients = this.errorGradients;
+
+        for (var neuronI = 0; neuronI < nodeCount; neuronI++) {
+            for (var inputI = 0; inputI < inputCount; inputI++) {
                 // logWeightUpdate(
                 //     neuronI + ':' + inputI,
                 //     -this.learningRate * this.inputs[inputI] * this.errorGradients[neuronI],
@@ -74,16 +89,24 @@ export default class OutputLayer {
                 //     this.errorGradients[neuronI]
                 // );
 
-                this.weights[neuronI * this.inputCount + inputI] -=
-                    this.learningRate * this.inputs[inputI] * this.errorGradients[neuronI];
+                weights[neuronI * inputNodeCount + inputI] -=
+                    learningRate * inputs[inputI] * errorGradients[neuronI];
 
-                assertIsNumber(this.weights[neuronI * this.inputCount + inputI], 'Weight');
+                // assertIsNumber(this.weights[neuronI * this.inputNodeCount + inputI], 'Weight');
             }
 
-            this.weights[neuronI * this.inputCount + this.inputCount] -= //Do the bias node weight
-                this.learningRate * this.errorGradients[neuronI];
+            // logWeightUpdate(
+            //     neuronI + ':' + inputI,
+            //     -this.learningRate * this.errorGradients[neuronI],
+            //     this.weights[neuronI * this.inputCount + inputI],
+            //     this.weights[neuronI * this.inputCount + inputI] -
+            //     this.learningRate * this.errorGradients[neuronI],
+            //     this.errorGradients[neuronI]
+            // );
+            weights[neuronI * inputNodeCount + inputCount] -= //Do the bias node weight
+                learningRate * errorGradients[neuronI];
 
-            assertIsNumber(this.weights[neuronI * this.inputCount + this.inputCount], 'Bias weight');
+            // assertIsNumber(this.weights[neuronI * this.inputNodeCount + this.inputCount], 'Bias weight');
         }
     }
 }

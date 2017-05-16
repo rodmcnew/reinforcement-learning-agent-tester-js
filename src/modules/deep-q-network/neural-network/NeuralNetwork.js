@@ -1,8 +1,6 @@
 import DeepNetwork from '../../fast-deep-net/network/DeepNetwork'
-import Tanh from '../../fast-deep-net/activation-function/Tanh'
-// import LogisticSigmoid from '../../fast-deep-net/activation-function/LogisticSigmoid'
 import Linear from '../../fast-deep-net/activation-function/Linear'
-// import LeakyRelu from '../../fast-deep-net/activation-function/LeakyRelu'
+import LeakyRelu from '../../fast-deep-net/activation-function/LeakyRelu'
 export default function (inputCount, hiddenCount, outputCount) {
     return new DeepNetwork(
         [
@@ -11,13 +9,13 @@ export default function (inputCount, hiddenCount, outputCount) {
             },
             { //Hidden layer
                 size: hiddenCount,
-                activationFunction: new Tanh(),
-                learningRate: 0.5
+                activationFunction: new LeakyRelu(),
+                learningRate: 0.01
             },
             { //Output layer
                 size: outputCount,
-                activationFunction: new Tanh(),
-                learningRate: 0.5
+                activationFunction: new Linear(),
+                learningRate: 0.01
             }
         ],
     );

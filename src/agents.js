@@ -1,14 +1,13 @@
 import LookAhead from './agent/hand-programmed/LookAhead'
-// import LookAheadIn3x2Viewport from './agent/hand-programmed/LookAheadIn3x2Viewport'
-// import AlwaysMoveStraightDown from './agent/hand-programmed/AlwaysMoveStraightDown'
 import LookAheadIn5x3Viewport from './agent/hand-programmed/LookAheadIn5x3Viewport'
-import MatrixDeepQNetwork from './agent/machine-learning/MatrixDeepQNetwork'
+// import MatrixDeepQNetwork from './agent/machine-learning/MatrixDeepQNetwork'
+import DeepQNetwork from './agent/machine-learning/DeepQNetwork'
 import TabularSARSA from './agent/machine-learning/TabularSARSA'
 
 export default [
     {
-        name: 'ReinforcementLearning - MatrixDeepQNetwork - PreTrained - ranked 228',
-        class: MatrixDeepQNetwork
+        name: 'ReinforcementLearning - DeepQNetwork - ranked - 212',
+        class: DeepQNetwork
     },
     {
         class: TabularSARSA,
@@ -25,11 +24,7 @@ export default [
         class: LookAheadIn5x3Viewport
     },
     // {
-    //     name: 'HandProgrammed - LookAheadIn3x2Viewport - ranked 74',
-    //     class: LookAheadIn3x2Viewport
-    // },
-    // {
-    //     name: 'HandProgrammed - AlwaysMoveStraightDown - ranked (-31)',
-    //     class: AlwaysMoveStraightDown
+    //     name: 'ReinforcementLearning - MatrixDeepQNetwork - PreTrained - ranked 228',
+    //     class: MatrixDeepQNetwork
     // },
 ];

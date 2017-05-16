@@ -63,19 +63,20 @@ export default class Agent {
         let actionWeights = null;
         let action;
 
-        // epsilon greedy policy
-        // if (Math.random() < this._options.randomActionProbability) {
-        //     action = getRandomIntWithZeroMin(this.numberOfActions);
-        //     actionWasRandom = true;
-        // } else {
-        //     // greedy wrt Q function
-        //     var actionMatrix = this._neuralNetwork.invoke(state);
-        //
-        //     actionWeights = actionMatrix;
-        //     action = arrayMath.getIndexOfMaxValue(actionMatrix); // returns index of argmax action
-        // }
 
-        action = 0;
+        // greedy wrt Q function
+        var actionMatrix = this._neuralNetwork.invoke(state);
+
+        actionWeights = actionMatrix;
+        action = arrayMath.getIndexOfMaxValue(actionMatrix); // returns index of argmax action
+
+        //epsilon greedy policy
+        if (Math.random() < this._options.randomActionProbability) {
+            action = getRandomIntWithZeroMin(this.numberOfActions);
+            actionWasRandom = true;
+        }
+
+        // action = 0;
 
         // console.log(actionWeights);
 
@@ -100,7 +101,7 @@ export default class Agent {
 
     _learn(r1) {
         // perform an update on Q function
-        if (!(this.lastReward == null) && this._options.learningRate > 0) {
+        if (this.lastObservation !== null && this.lastReward !== null && this._options.learningRate > 0) {
 
             // learn from this tuple to get a sense of how "surprising" it is to the agent
             var tdError = this._learnFromExample(this.lastObservation, this.lastAction, this.lastReward, this.currentObservation);
@@ -115,12 +116,12 @@ export default class Agent {
             }
             this.t += 1;
 
-            // // sample some additional experience from replay memory and learn from it//@TODO re-enable
-            // for (var k = 0; k < this._options.learningStepsPerIteration; k++) {
-            //     var ri = getRandomIntWithZeroMin(this.exp.length);
-            //     var e = this.exp[ri];
-            //     this._learnFromExample(e[0], e[1], e[2], e[3])
-            // }
+            // sample some additional experience from replay memory and learn from it//@TODO re-enable
+            for (var k = 0; k < this._options.learningStepsPerIteration; k++) {
+                var ri = getRandomIntWithZeroMin(this.exp.length);
+                var e = this.exp[ri];
+                this._learnFromExample(e[0], e[1], e[2], e[3])
+            }
         }
         this.lastReward = r1; // store for next update
         return tdError;
@@ -145,17 +146,25 @@ export default class Agent {
         // }
 //@TODO td error clamp?
         var target = prediction.slice();
-        var targetActionValue = lastReward; //+ estimatedFutureReward * this._options.discountFactor;//@TODO uncomment
+        var targetActionValue = lastReward + estimatedFutureReward * this._options.discountFactor;//@TODO uncomment
         target[lastAction] = targetActionValue;
 
-        console.log('pred', prediction);
-        console.log('targ', target);
+        // console.log('pred', prediction);
+        // console.log('targ', target);
         this._neuralNetwork.learn(target);
-        console.log('npre', this._neuralNetwork.invoke(lastObservation));
-        console.log('-');
+        // console.log('npre', this._neuralNetwork.invoke(lastObservation));
+        // console.log('-');
 //@TODO learn only from error output and not others?
         var error = (prediction[lastAction] - targetActionValue);
         // console.log('error:' + error);
         return error; //@TODO chart error?
+    }
+
+    loadFromJson(json) {
+        this._neuralNetwork.loadFromJson(json);
+    }
+
+    saveToJson() {
+        return this._neuralNetwork.saveToJson();
     }
 };

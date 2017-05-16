@@ -1,5 +1,5 @@
 import OutputLayer from './OutputLayer'
-import {assertIsNumber} from '../assert/assert'
+// import {assertIsNumber} from '../assert/assert'
 
 export default class HiddenLayer extends OutputLayer {
     setOutputLayer(outputLayer) {
@@ -7,17 +7,28 @@ export default class HiddenLayer extends OutputLayer {
     }
 
     backPropagateCalculateErrorGradient() {
-        for (var neuronI = 0; neuronI < this.nodeCount; neuronI++) {
+        //Defining these locally speeds up the loop below by reducing object property access
+        var nodeCount = this.nodeCount;
+        var errorGradients = this.errorGradients;
+        var outputs = this.outputs;
+        var activationFunctionDerivative = this.activationFunctionDerivative;
+        var outputLayerNodeCount = this.outputLayer.nodeCount;
+        var outputLayerWeights = this.outputLayer.weights;
+        var outputLayerInputNodeCount = this.outputLayer.inputNodeCount;
+        var outputLayerErrorGradients = this.outputLayer.errorGradients;
+
+        for (var neuronI = 0; neuronI < nodeCount; neuronI++) {
             var errorWithRespectToOutput = 0;
-            for (var outputI = 0; outputI < this.outputLayer.nodeCount; outputI++) {
-                // console.log('ggg', neuronI, outputI, this.outputLayer.errorGradients[outputI]
-                //     , this.outputLayer.weights[outputI * this.outputLayer.inputCount + neuronI]);
-                errorWithRespectToOutput += this.outputLayer.errorGradients[outputI]
-                    * this.outputLayer.weights[outputI * this.outputLayer.inputCount + neuronI]
+            for (var outputI = 0; outputI < outputLayerNodeCount; outputI++) {
+                errorWithRespectToOutput += outputLayerErrorGradients[outputI]
+                    * outputLayerWeights[outputI * outputLayerInputNodeCount + neuronI];
+
             }
 
-            this.errorGradients[neuronI] = errorWithRespectToOutput * this.activationFunctionDerivative(this.outputs[neuronI]);
-            assertIsNumber(this.errorGradients[neuronI], 'Error gradient');
+            errorGradients[neuronI] = errorWithRespectToOutput
+                * activationFunctionDerivative(outputs[neuronI]);
+
+            // assertIsNumber(this.errorGradients[neuronI], 'Error gradient');
         }
     }
 }

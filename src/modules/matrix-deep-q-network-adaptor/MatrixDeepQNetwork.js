@@ -1,5 +1,5 @@
 import {matrixToFlatArray} from '../../environment/nestedFloatMatrixMath'
-import {data as savedNeuralNetwork} from '../../data/saves/deep-q-9x9'
+// import {data as savedNeuralNetwork} from '../../data/saves/matrix-deep-q-9x9'
 // import * as viewportConversions from '../../environment/viewportConversions'
 import Agent from '../../modules/matrix-deep-q-network/Agent'
 import {settings} from '../../App' //@TODO use DI instead for this
@@ -11,7 +11,7 @@ const numberOfStates = config.viewPortSize[0] * config.viewPortSize[1];
 let agent = new Agent(numberOfStates, actions.length);
 let agentHasBeenInitialized = false;
 
-agent.loadFromJson(savedNeuralNetwork);
+// agent.loadFromJson(savedNeuralNetwork);
 
 export default class MatrixDeepQNetwork {
     constructor() {

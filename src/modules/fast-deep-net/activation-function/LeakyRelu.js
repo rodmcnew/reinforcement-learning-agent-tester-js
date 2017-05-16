@@ -1,5 +1,5 @@
 export default class LeakyRelu {
-    invoke(x) {
+    xToY(x) {
         if (x > 0) {
             return x
         } else {
@@ -7,11 +7,11 @@ export default class LeakyRelu {
         }
     }
 
-    invokeDerivative(y) {
+    yToSlope(y) {
         if (y > 0) {
             return 1
         } else {
-            return 0.01; //@TODO is this correct for Y input?
+            return 0.01;
         }
     }
 }

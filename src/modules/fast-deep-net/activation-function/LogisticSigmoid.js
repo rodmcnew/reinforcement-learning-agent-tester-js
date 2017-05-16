@@ -1,9 +1,9 @@
 export default class LogisticSigmoid {
-    invoke(x) {
+    xToY(x) {
         return 1 / (1 + Math.exp(-x));
     }
 
-    invokeDerivative(y) {
+    yToSlope(y) {
         return y * (1 - y);
     }
 }

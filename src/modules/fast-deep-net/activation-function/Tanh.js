@@ -1,9 +1,9 @@
 export default class Tanh {
-    invoke(x) {
+    xToY(x) {
         return Math.tanh(x);
     }
 
-    invokeDerivative(y) {
+    yToSlope(y) {
         return 1 - y * y;
     }
 }

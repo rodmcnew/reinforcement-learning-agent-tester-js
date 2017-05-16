@@ -1,18 +1,23 @@
 import {matrixToFlatArray} from '../../environment/nestedFloatMatrixMath'
-import RlDqn from './helper/deepQNetworkAdaptor'
-// import {config} from '../../environment'
-import {data as savedNeuralNetwork} from '../../data/saves/deep-q-5x3'
-const actions = ['w', 'a', 's', 'd'];
-import * as viewportConversions from '../../environment/viewportConversions'
+import {data as savedNeuralNetwork} from '../../data/saves/deep-q-network-9x9'
+// import * as viewportConversions from '../../environment/viewportConversions'
+import Agent from '../../modules/deep-q-network/Agent'
+import {settings} from '../../App' //@TODO use DI instead for this
+import {renderActionResponse, renderReward} from './helper/qStateRenderer'
+import {actions, config} from '../../environment'
+import RewardCalculator from './helper/RewardCalculator'
 
-const numberOfStates = 5 * 3;//config.viewPortSize[0] * config.viewPortSize[1];
+// const numberOfStates = 5*3;
+const numberOfStates = config.viewPortSize[0] * config.viewPortSize[1];
 
-let rlDqn = new RlDqn(true, numberOfStates, savedNeuralNetwork);
-let rlDqnHasBeenInitialized = false;
+let agent = new Agent(numberOfStates, actions.length);
+let rewardCalculator = new RewardCalculator();
 
-export default class DeepQNetwork_OneStep {
+agent.loadFromJson(savedNeuralNetwork);
+
+export default class MatrixDeepQNetwork {
     constructor() {
-        this._lastScore = null;
+        rewardCalculator = new RewardCalculator();
     }
 
     /**
@@ -21,28 +26,34 @@ export default class DeepQNetwork_OneStep {
      * @return {string} action code
      */
     getAction(observation) {
-        const state = matrixToFlatArray(viewportConversions.convert9x9to5x3(observation.tileTypes));
+        const lastReward = rewardCalculator.calcLastReward(observation);
+        // const state = matrixToFlatArray(viewportConversions.convert9x9to5x3(observation.tileTypes));
+        const state = matrixToFlatArray(observation.tileTypes);
 
-        let reward = null;
-        if (this._lastScore !== null && rlDqnHasBeenInitialized) {
-            reward = observation.score - this._lastScore;
+        // console.log(lastReward,state);
+        let actionIndex = agent.learnAndAct(lastReward, state);
+        let actionResponse = agent.getLastActionStats();
+// console.log(actionResponse);
+
+        if (settings.renderingEnabled) {
+            renderActionResponse(actionResponse);
+            if (lastReward !== null) {
+                renderReward(lastReward)
+            }
         }
-
-        const actionIndex = rlDqn.getAction(state, reward);
 
         let action = actions[actionIndex];
 
         this._lastScore = observation.score;
-        rlDqnHasBeenInitialized = true;
         return action;
     }
 
     clearBrain() {
-        rlDqn = new RlDqn(true, numberOfStates);
-        rlDqnHasBeenInitialized = false;
+        agent = new Agent(numberOfStates, actions.length);
+        rewardCalculator = new RewardCalculator();
     }
 
-    exportBrain(){
-        return rlDqn.exportBrain();
+    exportBrain() {
+        return agent.saveToJson();
     }
 }

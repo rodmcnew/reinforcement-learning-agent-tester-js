@@ -1,9 +1,9 @@
 export default class Linear {
-    invoke(x) {
+    xToY(x) {
         return x;
     }
 
-    invokeDerivative(y) {
+    yToSlope(y) {
         return 1
     }
 }
