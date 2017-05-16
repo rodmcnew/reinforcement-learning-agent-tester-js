@@ -46,8 +46,8 @@ export function renderActionResponse(actionResponse) {//@TODO move out
         let fixedValue = (actionResponse.weights[i] - minActionValue);
         if (fixedValue < minActionValue) {
             fixedValue = 0;
-        } else if (fixedValue > maxActionValue) {
-            fixedValue = maxActionValue
+        } else if (fixedValue > maxActionValue * 2) {
+            fixedValue = maxActionValue * 2;
         }
         actionElements[i].style.width = (fixedValue * 150 + barFrontPadding) + 'px';
         actionElements[i].innerHTML = (actionResponse.weights[i] * 100).toFixed(0);
