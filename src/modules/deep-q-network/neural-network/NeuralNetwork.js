@@ -1,6 +1,6 @@
-import DeepNetwork from '../../fast-deep-net/network/DeepNetwork'
-import Linear from '../../fast-deep-net/activation-function/Linear'
-import LeakyRelu from '../../fast-deep-net/activation-function/LeakyRelu'
+import DeepNetwork from 'layer-oriented-deep-learning-network-js/lib/network/DeepNetwork'
+import Linear from 'layer-oriented-deep-learning-network-js/lib/activation-function/Linear'
+import LeakyRelu from 'layer-oriented-deep-learning-network-js/lib/activation-function/LeakyRelu'
 export default function (inputCount, hiddenCount, outputCount) {
     return new DeepNetwork(
         [

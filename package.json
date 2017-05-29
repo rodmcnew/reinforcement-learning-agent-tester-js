@@ -8,6 +8,7 @@
   },
   "devDependencies": {
     "chart.js": "^2.5.0",
+    "layer-oriented-deep-learning-network-js": "^1.0.0",
     "react-scripts": "0.9.5",
     "tabular-sarsa": "^1.0.6"
   },
