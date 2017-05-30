@@ -2,7 +2,7 @@ import LookAhead from './agent/hand-programmed/LookAhead'
 import LookAheadIn5x3Viewport from './agent/hand-programmed/LookAheadIn5x3Viewport'
 // import MatrixDeepQNetwork from './agent/machine-learning/MatrixDeepQNetwork'
 import DeepQNetwork from './agent/machine-learning/DeepQNetwork'
-import TabularSARSA from './modules/tabular-sarsa-adaptor/TabularSARSA'
+import TabularSARSA from './agent/machine-learning/TabularSARSA'
 export default [
     {
         name: 'ReinforcementLearning - DeepQNetwork - ranked - 227',
