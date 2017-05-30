@@ -6,9 +6,9 @@ import NeuralNetwork from './neural-network/NeuralNetwork'
 export default class Agent {
     constructor(numberOfStates, numberOfActions, options) {
         var defaultOptions = {
-            discountFactor: 0.75, //was .075, future reward discount factor
+            discountFactor: 0.9, //was .075, future reward discount factor
             randomActionProbability: 0.05,// for epsilon-greedy policy
-            learningRate: 0.01,//was 0.01, value function learning rate
+            learningRate: 0.01,//was 0.01, value function learning rate //@TODO this is not used in the NN anymore
             experienceRecordInterval: 25,// number of time steps before we add another experience to replay memory
             experienceSize: 5000,// size of experience replay
             learningStepsPerIteration: 10,

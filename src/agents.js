@@ -5,7 +5,7 @@ import DeepQNetwork from './agent/machine-learning/DeepQNetwork'
 import TabularSARSA from './modules/tabular-sarsa-adaptor/TabularSARSA'
 export default [
     {
-        name: 'ReinforcementLearning - DeepQNetwork - ranked - 212',
+        name: 'ReinforcementLearning - DeepQNetwork - ranked - 227',
         class: DeepQNetwork
     },
     {
