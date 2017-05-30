@@ -1,10 +1,10 @@
-import DeepNetwork from 'layer-oriented-deep-learning-network-js/lib/network/DeepNetwork'
-import InputLayer from 'layer-oriented-deep-learning-network-js/lib/layer/InputLayer'
-import HiddenLayer from 'layer-oriented-deep-learning-network-js/lib/layer/HiddenLayer'
-import OutputLayer from 'layer-oriented-deep-learning-network-js/lib/layer/OutputLayer'
-import Linear from 'layer-oriented-deep-learning-network-js/lib/activation-function/Linear'
-import LeakyRelu from 'layer-oriented-deep-learning-network-js/lib/activation-function/LeakyRelu'
-import StochasticGradientDescent from 'layer-oriented-deep-learning-network-js/lib/optimizer/StochasticGradientDescent'
+import DeepNetwork from 'layerganza/lib/network/DeepNetwork'
+import InputLayer from 'layerganza/lib/layer/InputLayer'
+import HiddenLayer from 'layerganza/lib/layer/HiddenLayer'
+import OutputLayer from 'layerganza/lib/layer/OutputLayer'
+import Linear from 'layerganza/lib/activation-function/Linear'
+import LeakyRelu from 'layerganza/lib/activation-function/LeakyRelu'
+import StochasticGradientDescent from 'layerganza/lib/optimizer/StochasticGradientDescent'
 export default function (inputCount, hiddenCount, outputCount) {
     const learningRate = 0.01;
     return new DeepNetwork(

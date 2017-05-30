@@ -1,5 +1,5 @@
 import NeuralNetwork from './NeuralNetwork'
-import shuffleTrain from 'layer-oriented-deep-learning-network-js/lib/trainer/shuffleTrain'
+import shuffleTrain from 'layerganza/lib/trainer/shuffleTrain'
 
 export function networkTest(){
     var trainingSets = [//left, down, right
