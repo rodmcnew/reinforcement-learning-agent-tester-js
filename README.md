@@ -6,4 +6,4 @@ List of the machine-learning agents:
 - DeepQNetwork - (Author: Rod Mcnew, Link: https://github.com/rodmcnew/layerganza)
 - TabularSarsa - (Author: Rod Mcnew, Link: https://github.com/rodmcnew/tabular-sarsa-js)
 
-This is written in ES6 JavaScript and also uses ReactJS for the UI.
+This is written in ES6 JavaScript and uses ReactJS for the UI.
