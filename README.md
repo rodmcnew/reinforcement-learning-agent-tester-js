@@ -2,7 +2,7 @@ The contains a path finding game and a few different machine-learning agents tha
 
 Try the demo at http://rodmcnew.github.io/reinforcement-learning-agent-tester-js/
 
-Here is a list of the machine-learning agents:
+List of the machine-learning agents:
 - DeepQNetwork - (Author: Rod Mcnew, Link: https://github.com/rodmcnew/layerganza)
 - TabularSarsa - (Author: Rod Mcnew, Link: https://github.com/rodmcnew/tabular-sarsa-js)
 
