@@ -66,6 +66,15 @@ export default class TabularSARSA {
         rewardCalculator = new RewardCalculator();
     }
 
+    static getName() {
+        return 'ReinforcementLearning - TabularSARSA - 5x3 - ranked 224';
+    }
+
+    static getDescription() {
+        return 'This agent views a 5x3 section of the viewport that can be in ' + stateCount + ' possible states. ' +
+            'It uses the Expected-SARSA algorithm with a table-based Q function.';
+    }
+    
     /**
      * @param {AgentObservation} observation
      * @TODO clear last actions when is new game
@@ -92,14 +101,5 @@ export default class TabularSARSA {
 
     exportBrain() {
         return agent.saveToJson();
-    }
-
-    static getName() {
-        return 'ReinforcementLearning - TabularSARSA - ranked 224';
-    }
-
-    static getDescription() {
-        return 'This agent views a 5x3 section of the viewport that can be in ' + stateCount + ' possible states. ' +
-            'It uses the Expected-SARSA algorithm with a table-based Q function.';
     }
 }

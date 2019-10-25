@@ -3,13 +3,14 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "react": "^15.5.4",
-    "react-dom": "^15.5.4"
+    "@tensorflow/tfjs": "^1.2.11",
+    "react": "^16.11.0",
+    "react-dom": "^16.11.0"
   },
   "devDependencies": {
     "chart.js": "^2.5.0",
     "layerganza": "^2.3.1",
-    "react-scripts": "0.9.5",
+    "react-scripts": "3.2.0",
     "tabular-sarsa": "^1.0.6"
   },
   "scripts": {
@@ -18,5 +19,17 @@
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject"
   },
-  "homepage": "./"
+  "homepage": "./",
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
 }

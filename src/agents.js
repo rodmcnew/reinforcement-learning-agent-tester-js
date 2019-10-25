@@ -1,10 +1,11 @@
 import LookAhead from './agent/hand-programmed/LookAhead'
 import LookAheadIn5x3Viewport from './agent/hand-programmed/LookAheadIn5x3Viewport'
 import DeepQNetwork from './agent/machine-learning/DeepQNetwork'
+import TensorFlowUltraBasic from './agent/machine-learning/TensorFlowUltraBasic'
 import TabularSARSA from './agent/machine-learning/TabularSARSA'
 export default [
     {
-        name: 'ReinforcementLearning - DeepQNetwork - ranked - 227',
+        name: DeepQNetwork.getName(),
         class: DeepQNetwork
     },
     {
@@ -14,11 +15,15 @@ export default [
         ticksPerInterval: 20000 //This agent runs fast but needs many games to learn
     },
     {
-        name: 'HandProgrammed - LookAhead - ranked 255',
+        name: TensorFlowUltraBasic.getName(),
+        class: TensorFlowUltraBasic
+    },
+    {
+        name: 'HandProgrammed - LookAhead - 9x3 - ranked 255',
         class: LookAhead
     },
     {
-        name: 'HandProgrammed - LookAheadIn5x3Viewport - ranked 247',
+        name: 'HandProgrammed - LookAhead - 5x3 - ranked 247',
         class: LookAheadIn5x3Viewport
     },
 ];

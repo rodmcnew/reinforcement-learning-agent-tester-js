@@ -4,7 +4,7 @@ import * as arrayMath from './math/arrayMath'
 import {getRandomIntWithZeroMin} from './math/random'
 import NeuralNetwork from './neural-network/NeuralNetwork'
 export default class Agent {
-    constructor(numberOfStates, numberOfActions, options) {
+    constructor(inputCount, numberOfActions, options) {
         var defaultOptions = {
             discountFactor: 0.9, //was .075, future reward discount factor
             randomActionProbability: 0.05,// for epsilon-greedy policy
@@ -17,9 +17,9 @@ export default class Agent {
 
         this._options = Object.assign(defaultOptions, options);
 
-        this._neuralNetwork = new NeuralNetwork(numberOfStates, 100, numberOfActions);//@TODO use state count rather than 100?
+        this._neuralNetwork = new NeuralNetwork(inputCount, 64, numberOfActions);//@TODO use state count rather than 100?
 
-        this.numberOfInputs = numberOfStates;
+        this.numberOfInputs = inputCount;
         this.numberOfActions = numberOfActions;
 
         this._lastActionStats = {
