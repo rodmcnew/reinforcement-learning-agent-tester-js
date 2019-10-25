@@ -36,18 +36,17 @@ export default class TensorFlowUltraBasic {
      */
     getAction(observation) {
         const lastReward = rewardCalculator.calcLastReward(observation);
-        if (this.lastObservationTensor !== null) {
+        if (this.lastObservationTensor !== null) { //@TODO maybe train in batches instead of every action?
             const target = [null, null, null, null];//@TODO is this right? is it interpreting these as zeros which would be bad?
             target[this.lastActionIndex] = lastReward;
             model.trainOnBatch(this.lastObservationTensor, tf.tensor(target, [1, 4]));
         }
 
-        const data = Array.from(matrixToFlatArray(observation.tileTypes));//@TODO? 
-
-        const tensor = tf.tensor(data, [1, 9, 9]);
-        const actionPredictedValues = model.predictOnBatch(tensor);
-        const actionIndex = actionPredictedValues.argMax(1).dataSync();
-        this.lastObservationTensor = tensor;
+        const observationArray = Array.from(matrixToFlatArray(observation.tileTypes));//@TODO avoid Array.from? 
+        const observationTensor = tf.tensor(observationArray, [1, 9, 9]);
+        const predictedRewardsByAction = model.predictOnBatch(observationTensor);
+        const actionIndex = predictedRewardsByAction.argMax(1).dataSync();
+        this.lastObservationTensor = observationTensor;
         this.lastActionIndex = actionIndex;
 
         // if (settings.renderingEnabled) { //@TODO
@@ -58,8 +57,6 @@ export default class TensorFlowUltraBasic {
         // }
 
         let action = actions[actionIndex];
-
-        this._lastScore = observation.score;
 
         return action;
     }

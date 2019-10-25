@@ -61,7 +61,6 @@ function observationToInt(observation, lastAction) {
 
 export default class TabularSARSA {
     constructor() {
-        this._lastScore = null;
         this._lastAction = 0;
         rewardCalculator = new RewardCalculator();
     }
@@ -74,7 +73,7 @@ export default class TabularSARSA {
         return 'This agent views a 5x3 section of the viewport that can be in ' + stateCount + ' possible states. ' +
             'It uses the Expected-SARSA algorithm with a table-based Q function.';
     }
-    
+
     /**
      * @param {AgentObservation} observation
      * @TODO clear last actions when is new game

@@ -46,7 +46,6 @@ export default class MatrixDeepQNetwork {
 
         let action = actions[actionIndex];
 
-        this._lastScore = observation.score;
         return action;
     }
 
