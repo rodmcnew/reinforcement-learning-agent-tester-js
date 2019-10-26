@@ -33,9 +33,13 @@ for (let sideWaysAmount = 1; sideWaysAmount <= lookToSideCount; sideWaysAmount++
     });
 
 }
-export default class LookAhead {
+export default class LookAhead9x3 {
     constructor() {
         this._state = {lastAction: null};
+    }
+    
+    static getName() {
+        return 'HandProgrammed - LookAhead - 9x3 - ranked 255';
     }
 
     /**

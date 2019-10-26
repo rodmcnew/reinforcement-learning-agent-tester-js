@@ -1,13 +1,13 @@
 import './App.css';
 import React, {Component} from 'react';
-import {config as environmentConfig, actions} from './environment'
-import ObservationRenderer from './component/ObservationRenderer'
-import BrainExportButton from './component/BrainExportButton'
-import ScoreHistoryChart from './component/ScoreHistoryChart'
-import GameRulesDisplay from './component/GameRulesDisplay'
+import {config as environmentConfig, actions} from './modules/environment'
+import ObservationRenderer from './modules/react-ui-component/ObservationRenderer'
+import BrainExportButton from './modules/react-ui-component/BrainExportButton'
+import ScoreHistoryChart from './modules/react-ui-component/ScoreHistoryChart'
+import GameRulesDisplay from './modules/react-ui-component/GameRulesDisplay'
 import agents from './agents'
 import GameRunner from './GameRunner'
-import StatsDisplay from './component/StatsDisplay'
+import StatsDisplay from './modules/react-ui-component/StatsDisplay'
 
 export const settings = {//@TODO move out of global?
     // renderingEnabled: false,

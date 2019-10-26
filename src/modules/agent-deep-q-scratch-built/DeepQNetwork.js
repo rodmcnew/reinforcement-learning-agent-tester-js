@@ -1,11 +1,11 @@
-import { matrixToFlatArray } from '../../environment/nestedFloatMatrixMath'
+import { matrixToFlatArray } from '../environment/nestedFloatMatrixMath'
 import { data as savedNeuralNetwork } from '../../data/saves/deep-q-network'
 // import * as viewportConversions from '../../environment/viewportConversions'
-import Agent from '../../modules/deep-q-network/Agent'
+import Agent from './lib-deep-q-network-scratch-built/Agent'
 import { settings } from '../../App' //@TODO use DI instead for this
-import { renderActionResponse, renderReward } from './helper/qStateRenderer'
-import { actions, config } from '../../environment'
-import RewardCalculator from './helper/RewardCalculator'
+import { renderActionResponse, renderReward } from '../lib-agent-helper/qStateRenderer'
+import { actions, config } from '../environment'
+import RewardCalculator from '../lib-agent-helper/RewardCalculator'
 
 // const inputCount = 5 * 3;
 const inputCount = config.viewPortSize[0] * config.viewPortSize[1];
@@ -21,7 +21,7 @@ export default class MatrixDeepQNetwork {
     }
 
     static getName() {
-        return 'ReinforcementLearning - DeepQNetwork - 9x9 - ranked - 230'
+        return 'ReinforcementLearning - DeepQNetworkScratchBuilt - 9x9 - ranked 230'
     }
 
     /**

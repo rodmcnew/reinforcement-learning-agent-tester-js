@@ -1,11 +1,11 @@
-import * as viewportConversions from '../../environment/viewportConversions'
-import {matrixToFlatArray} from '../../environment/nestedFloatMatrixMath'
+import * as viewportConversions from '../environment/viewportConversions'
+import {matrixToFlatArray} from '../environment/nestedFloatMatrixMath'
 import {data as savedBrain} from '../../data/saves/tabular-sarsa'
 import {Agent} from 'tabular-sarsa'
-import {renderActionResponse, renderReward} from '../../agent/machine-learning/helper/qStateRenderer'
+import {renderActionResponse, renderReward} from '../lib-agent-helper/qStateRenderer'
 import {settings} from '../../App'
-import {actions} from '../../environment'
-import RewardCalculator from '../../agent/machine-learning/helper/RewardCalculator'
+import {actions} from '../environment'
+import RewardCalculator from '../lib-agent-helper/RewardCalculator'
 
 /**
  * This controls whether we make the agent aware of what it's last action was. Setting this to true causes the agent

@@ -1,4 +1,4 @@
-import Environment from './environment'
+import Environment from './modules/environment'
 
 const historyLength = 1000;
 

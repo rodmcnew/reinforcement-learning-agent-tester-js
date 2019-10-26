@@ -14,7 +14,11 @@ const feelerPaths = [
     ['s', 'd', 's'],
 ];
 
-export default class LookAheadIn5x3Viewport {
+export default class LookAhead5x3 {
+    static getName() {
+        return 'HandProgrammed - LookAhead - 5x3 - ranked 247'
+    }
+
     /**
      *
      * @param {AgentObservation} observation

@@ -1,5 +1,5 @@
 /**
- * Creates a matrix out of nested Float64Arrays and returns it
+ * Creates a matrix out of nested Float32Arrays and returns it
  *
  * @param {Array} dimensions [xLength, yLength]
  * @returns {Array}
@@ -8,7 +8,7 @@ export function createMatrix(dimensions) {
     let matrix = [];
 
     for (let i = 0; i < dimensions[0]; i++) {
-        matrix[i] = new Float64Array(dimensions[1]);
+        matrix[i] = new Float32Array(dimensions[1]);
     }
 
     return matrix;
@@ -52,7 +52,7 @@ export function shiftAndTrimMatrix(matrix, shiftVector, defaultValue, trimVector
         }
     }
 
-    //Thought this was may be faster but it was not
+    //Thought this may be faster but it was not
     // for (var x = 0; x < xLen; x++) {
     //     for (var y = 0; y < yLen; y++) {
     //         if (x + shiftX >= 0 && x + shiftX < fromXLen && y + shiftY >= 0 && y + shiftY < fromYLen) {
@@ -68,13 +68,15 @@ export function shiftAndTrimMatrix(matrix, shiftVector, defaultValue, trimVector
  * Converts a matrix made of nested arrays to a single flat array and returns it
  *
  * @param {Array} matrix
- * @returns {Float64Array}
+ * @returns {Float32Array}
  */
 export function matrixToFlatArray(matrix) {
     const xLen = matrix.length;
     const yLen = matrix[0].length;
     var vectorI = 0;
-    var vector = new Float64Array(xLen * yLen);
+    // var vector = new Float32Array(xLen * yLen);
+    var vector = new Float32Array(xLen * yLen);
+    // var vector = [];
     for (var xI = 0; xI < xLen; xI++) {
         for (var yI = 0; yI < yLen; yI++) {
             vector[vectorI] = matrix[xI][yI];
