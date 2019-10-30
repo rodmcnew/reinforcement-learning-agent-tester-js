@@ -5,19 +5,19 @@ import Agent from './lib-deep-q-network-scratch-built/Agent'
 import { settings } from '../../App' //@TODO use DI instead for this
 import { renderActionResponse, renderReward } from '../lib-agent-helper/qStateRenderer'
 import { actions, config } from '../environment'
-import RewardCalculator from '../lib-agent-helper/RewardCalculator'
+// import RewardCalculator from '../lib-agent-helper/RewardCalculator'
 
 // const inputCount = 5 * 3;
 const inputCount = config.viewPortSize[0] * config.viewPortSize[1];
 
 let agent = new Agent(inputCount, actions.length);
-let rewardCalculator = new RewardCalculator();
+// let rewardCalculator = new RewardCalculator();
 
 agent.loadFromJson(savedNeuralNetwork);
 
 export default class MatrixDeepQNetwork {
     constructor() {
-        rewardCalculator = new RewardCalculator();
+        // rewardCalculator = new RewardCalculator();
     }
 
     static getName() {
@@ -29,10 +29,10 @@ export default class MatrixDeepQNetwork {
      * @param {AgentObservation} observation
      * @return {string} action code
      */
-    getAction(observation) {
-        const lastReward = rewardCalculator.calcLastReward(observation);
+    getAction(lastAction, lastReward, observationMatrix) {
+        // const lastReward = rewardCalculator.calcLastReward(observation);
         // const state = matrixToFlatArray(viewportConversions.convert9x9to5x3(observation.tileTypes));
-        const state = matrixToFlatArray(observation.tileTypes);
+        const state = matrixToFlatArray(observationMatrix);
 
         let actionIndex = agent.learnAndAct(lastReward, state);
         let actionResponse = agent.getLastActionStats();
@@ -44,14 +44,16 @@ export default class MatrixDeepQNetwork {
             }
         }
 
-        let action = actions[actionIndex];
+        // let action = actions[actionIndex];
 
-        return action;
+        return actionIndex;
     }
+
+    newGame() { }
 
     clearBrain() {
         agent = new Agent(inputCount, actions.length);
-        rewardCalculator = new RewardCalculator();
+        // rewardCalculator = new RewardCalculator();
     }
 
     exportBrain() {

@@ -1,7 +1,7 @@
 // import Matrix from './Matrix'
 import './neural-network/networkTest'
 import * as arrayMath from './math/arrayMath'
-import {getRandomIntWithZeroMin} from './math/random'
+import { getRandomIntWithZeroMin } from './math/random'
 import NeuralNetwork from './neural-network/NeuralNetwork'
 export default class Agent {
     constructor(inputCount, numberOfActions, options) {
@@ -131,8 +131,9 @@ export default class Agent {
 
         // goal: Q(s,a) = r + discountFactor * max_a' Q(s',a')
 
-        var actionMatrix = this._neuralNetwork.invoke(currentObservation);
-        var estimatedFutureReward = actionMatrix[arrayMath.getIndexOfMaxValue(actionMatrix)];
+        // var actionMatrix = this._neuralNetwork.invoke(currentObservation);
+        // var estimatedFutureReward = actionMatrix[arrayMath.getIndexOfMaxValue(actionMatrix)];
+        var estimatedFutureReward = this.estimateFutureReward(currentObservation);
 
         var prediction = this._neuralNetwork.invoke(lastObservation);
         // var lastActionPredictedReward = prediction[lastAction];
@@ -144,7 +145,7 @@ export default class Agent {
         // } else if (tdError < -this._options.tdErrorClamp) {
         //     tdError = -this._options.tdErrorClamp
         // }
-//@TODO td error clamp?
+        //@TODO td error clamp?
         var target = prediction.slice();
         var targetActionValue = lastReward + estimatedFutureReward * this._options.discountFactor;//@TODO uncomment
         target[lastAction] = targetActionValue;
@@ -154,10 +155,21 @@ export default class Agent {
         this._neuralNetwork.learn(target);
         // console.log('npre', this._neuralNetwork.invoke(lastObservation));
         // console.log('-');
-//@TODO learn only from error output and not others?
+        //@TODO learn only from error output and not others?
         var error = (prediction[lastAction] - targetActionValue);
         // console.log('error:' + error);
         return error; //@TODO chart error?
+    }
+
+    estimateFutureReward(currentObservation) {
+        const actionMatrix = this._neuralNetwork.invoke(currentObservation);
+        const nonRandomReward = (1 - this._options.randomActionProbability) * actionMatrix[arrayMath.getIndexOfMaxValue(actionMatrix)];
+        const randomReward = (
+            this._options.randomActionProbability * actionMatrix.reduce((accumulator, currentValue) => {
+                return accumulator + currentValue / this.numberOfActions
+            })
+        )
+        return nonRandomReward + randomReward;
     }
 
     loadFromJson(json) {

@@ -1,57 +1,22 @@
-import {getActionViaFeelers} from './helper/feeler'
-// import {config} from '../../environment'
-
-const feelerPaths = [];
-var lookToSideCount = 4;//Math.floor(config.viewPortSize[0] / 2);
-var leftPrepend = [];
-var rightPrepend = [];
-var appends = [
-    ['s', 's'],
-    
-    ['s', 'a', 's'],
-    ['s', 'a', 'a', 's'],
-    ['s', 'a', 'a', 'a', 's'],
-    ['s', 'a', 'a', 'a', 'a', 's'],
-    ['s', 'a', 'a', 'a', 'a', 'a', 's'],
-    ['s', 'a', 'a', 'a', 'a', 'a', 'a', 's'],
-
-    ['s', 'd', 's'],
-    ['s', 'd', 'd', 's'],
-    ['s', 'd', 'd', 'd', 's'],
-    ['s', 'd', 'd', 'd', 'd', 's'],
-    ['s', 'd', 'd', 'd', 'd', 'd', 's'],
-    ['s', 'd', 'd', 'd', 'd', 'd', 'd', 's'],
-];
-feelerPaths.push(['s', 's']);
-for (let sideWaysAmount = 1; sideWaysAmount <= lookToSideCount; sideWaysAmount++) {
-    leftPrepend.push('a');
-    rightPrepend.push('d');
-
-    appends.forEach((append)=> {
-        feelerPaths.push([...leftPrepend, ...append]);
-        feelerPaths.push([...rightPrepend, ...append]);
-    });
-
-}
+import { getActionViaFeelers } from './helper/feeler'
+import generateFeelerPaths from './helper/generateFeelerPathsXByThree'
 export default class LookAhead9x3 {
     constructor() {
-        this._state = {lastAction: null};
-    }
-    
-    static getName() {
-        return 'HandProgrammed - LookAhead - 9x3 - ranked 255';
+        this._state = { lastAction: null };
+        this.feelerPaths = generateFeelerPaths(4);
     }
 
-    /**
-     *
-     * @param {AgentObservation} observation
-     * @return {string} action code
-     */
-    getAction(observation) {
-        let action = getActionViaFeelers(observation, feelerPaths, this._state.lastAction);
+    static getName() {
+        return 'HandProgrammed - LookAhead - 9x3 - ranked 0.956';
+    }
+
+    getAction(lastAction, lastReward, observationMatrix) {
+        let action = getActionViaFeelers(observationMatrix, this.feelerPaths, this._state.lastAction);
 
         this._state.lastAction = action;
 
         return action;
     }
+
+    newGame() { }
 }

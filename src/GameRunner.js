@@ -1,5 +1,4 @@
-import Environment from './modules/environment'
-
+import { default as Environment, actions,config } from './modules/environment'
 const historyLength = 1000;
 
 const defaultStats = {
@@ -27,8 +26,9 @@ export default class GameRunner {
         this._onStatusChange = onStatusChange;
         this._agentObservation = null;
         this._godObservation = null;
-        this._agentClass = null;
-        this._nextAction = null;
+        // this._agentClass = null;
+        // this._nextAction = null;
+        this._nextAction = 0;//@TODO this doesn't seem right
 
         this.newGame = this.newGame.bind(this);
         this.takeAction = this.takeAction.bind(this);
@@ -36,16 +36,19 @@ export default class GameRunner {
         this.clearStats = this.clearStats.bind(this);
         this.setRenderingEnabled = this.setRenderingEnabled.bind(this);
 
+        this.last = { action: null, reward: null };
+
         setInterval(() => {//@TODO accomplish this without an interval
             this._stats.actionsPerSecond = this._stats.actionCount - this._stats.lastSecondsActionCount;
             this._stats.lastSecondsActionCount = this._stats.actionCount;
         }, 1000);
     }
 
-    newGame(agentClass) {
+    newGame(agentInstance) {
         this._universalGameNumber++;
-        this._agentClass = agentClass;
-        this._agent = new this._agentClass();
+        // this._agentClass = agentClass;
+        this._agent = agentInstance;
+        // this._agent = new this._agentClass();
         // this._renderingEnabled = renderingEnabled;
         this._environment = new Environment();
         this._stats.currentScore = 0;//@TODO get from environment?
@@ -73,8 +76,9 @@ export default class GameRunner {
      *
      * @param actionCode
      */
-    takeAction(actionCode) {
+    takeAction(action) {
         var stats = this._stats;
+        const actionCode = actions[action];
         //Apply the action and get the next observation
         if (actionCode !== null) {
             this._environment.applyAction(actionCode);
@@ -82,14 +86,15 @@ export default class GameRunner {
         this._updateObservations();
 
         if (this._godObservation.isComplete) {//@Find better way to communicate "isComplete"
-            this._agent.getAction(this._agentObservation);//Ask for one more action so the agent can see the observation after its last action
+            this._agent.getAction(this.last.action, this.last.reward, this._agentObservation.tileTypes);//Ask for one more action so the agent can see the observation after its last action
+            this._agent.newGame();
             stats.lastGameScore = this._agentObservation.score;
             stats.lastFinalScores.push(this._agentObservation.score);
             if (stats.lastFinalScores.length > 100) {
                 stats.lastFinalScores.shift();
             }
             var totalScoreFinaleScore = stats.lastFinalScores.reduce((acc, val) => acc + val, 0);
-            stats.averageFinalScore = Math.floor(totalScoreFinaleScore / stats.lastFinalScores.length) || 0;
+            stats.averageFinalScore = (totalScoreFinaleScore / stats.lastFinalScores.length) || 0;
             stats.scoreSum += this._agentObservation.score;
             stats.gameCountToScore.push(stats.lastGameScore);
             stats.gameCountToAverageScore.push(stats.averageFinalScore);
@@ -101,7 +106,7 @@ export default class GameRunner {
                 stats.gameCountToAverageScore = stats.gameCountToAverageScore.slice(-historyLength);
             }
 
-            this.newGame(this._agentClass, this._renderingEnabled);
+            this.newGame(this._agent, this._renderingEnabled);
         }
 
         if (this._renderingEnabled) {
@@ -115,7 +120,10 @@ export default class GameRunner {
         stats.lastActionScore = this._agentObservation.score;
         stats.totalReward += reward;
 
-        this._nextAction = this._agent.getAction(this._agentObservation);
+        this.last.reward = reward;
+        this.last.action = action;
+
+        this._nextAction = this._agent.getAction(this.last.action, this.last.reward, this._agentObservation.tileTypes);
     }
 
     setRenderingEnabled(renderingEnabled) {

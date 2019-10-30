@@ -6,9 +6,9 @@ export default class AgentObservation {
      *
      * @param {Array} tileTypes
      * @param {int} score
-     * @param {Array} position
+    //  * @param {Array} position
      */
-    constructor(tileTypes, score, position) {
+    constructor(tileTypes, score/*, position*/) {
         /**
          * @type {Array}
          */
@@ -19,10 +19,10 @@ export default class AgentObservation {
          */
         this.score = score;
 
-        /**
-         *
-         * @type {Array} A vector contained the X and Y of the current agent position
-         */
-        this.position = position;
+        // /**
+        //  *
+        //  * @type {Array} A vector contained the X and Y of the current agent position
+        //  */
+        // this.position = position;
     }
 }

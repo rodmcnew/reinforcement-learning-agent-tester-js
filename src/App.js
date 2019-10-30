@@ -1,6 +1,6 @@
 import './App.css';
-import React, {Component} from 'react';
-import {config as environmentConfig, actions} from './modules/environment'
+import React, { Component } from 'react';
+import { config as environmentConfig, actions } from './modules/environment'
 import ObservationRenderer from './modules/react-ui-component/ObservationRenderer'
 import BrainExportButton from './modules/react-ui-component/BrainExportButton'
 import ScoreHistoryChart from './modules/react-ui-component/ScoreHistoryChart'
@@ -31,6 +31,7 @@ export default class App extends Component {
         this.handleManualControlClick = this.handleManualControlClick.bind(this);
 
         this._agents = agents;//@TODO take as construct arg?
+        this.agentInstances = [];
 
         this._settings = settings;//@TODO take as construct arg?
 
@@ -69,11 +70,11 @@ export default class App extends Component {
             this.setState({
                 statsToDisplay: {
                     // 'Agent' :currentAgentName ,
-                    'Current Score': stats.currentScore,
+                    'Current Score': stats.currentScore.toFixed(3),
                     'Actions per second': stats.actionsPerSecond.toLocaleString(),
-                    'Last Game Final Score': stats.lastGameScore,
-                    'Average Final Score (trailing)': stats.averageFinalScore,
-                    'Average Final Score (all time)': (Math.floor(stats.scoreSum / stats.gameCount) || 0),
+                    'Last Game Final Score': stats.lastGameScore.toFixed(3),
+                    'Average Final Score (trailing)': stats.averageFinalScore.toFixed(3),
+                    'Average Final Score (all time)': ((stats.scoreSum / stats.gameCount) || 0).toFixed(3),
                     // 'Average Reward' : (stats.totalReward / stats.actionCount).toFixed(2) ,
                     'Game Count': stats.gameCount.toLocaleString()
                 },
@@ -119,11 +120,14 @@ export default class App extends Component {
     clearStatsAndNewGame() {
         this._gameRunner.setRenderingEnabled(this._settings.renderingEnabled);
         this._gameRunner.clearStats();
-        this._gameRunner.newGame(this._agents[this.state.currentAgentIndex].class, this._settings.renderingEnabled);
+        if (!this.agentInstances[this.state.currentAgentIndex]) {
+            this.agentInstances[this.state.currentAgentIndex] = new this._agents[this.state.currentAgentIndex].class();
+        }
+        this._gameRunner.newGame(this.agentInstances[this.state.currentAgentIndex], this._settings.renderingEnabled);
     }
 
     setSpeed(value) {//@TODO use setState in here
-        this.setState({speed: value});
+        this.setState({ speed: value });
         let newEnableRenderingValue = true;
         this._settings.autoPlay = true;
         if (value === 'no-render') {
@@ -155,7 +159,7 @@ export default class App extends Component {
     }
 
     handleAgentSelectorChange(event) {
-        this.setState({currentAgentIndex: event.target.value});
+        this.setState({ currentAgentIndex: event.target.value });
     }
 
     handleClearBrainClick() {
@@ -164,8 +168,9 @@ export default class App extends Component {
     }
 
     handleManualControlKeyDown(event) {
-        if (actions.indexOf(event.key) !== -1) {
-            this._gameRunner.takeAction(event.key);
+        const action = actions.indexOf(event.key);
+        if (action !== -1) {
+            this._gameRunner.takeAction(action);
         }
     }
 
@@ -179,13 +184,13 @@ export default class App extends Component {
                 <div id="info">Agent:
                     <select onChange={this.handleAgentSelectorChange}>
                         {this._agents.map(((agent, index) =>
-                                <option key={index} value={index}>{agent.name}</option>
+                            <option key={index} value={index}>{agent.name}</option>
                         ))
                         }
                     </select>
                     &nbsp;
                     <button onClick={this.handleClearBrainClick}>Clear Brain and Retrain</button>
-                    <br/>
+                    <br />
                     Speed:
                     <select onChange={this.handleSpeedSelectorChange} value={this.state.speed}>
                         <option value="no-render">Ludicrous Speed (no rendering)</option>
@@ -197,37 +202,37 @@ export default class App extends Component {
                     </select>
                     &nbsp;
                     <button type="text"
-                            onKeyDown={this.handleManualControlKeyDown}
-                            onClick={this.handleManualControlClick}>Enable Manual Control (WASD)
+                        onKeyDown={this.handleManualControlKeyDown}
+                        onClick={this.handleManualControlClick}>Enable Manual Control (WASD)
                     </button>
-                    <pre id="score"/>
-                    <StatsDisplay stats={this.state.statsToDisplay}/>
-                    <br/>
+                    <pre id="score" />
+                    <StatsDisplay stats={this.state.statsToDisplay} />
+                    <br />
                 </div>
                 {!this._settings.renderingEnabled && this.state.scoreHistoryChartData &&
-                <div style={{width: '30em'}}>
-                    <ScoreHistoryChart stats={this.state.scoreHistoryChartData}/>
-                </div>
+                    <div style={{ width: '30em' }}>
+                        <ScoreHistoryChart stats={this.state.scoreHistoryChartData} />
+                    </div>
                 }
                 {this._settings.renderingEnabled && this.state.agentObservation &&
-                <div>
-                    <ObservationRenderer
-                        agentObservation={this.state.agentObservation}
-                        godObservation={this.state.godObservation}
-                        gameNumber={this.state.universalGameNumber}
-                    />
-                    <div id="agentRendererContainer"></div>
-                    {this._agents[this.state.currentAgentIndex].description &&
                     <div>
-                        {this._agents[this.state.currentAgentIndex].description}
+                        <ObservationRenderer
+                            agentObservation={this.state.agentObservation}
+                            godObservation={this.state.godObservation}
+                            gameNumber={this.state.universalGameNumber}
+                        />
+                        <div id="agentRendererContainer"></div>
+                        {this._agents[this.state.currentAgentIndex].description &&
+                            <div>
+                                {this._agents[this.state.currentAgentIndex].description}
+                            </div>
+                        }
                     </div>
-                    }
-                </div>
                 }
-                <br/>
-                <GameRulesDisplay environmentConfig={environmentConfig}/>
-                <br/>
-                <BrainExportButton gameRunner={this._gameRunner}/>
+                <br />
+                <GameRulesDisplay environmentConfig={environmentConfig} />
+                <br />
+                <BrainExportButton gameRunner={this._gameRunner} />
             </div>
         );
     }

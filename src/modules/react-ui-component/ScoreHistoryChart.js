@@ -39,8 +39,8 @@ export default class ScoreHistoryChart extends Component {
                 scales: {
                     yAxes: [{
                         ticks: {
-                            min: 160,
-                            max: 260
+                            min: -1,
+                            max: 1
                         }
                     }],
                     xAxes: [{

@@ -1,7 +1,7 @@
-import {shiftAndTrimMatrix, createMatrix} from './nestedFloatMatrixMath'
+import { shiftAndTrimMatrix, createMatrix } from './nestedFloatMatrixMath'
 import AgentObservation from './AgentObservation'
-import {generateInitialState} from './generateInitialState'
-
+import { generateInitialState } from './generateInitialState'
+const easyMode = true;
 export const config = {
     //Environment size
     size: [31, 31],
@@ -12,9 +12,11 @@ export const config = {
     viewPortPosition: [4, 2],
 
     //Scoring settings
-    verticalDeltaScore: 10,
-    deltaScorePerAction: -1,
-    tileTypeToDeltaScore: [0, -50]
+    verticalDeltaScore: easyMode ? 0.01 : 0,
+    deltaScorePerAction: -0.01,
+    tileTypeToDeltaScore: [0, -0.2],
+    getToBottomDeltaScore: 1,
+    // maxDeltaScoreAbs: 1000
 };
 
 export const actions = ['w', 'a', 's', 'd'];
@@ -81,6 +83,9 @@ export default class Environment {
             deltaScoreFromHittingEdge;
 
         this._state.isComplete = this._state.position[1] === config.size[1] - 1;
+        if (this._state.isComplete) {
+            this._state.score += config.getToBottomDeltaScore
+        }
     }
 
     /**
@@ -112,8 +117,8 @@ export default class Environment {
 
         return new AgentObservation(
             this.viewportOutputMatrix,
-            this._state.score,
-            config.viewPortPosition
+            this._state.score//,
+            // config.viewPortPosition
         );
     }
 

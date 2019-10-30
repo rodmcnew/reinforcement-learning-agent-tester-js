@@ -49,8 +49,9 @@ export function renderActionResponse(actionResponse) {//@TODO move out
         } else if (fixedValue > maxActionValue * 2) {
             fixedValue = maxActionValue * 2;
         }
+        fixedValue += 1
         actionElements[i].style.width = (fixedValue * 150 + barFrontPadding) + 'px';
-        actionElements[i].innerHTML = (actionResponse.weights[i] * 100).toFixed(0);
+        actionElements[i].innerHTML = (actionResponse.weights[i]).toFixed(3);
     }
 
     if (actionResponse.wasRandom) {
@@ -64,7 +65,7 @@ export function renderActionResponse(actionResponse) {//@TODO move out
 
 export function renderReward(reward) {//@TODO move out
     ensureElementsExist();
-    reward *= 100;
+    // reward *= 100;
     let good = 0;
     let bad = 0;
     if (reward < 0) {
@@ -73,9 +74,9 @@ export function renderReward(reward) {//@TODO move out
         good = reward;
     }
 
-    rewardElements[0].style.width = (good * 15 + 50) + 'px';
-    rewardElements[0].innerHTML = good;
+    rewardElements[0].style.width = ((good + 1) * 200 + 100) + 'px';
+    rewardElements[0].innerHTML = good.toFixed(3);
 
-    rewardElements[1].style.width = (bad * 15 + 50) + 'px';
-    rewardElements[1].innerHTML = bad;
+    rewardElements[1].style.width = ((bad + 1) * 200 + 100) + 'px';
+    rewardElements[1].innerHTML = bad.toFixed(3);
 }

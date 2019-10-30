@@ -1,11 +1,10 @@
 import * as viewportConversions from '../environment/viewportConversions'
-import {matrixToFlatArray} from '../environment/nestedFloatMatrixMath'
-import {data as savedBrain} from '../../data/saves/tabular-sarsa'
-import {Agent} from 'tabular-sarsa'
-import {renderActionResponse, renderReward} from '../lib-agent-helper/qStateRenderer'
-import {settings} from '../../App'
-import {actions} from '../environment'
-import RewardCalculator from '../lib-agent-helper/RewardCalculator'
+import { matrixToFlatArray } from '../environment/nestedFloatMatrixMath'
+// import { data as savedBrain } from '../../data/saves/tabular-sarsa'
+import { Agent } from 'tabular-sarsa'
+import { renderActionResponse, renderReward } from '../lib-agent-helper/qStateRenderer'
+import { settings } from '../../App'
+import { actions } from '../environment'
 
 /**
  * This controls whether we make the agent aware of what it's last action was. Setting this to true causes the agent
@@ -13,15 +12,14 @@ import RewardCalculator from '../lib-agent-helper/RewardCalculator'
  * brain data in Chrome because chrome returns "call stack size exceeded" when parsing the large saved JSON.
  * @type {boolean}
  */
-const rememberLastAction = false;
+const rememberLastAction = true;
 
 const viewportPixelCount = 5 * 3;
 export const stateCount = Math.pow(2, viewportPixelCount) * (rememberLastAction ? actions.length : 1);
 
 var agent = new Agent(stateCount, actions.length);
-let rewardCalculator = new RewardCalculator();
 
-agent.loadFromJson(savedBrain);//Load the previously saved brain
+// agent.loadFromJson(savedBrain);//Load the previously saved brain
 /**
  * Takes an array of 0s and 1s and converts the whole thing to a single int
  *
@@ -46,8 +44,9 @@ export function arrayOfBinariesToInt(array) {
 function observationToInt(observation, lastAction) {
     var viewportState = arrayOfBinariesToInt(
         matrixToFlatArray(
-            viewportConversions.convert9x9to5x3(//Trim down the viewport to reduce the combinatorial explosion
-                observation.tileTypes
+            //Trim down the viewport to reduce the combinatorial explosion
+            viewportConversions.convert9x9to5x3(
+                observation
             )
         )
     );
@@ -62,7 +61,7 @@ function observationToInt(observation, lastAction) {
 export default class TabularSARSA {
     constructor() {
         this._lastAction = 0;
-        rewardCalculator = new RewardCalculator();
+        // rewardCalculator = new RewardCalculator();
     }
 
     static getName() {
@@ -70,8 +69,10 @@ export default class TabularSARSA {
     }
 
     static getDescription() {
-        return 'This agent views a 5x3 section of the viewport that can be in ' + stateCount + ' possible states. ' +
-            'It uses the Expected-SARSA algorithm with a table-based Q function.';
+        return 'This agent uses the Expected-SARSA algorithm with a table-based Q function.'
+            + ' The table stores the expected reward for ' + stateCount + ' possible states.'
+            + ' This agent views a 5x3 section of the viewport. '
+            + (rememberLastAction ? ' It also remembers the last action it took to help avoid loops.' : '');
     }
 
     /**
@@ -79,23 +80,28 @@ export default class TabularSARSA {
      * @TODO clear last actions when is new game
      * @return {string} action code
      */
-    getAction(observation) {
-        let reward = rewardCalculator.calcLastReward(observation);
-        var state = observationToInt(observation, this._lastAction);
-        var actionIndex = agent.decide(reward, state);
-        var action = actions[actionIndex];
-        var lastActionStat = agent.getLastActionStats();
+    getAction(lastAction, lastReward, observationMatrix) {
+        // let reward = rewardCalculator.calcLastReward(observation);
+        var state = observationToInt(observationMatrix, this._lastAction);
+        var actionIndex = agent.decide(lastReward, state);
+        var lastActionStats = agent.getLastActionStats();
         if (settings.renderingEnabled) {
-            renderActionResponse({weights: lastActionStat.weights, wasRandom: lastActionStat.wasRandomlyChosen});
-            renderReward(reward);
+            renderActionResponse(
+                {
+                    weights: lastActionStats.weights,
+                    wasRandom: lastActionStats.wasRandomlyChosen
+                }
+            );
+            renderReward(lastReward);
         }
         this._lastAction = actionIndex;
-        return action;
+        return actionIndex;
     }
+
+    newGame() { }
 
     clearBrain() {
         agent = new Agent(stateCount, actions.length);
-        rewardCalculator = new RewardCalculator();
     }
 
     exportBrain() {

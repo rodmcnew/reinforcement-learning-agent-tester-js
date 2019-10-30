@@ -1,30 +1,32 @@
-import {getActionViaFeelers} from './helper/feeler'
+// import { getActionViaFeelers } from './helper/feeler'
 
-const feelerPaths = [
-    ['a', 'a', 's', 's'],
-    ['a', 's', 'a', 's'],
-    ['a', 's', 's'],
-    ['s', 'a', 's'],
-    
-    ['s', 's'],
+// const feelerPaths = [
+//     ['a', 'a', 's', 's'],
+//     ['a', 's', 'a', 's'],
+//     ['a', 's', 's'],
+//     ['s', 'a', 's'],
 
-    ['d', 'd', 's', 's'],
-    ['d', 's', 'd', 's'],
-    ['d', 's', 's'],
-    ['s', 'd', 's'],
-];
+//     ['s', 's'],
 
-export default class LookAhead5x3 {
-    static getName() {
-        return 'HandProgrammed - LookAhead - 5x3 - ranked 247'
-    }
+//     ['d', 'd', 's', 's'],
+//     ['d', 's', 'd', 's'],
+//     ['d', 's', 's'],
+//     ['s', 'd', 's'],
+// ];
 
-    /**
-     *
-     * @param {AgentObservation} observation
-     * @return {string} action code
-     */
-    getAction(observation) {
-        return getActionViaFeelers(observation, feelerPaths, null);
-    }
-}
+// export default class LookAhead5x3 {
+//     static getName() {
+//         return 'HandProgrammed - LookAhead - 5x3 - ranked 247'
+//     }
+
+//     /**
+//      *
+//      * @param {AgentObservation} observation
+//      * @return {string} action code
+//      */
+//     getAction(lastAction, lastReward, observationMatrix) {
+//         return getActionViaFeelers(observationMatrix, feelerPaths, null);
+//     }
+
+//     newGame() { }
+// }

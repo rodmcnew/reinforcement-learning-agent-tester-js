@@ -1,1 +1,1 @@
-export {default as default} from './AgentAdaptor'
+export {default as default} from './Agent'

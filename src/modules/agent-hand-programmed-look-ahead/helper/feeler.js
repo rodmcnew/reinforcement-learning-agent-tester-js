@@ -1,4 +1,4 @@
-import {config} from '../../environment'
+import {config, actions} from '../../environment'
 
 export const oppositeActions = {
     w: 's',
@@ -15,16 +15,17 @@ const actionVectors = {
     d: [1, 0, config.deltaScorePerAction],
 };
 export function getFeelerValue(observation, feelerSteps) {
-    let position = [observation.position[0], observation.position[1]];
+    // let position = [observation.position[0], observation.position[1]];
+    let position = config.viewPortPosition;
     let value = 0;
     feelerSteps.forEach((step) => {
         const vector = actionVectors[step];
         position = [position[0] + vector[0], position[1] + vector[1]];
         let cost;
-        if (typeof observation.tileTypes[position[0]] === 'undefined' || typeof observation.tileTypes[position[0]][position[1]] === 'undefined') {
+        if (typeof observation[position[0]] === 'undefined' || typeof observation[position[0]][position[1]] === 'undefined') {
             cost = config.tileTypeToDeltaScore[1]; //If going off map, make look very expensive
         } else {
-            cost = config.tileTypeToDeltaScore[observation.tileTypes[position[0]][position[1]]]
+            cost = config.tileTypeToDeltaScore[observation[position[0]][position[1]]]
         }
         value = value + vector[2] + cost;
     });
@@ -64,5 +65,5 @@ export function getActionViaFeelers(observation, feelerPaths, lastAction) {
 
     const bestFeeler = getBestFeeler(feelersWithValues);
 
-    return bestFeeler.path[0];
+    return actions.indexOf(bestFeeler.path[0]);
 }

@@ -1,7 +1,7 @@
 // import * as viewportConversions from './../environment/viewportConversions'
-import React, {Component} from 'react';
-import PropTypes from 'prop-types'
-
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
+import { config } from '../environment';
 export default class ObservationRenderer extends Component {
     constructor() {
         super();
@@ -36,7 +36,8 @@ export default class ObservationRenderer extends Component {
             // viewportConversions.convert9x9to5x3(this.props.agentObservation.tileTypes),
             this.props.agentObservation.tileTypes,
             // [2, 0]
-            this.props.agentObservation.position
+            // this.props.agentObservation.position,
+            config.viewPortPosition
         );
         const godTileColors = calculateGodTileColors(
             this.props.godObservation.tileTypes,
@@ -49,13 +50,13 @@ export default class ObservationRenderer extends Component {
                 <span>Agent View</span>
                 <table className="renderer-table-canvas-agent">
                     <tbody>
-                    {agentTileColors.map((row, rowIndex) =>
-                        <tr key={rowIndex}>
-                            {row.map((tileColor, tileIndex) =>
-                                <td key={tileIndex} style={{backgroundColor: tileColor}}/>
-                            )}
-                        </tr>
-                    )}
+                        {agentTileColors.map((row, rowIndex) =>
+                            <tr key={rowIndex}>
+                                {row.map((tileColor, tileIndex) =>
+                                    <td key={tileIndex} style={{ backgroundColor: tileColor }} />
+                                )}
+                            </tr>
+                        )}
                     </tbody>
                 </table>
             </div>
@@ -63,13 +64,13 @@ export default class ObservationRenderer extends Component {
                 <span>Environment View</span>
                 <table className="renderer-table-canvas-god">
                     <tbody>
-                    {godTileColors.map((row, rowIndex) =>
-                        <tr key={rowIndex}>
-                            {row.map((tileColor, tileIndex) =>
-                                <td key={tileIndex} style={{backgroundColor: tileColor}}/>
-                            )}
-                        </tr>
-                    )}
+                        {godTileColors.map((row, rowIndex) =>
+                            <tr key={rowIndex}>
+                                {row.map((tileColor, tileIndex) =>
+                                    <td key={tileIndex} style={{ backgroundColor: tileColor }} />
+                                )}
+                            </tr>
+                        )}
                     </tbody>
                 </table>
             </div>
@@ -91,17 +92,17 @@ function calculateGodTileColors(tileTypes, position, previousPositions) {
         for (let y = 0; y < yLength; y++) {
             let scalarPosition = x * xLength + y;
             let inPreviousPosition = previousPositions[scalarPosition];
-            let color = {r: 50, g: 50, b: 50};
+            let color = { r: 50, g: 50, b: 50 };
             if (x === position[0] && y === position[1] && tileTypes[x][y] !== 0) {
-                color = {r: 255, g: 255, b: 0};
+                color = { r: 255, g: 255, b: 0 };
             } else if (x === position[0] && y === position[1]) {
-                color = {r: 0, g: 255, b: 0};
+                color = { r: 0, g: 255, b: 0 };
             } else if (inPreviousPosition && tileTypes[x][y] !== 0) {
-                color = {r: 255, g: 255, b: 128}
+                color = { r: 255, g: 255, b: 128 }
             } else if (inPreviousPosition) {
-                color = {r: 0, g: 128, b: 0}
+                color = { r: 0, g: 128, b: 0 }
             } else if (tileTypes[x][y] !== 0) {
-                color = {r: 230, g: 0, b: 0};
+                color = { r: 230, g: 0, b: 0 };
             }
             if (!tileColors[y]) {
                 tileColors[y] = [];
@@ -119,13 +120,13 @@ function calculateAgentTileColors(tileTypes, position) {
     const yLength = tileTypes[0].length;
     for (let x = 0; x < xLength; x++) {
         for (let y = 0; y < yLength; y++) {
-            let color = {r: 50, g: 50, b: 50};
+            let color = { r: 50, g: 50, b: 50 };
             if (x === position[0] && y === position[1] && tileTypes[x][y] !== 0) {
-                color = {r: 255, g: 255, b: 0};
+                color = { r: 255, g: 255, b: 0 };
             } else if (x === position[0] && y === position[1]) {
-                color = {r: 0, g: 255, b: 0};
+                color = { r: 0, g: 255, b: 0 };
             } else if (tileTypes[x][y] !== 0) {
-                color = {r: 230, g: 0, b: 0};
+                color = { r: 230, g: 0, b: 0 };
             }
             if (!tileColors[y]) {
                 tileColors[y] = [];
