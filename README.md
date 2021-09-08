@@ -1,6 +1,8 @@
-This contains a path finding game and a few different machine-learning agents that learn to play the game.
+# Demo
+[Try the demo](http://rodmcnew.github.io/reinforcement-learning-agent-tester-js/)
 
-Try the demo at http://rodmcnew.github.io/reinforcement-learning-agent-tester-js/
+# What
+This contains a path finding game and a few different machine-learning agents that learn to play the game.
 
 List of the machine-learning agents:
 - DeepQNetwork - (Author: Rod Mcnew, Link: https://github.com/rodmcnew/layerganza)
