@@ -1,7 +1,7 @@
 import { matrixToFlatArray } from '../environment/nestedFloatMatrixMath'
 import { data as savedNeuralNetwork } from '../../data/saves/deep-q-network'
 // import * as viewportConversions from '../../environment/viewportConversions'
-import Agent from './lib-deep-q-network-scratch-built/Agent'
+import Agent from './lib-deep-q-network-scratch-built/OldAgent'
 import { settings } from '../../App' //@TODO use DI instead for this
 import { renderActionResponse, renderReward } from '../lib-agent-helper/qStateRenderer'
 import { actions, config } from '../environment'

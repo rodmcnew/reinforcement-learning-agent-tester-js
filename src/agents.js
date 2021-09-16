@@ -2,15 +2,16 @@ import LookAhead9x3 from './modules/agent-hand-programmed-look-ahead/LookAhead9x
 // import DeepQNetwork from './modules/agent-deep-q-scratch-built/DeepQNetwork'
 import TabularSARSA from './modules/agent-tabular-sarsa/TabularSARSA'
 import DeepQNetworkTensorFlow from './modules/agent-deep-q-network-tensor-flow'
+import DeepQNetwork from './modules/agent-deep-q-scratch-built/DeepQNetwork'
 export default [
-    {
-        name: DeepQNetworkTensorFlow.getName(),
-        class: DeepQNetworkTensorFlow
-    },
     // {
-    //     name: DeepQNetwork.getName(),
-    //     class: DeepQNetwork
+    //     name: DeepQNetworkTensorFlow.getName(),
+    //     class: DeepQNetworkTensorFlow
     // },
+    {
+        name: DeepQNetwork.getName(),
+        class: DeepQNetwork
+    },
     {
         class: TabularSARSA,
         name: TabularSARSA.getName(),
