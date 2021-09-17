@@ -12,7 +12,8 @@ import { agents } from './agents';
 import TopControls from './modules/react-ui-component/TopControls';
 export const settings = {//@TODO move out of global?
     renderingEnabled: true,
-    ticksPerIntervalWhenNotRendering: 10
+    ticksPerIntervalWhenNotRendering: 10,
+    initialSpeed: 100
 };
 
 const clearStatsAndNewGame = (gameRunner, agent, renderingEnabled) => {
@@ -43,7 +44,7 @@ export const App = () => {
     // }
     const [gameRunner, setGameRunner] = useState(null);
     const [gameState, setGameState] = useState({});
-    const [speed, setSpeed] = useState(17); // 17 = Very Fast
+    const [speed, setSpeed] = useState(settings.initialSpeed);
     const [currentAgentIndex, setCurrentAgentIndex] = useState(0);
 
     const renderingEnabled = speed !== 0;

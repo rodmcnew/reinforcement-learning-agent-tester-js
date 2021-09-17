@@ -60,7 +60,7 @@ export function renderActionResponse(actionResponse) {//@TODO move out
         ctx.fillStyle = color;
         ctx.fillRect(0, lineNumber * lineHeight, length * lengthMultiplier, lineHeight);
         ctx.fillStyle = 'black';
-        ctx.fillText(label, 3, (lineNumber + 1) * lineHeight - 2)
+        ctx.fillText(label, 3, (lineNumber + 1) * lineHeight - 4)
     }
 
     renderBar(0, 0, 'white', 'Predicted expected reward from each action:')
@@ -99,11 +99,11 @@ export function renderReward(reward) {//@TODO move out
     const ctx = canvas.getContext('2d');
 
     ctx.clearRect(0, lineHeight * 7, canvas.width, canvas.height);
-    const renderBar = (lineNumber, length, color, label) => {
+    const renderBar = (lineNumber, length, color, label) => { //@TODO don't duplicate this code with the version above
         ctx.fillStyle = color;
         ctx.fillRect(0, lineNumber * lineHeight, length * lengthMultiplier, lineHeight);
         ctx.fillStyle = 'black';
-        ctx.fillText(label, 0, (lineNumber + 1) * lineHeight - 2)
+        ctx.fillText(label, 3, (lineNumber + 1) * lineHeight - 4)
     }
 
     renderBar(7, 0, 'white', 'Reward from last action:')
