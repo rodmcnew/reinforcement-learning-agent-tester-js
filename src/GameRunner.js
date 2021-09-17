@@ -1,4 +1,4 @@
-import { default as Environment, actions,config } from './modules/environment'
+import { default as Environment, actions, config } from './modules/environment'
 const historyLength = 1000;
 
 const defaultStats = {
@@ -25,7 +25,7 @@ export default class GameRunner {
         this._stats = Object.assign({}, defaultStats);
         this._onStatusChange = onStatusChange;
         this._agentObservation = null;
-        this._godObservation = null;
+        this._globalObservation = null;
         // this._agentClass = null;
         // this._nextAction = null;
         this._nextAction = 0;//@TODO this doesn't seem right
@@ -57,8 +57,9 @@ export default class GameRunner {
             // this._onRender.clear();
             this._onRender(
                 this._environment.getAgentObservation(),
-                this._environment.getGodObservation(),
-                this._universalGameNumber
+                this._environment.getGlobalObservation(),
+                this._universalGameNumber,
+                this._stats
             );
         } else {
             this._onStatusChange(this._stats);
@@ -85,17 +86,17 @@ export default class GameRunner {
         }
         this._updateObservations();
 
-        if (this._godObservation.isComplete) {//@Find better way to communicate "isComplete"
+        if (this._globalObservation.isComplete) {//@Find better way to communicate "isComplete"
             this._agent.getAction(this.last.action, this.last.reward, this._agentObservation.tileTypes);//Ask for one more action so the agent can see the observation after its last action
             this._agent.newGame();
-            stats.lastGameScore = this._agentObservation.score;
-            stats.lastFinalScores.push(this._agentObservation.score);
+            stats.lastGameScore = stats.currentScore;
+            stats.lastFinalScores.push(stats.currentScore);
             if (stats.lastFinalScores.length > 100) {
                 stats.lastFinalScores.shift();
             }
             var totalScoreFinaleScore = stats.lastFinalScores.reduce((acc, val) => acc + val, 0);
             stats.averageFinalScore = (totalScoreFinaleScore / stats.lastFinalScores.length) || 0;
-            stats.scoreSum += this._agentObservation.score;
+            stats.scoreSum += stats.currentScore;
             stats.gameCountToScore.push(stats.lastGameScore);
             stats.gameCountToAverageScore.push(stats.averageFinalScore);
             stats.gameCount += 1;
@@ -106,18 +107,17 @@ export default class GameRunner {
                 stats.gameCountToAverageScore = stats.gameCountToAverageScore.slice(-historyLength);
             }
 
-            this.newGame(this._agent, this._renderingEnabled);
+            this.newGame(this._agent);
         }
 
         if (this._renderingEnabled) {
-            this._onRender(this._agentObservation, this._godObservation, this._universalGameNumber);
-            stats.currentScore = this._agentObservation.score;
-            this._onStatusChange(stats);
+            this._onRender(this._agentObservation, this._globalObservation, this._universalGameNumber, stats);
         }
 
         stats.actionCount++;
-        var reward = this._agentObservation.score - stats.lastActionScore;
-        stats.lastActionScore = this._agentObservation.score;
+        var reward = this._agentObservation.lastReward;
+        stats.lastActionScore = stats.lastActionScore + this._agentObservation.lastReward;
+        stats.currentScore += this._agentObservation.lastReward;
         stats.totalReward += reward;
 
         this.last.reward = reward;
@@ -143,10 +143,11 @@ export default class GameRunner {
         this._stats.lastFinalScores = [];
         this._stats.gameCountToScore = [];
         this._stats.gameCountToAverageScore = [];
+        this._stats.currentScore = 0;
     }
 
     _updateObservations() {
         this._agentObservation = this._environment.getAgentObservation();
-        this._godObservation = this._environment.getGodObservation();
+        this._globalObservation = this._environment.getGlobalObservation();
     }
 }

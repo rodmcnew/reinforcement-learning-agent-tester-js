@@ -1,7 +1,15 @@
 // import * as viewportConversions from './../environment/viewportConversions'
-import React, { Component } from 'react';
+import React, { Component, memo } from 'react';
 import PropTypes from 'prop-types';
 import { config } from '../environment';
+import PixelCanvas from './PixelCanvas';
+
+// // const TD = memo(({ tileColor }) => <td style={{ backgroundColor: tileColor }} />);
+// // //@TODO move to own files?
+// // const Cell = (tileColor, tileIndex) => <TD key={tileIndex} tileColor={tileColor} />;
+// const Cell = (tileColor, tileIndex) => <td key={tileIndex} style={{ backgroundColor: tileColor }} />;
+// // const CellMemo = memo(Cell);
+// const Row = (row, rowIndex) => <tr key={rowIndex}>{row.map(Cell)}</tr>;
 export default class ObservationRenderer extends Component {
     constructor() {
         super();
@@ -22,8 +30,8 @@ export default class ObservationRenderer extends Component {
             //We are in the same game as before so add to the current "previous positions trail"
             const previousPositions = this.state.previousPositions.slice();//Make copy to preserve immutability
             const scalarPosition =
-                nextProps.godObservation.position[0] * nextProps.godObservation.tileTypes.length
-                + nextProps.godObservation.position[1];
+                nextProps.globalObservation.position[0] * nextProps.globalObservation.tileTypes.length
+                + nextProps.globalObservation.position[1];
             previousPositions[scalarPosition] = true;
             this.setState({
                 previousPositions: previousPositions
@@ -39,16 +47,18 @@ export default class ObservationRenderer extends Component {
             // this.props.agentObservation.position,
             config.viewPortPosition
         );
-        const godTileColors = calculateGodTileColors(
-            this.props.godObservation.tileTypes,
-            this.props.godObservation.position,
+        const globalTileColors = calculateGlobalTileColors(
+            this.props.globalObservation.tileTypes,
+            this.props.globalObservation.position,
             this.state.previousPositions
         );
 
+
         return <div className="InfectionGameHtmlTableRender">
             <div>
-                <span>Agent View</span>
-                <table className="renderer-table-canvas-agent">
+                <div>Agent View</div>
+                <PixelCanvas pixels={agentTileColors} />
+                {/* <table className="renderer-table-canvas-agent">
                     <tbody>
                         {agentTileColors.map((row, rowIndex) =>
                             <tr key={rowIndex}>
@@ -58,13 +68,14 @@ export default class ObservationRenderer extends Component {
                             </tr>
                         )}
                     </tbody>
-                </table>
+                </table> */}
             </div>
             <div>
-                <span>Environment View</span>
-                <table className="renderer-table-canvas-god">
+                <div>Environment View</div>
+                <PixelCanvas pixels={globalTileColors} />
+                {/* <table className="renderer-table-canvas-global">
                     <tbody>
-                        {godTileColors.map((row, rowIndex) =>
+                        {globalTileColors.map((row, rowIndex) =>
                             <tr key={rowIndex}>
                                 {row.map((tileColor, tileIndex) =>
                                     <td key={tileIndex} style={{ backgroundColor: tileColor }} />
@@ -72,7 +83,7 @@ export default class ObservationRenderer extends Component {
                             </tr>
                         )}
                     </tbody>
-                </table>
+                </table> */}
             </div>
         </div>;
     };
@@ -80,11 +91,11 @@ export default class ObservationRenderer extends Component {
 
 ObservationRenderer.propTypes = {
     agentObservation: PropTypes.object.isRequired,
-    godObservation: PropTypes.object.isRequired,
+    globalObservation: PropTypes.object.isRequired,
     gameNumber: PropTypes.number.isRequired
 };
 
-function calculateGodTileColors(tileTypes, position, previousPositions) {
+function calculateGlobalTileColors(tileTypes, position, previousPositions) {
     const tileColors = [];
     const xLength = tileTypes.length;
     const yLength = tileTypes[0].length;

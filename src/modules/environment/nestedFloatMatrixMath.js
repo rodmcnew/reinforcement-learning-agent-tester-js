@@ -1,5 +1,5 @@
 /**
- * Creates a matrix out of nested Float32Arrays and returns it
+ * Creates a matrix out of nested Float64Arrays and returns it
  *
  * @param {Array} dimensions [xLength, yLength]
  * @returns {Array}
@@ -8,7 +8,7 @@ export function createMatrix(dimensions) {
     let matrix = [];
 
     for (let i = 0; i < dimensions[0]; i++) {
-        matrix[i] = new Float32Array(dimensions[1]);
+        matrix[i] = new Float64Array(dimensions[1]);
     }
 
     return matrix;
@@ -34,8 +34,8 @@ export function shiftAndTrimMatrix(matrix, shiftVector, defaultValue, trimVector
     var yLen = fromYLen - trimVector[1] * 2;
     if (outputMatrix.length !== xLen || outputMatrix[0].length !== yLen) {
         throw new Error('Output matrix has the wrong dimensions. ' +
-            'Expected:'+xLen+'x'+yLen+' ,' +
-            'Actual:'+outputMatrix.length+'x'+outputMatrix[0].length);
+            'Expected:' + xLen + 'x' + yLen + ' ,' +
+            'Actual:' + outputMatrix.length + 'x' + outputMatrix[0].length);
     }
 
     for (var x = 0; x < xLen; x++) {
@@ -68,14 +68,14 @@ export function shiftAndTrimMatrix(matrix, shiftVector, defaultValue, trimVector
  * Converts a matrix made of nested arrays to a single flat array and returns it
  *
  * @param {Array} matrix
- * @returns {Float32Array}
+ * @returns {Float64Array}
  */
 export function matrixToFlatArray(matrix) {
     const xLen = matrix.length;
     const yLen = matrix[0].length;
     var vectorI = 0;
-    // var vector = new Float32Array(xLen * yLen);
-    var vector = new Float32Array(xLen * yLen);
+    // var vector = new Float64Array(xLen * yLen);
+    var vector = new Float64Array(xLen * yLen);
     // var vector = [];
     for (var xI = 0; xI < xLen; xI++) {
         for (var yI = 0; yI < yLen; yI++) {

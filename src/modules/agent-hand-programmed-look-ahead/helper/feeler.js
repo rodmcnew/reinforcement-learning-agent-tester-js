@@ -1,4 +1,4 @@
-import {config, actions} from '../../environment'
+import { config, actions } from '../../environment'
 
 export const oppositeActions = {
     w: 's',
@@ -9,10 +9,10 @@ export const oppositeActions = {
 
 const actionVectors = {
     //[dX, dY, dScore]
-    w: [0, -1, config.deltaScorePerAction - config.verticalDeltaScore],
-    a: [-1, 0, config.deltaScorePerAction],
-    s: [0, 1, config.deltaScorePerAction + config.verticalDeltaScore],
-    d: [1, 0, config.deltaScorePerAction],
+    w: [0, -1, config.actionCodeToDeltaScore['w']],
+    a: [-1, 0, config.actionCodeToDeltaScore['a']],
+    s: [0, 1, config.actionCodeToDeltaScore['s']],
+    d: [1, 0, config.actionCodeToDeltaScore['d']],
 };
 export function getFeelerValue(observation, feelerSteps) {
     // let position = [observation.position[0], observation.position[1]];

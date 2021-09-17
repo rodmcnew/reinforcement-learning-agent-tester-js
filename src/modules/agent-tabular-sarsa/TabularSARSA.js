@@ -65,7 +65,7 @@ export default class TabularSARSA {
     }
 
     static getName() {
-        return 'ReinforcementLearning - TabularSARSA - 5x3 - ranked 224';
+        return 'ReinforcementLearning - TabularSARSA - Untrained - 5x3';
     }
 
     static getDescription() {

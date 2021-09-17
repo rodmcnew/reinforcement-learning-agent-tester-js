@@ -25,5 +25,9 @@ export default class State {
          * @type {Boolean}
          */
         this.isComplete = isComplete;
+        /*
+         * @type {Number}
+         */
+        this.lastReward = 0;
     }
 }

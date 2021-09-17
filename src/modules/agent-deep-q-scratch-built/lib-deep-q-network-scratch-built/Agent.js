@@ -25,7 +25,7 @@ export default class Agent {
         this._lastActionStats = {
             action: 0,
             wasRandom: false,
-            weights: new Float32Array(numberOfActions),
+            weights: new Float64Array(numberOfActions),
             tdError: 0
         };
 

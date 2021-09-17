@@ -12,10 +12,9 @@ export const config = {
     viewPortPosition: [4, 2],
 
     //Scoring settings
-    verticalDeltaScore: easyMode ? 0.01 : 0,
-    deltaScorePerAction: -0.01,
-    tileTypeToDeltaScore: [0, -0.2],
-    getToBottomDeltaScore: 1,
+    actionCodeToDeltaScore: { w: -0.11, a: -0.01, s: 0.09, d: -0.01 },
+    tileTypeToDeltaScore: [0, -0.50],
+    getToBottomDeltaScore: 0,
     // maxDeltaScoreAbs: 1000
 };
 
@@ -31,7 +30,7 @@ export default class Environment {
         //Bind these to create proper JavaScript "this" context
         this.applyAction = this.applyAction.bind(this);
         this.getAgentObservation = this.getAgentObservation.bind(this);
-        this.getGodObservation = this.getGodObservation.bind(this);
+        this.getGlobalObservation = this.getGlobalObservation.bind(this);
 
         //This viewport output matrix is only instantiated once to increase performance
         this.viewportOutputMatrix = createMatrix(config.viewPortSize);
@@ -43,32 +42,30 @@ export default class Environment {
      * @param actionCode
      */
     applyAction(actionCode) {
-        var deltaScoreFromHittingEdge = 0;
+        let deltaScore = config.actionCodeToDeltaScore[actionCode];
         switch (actionCode) {
             case "w":
                 if (this._state.position[1] > 0) {
                     this._state.position[1]--;
-                    this._state.score -= config.verticalDeltaScore;
                 } else {
-                    deltaScoreFromHittingEdge = config.tileTypeToDeltaScore[1];//Edges are tileType 1 (red)
+                    deltaScore += config.tileTypeToDeltaScore[1];//Edges are tileType 1 (red)
                 }
                 break;
             case "a":
                 if (this._state.position[0] > 0) {
                     this._state.position[0]--;
                 } else {
-                    deltaScoreFromHittingEdge = config.tileTypeToDeltaScore[1];//Edges are tileType 1 (red)
+                    deltaScore += config.tileTypeToDeltaScore[1];//Edges are tileType 1 (red)
                 }
                 break;
             case "s":
                 this._state.position[1]++;
-                this._state.score = this._state.score + config.verticalDeltaScore;
                 break;
             case "d":
                 if (this._state.position[0] < config.size[0] - 1) {
                     this._state.position[0]++;
                 } else {
-                    deltaScoreFromHittingEdge = config.tileTypeToDeltaScore[1];//Edges are tileType 1 (red)
+                    deltaScore += config.tileTypeToDeltaScore[1];//Edges are tileType 1 (red)
                 }
                 break;
             default:
@@ -77,15 +74,17 @@ export default class Environment {
 
         const tileType = this._state.tileTypes[this._state.position[0]][this._state.position[1]];
 
-        this._state.score +=
-            config.tileTypeToDeltaScore[tileType] +
-            config.deltaScorePerAction +
-            deltaScoreFromHittingEdge;
-
         this._state.isComplete = this._state.position[1] === config.size[1] - 1;
+
+        deltaScore += config.tileTypeToDeltaScore[tileType];
+
         if (this._state.isComplete) {
-            this._state.score += config.getToBottomDeltaScore
+            deltaScore += config.getToBottomDeltaScore
         }
+
+        this._state.lastReward = deltaScore
+
+        this._state.score += this._state.lastReward;
     }
 
     /**
@@ -117,12 +116,12 @@ export default class Environment {
 
         return new AgentObservation(
             this.viewportOutputMatrix,
-            this._state.score//,
+            this._state.lastReward//,
             // config.viewPortPosition
         );
     }
 
-    getGodObservation() {
+    getGlobalObservation() {
         return this._state
     }
 }

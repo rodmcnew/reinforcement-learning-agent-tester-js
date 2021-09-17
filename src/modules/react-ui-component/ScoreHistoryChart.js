@@ -1,4 +1,4 @@
-import React, {Component} from 'react';
+import React, { Component } from 'react';
 import PropTypes from 'prop-types'
 import Chart from 'chart.js'
 
@@ -35,12 +35,12 @@ export default class ScoreHistoryChart extends Component {
                 animation: {
                     duration: 0
                 },
-                elements: {point: {radius: 0}},
+                elements: { point: { radius: 0 } },
                 scales: {
                     yAxes: [{
                         ticks: {
-                            min: -1,
-                            max: 1
+                            min: -5,
+                            max: 5
                         }
                     }],
                     xAxes: [{
@@ -50,7 +50,7 @@ export default class ScoreHistoryChart extends Component {
             }
         });
 
-        this.setState({chart: myChart});
+        this.setState({ chart: myChart });
     }
 
     mapStatsToChartData(stats) {

@@ -8,7 +8,7 @@ export default class AgentObservation {
      * @param {int} score
     //  * @param {Array} position
      */
-    constructor(tileTypes, score/*, position*/) {
+    constructor(tileTypes, lastReward/*, position*/) {
         /**
          * @type {Array}
          */
@@ -17,7 +17,7 @@ export default class AgentObservation {
         /**
          * @type {Number}
          */
-        this.score = score;
+        this.lastReward = lastReward;
 
         // /**
         //  *

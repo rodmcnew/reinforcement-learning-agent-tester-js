@@ -16,7 +16,7 @@
 
 // export default class LookAhead5x3 {
 //     static getName() {
-//         return 'HandProgrammed - LookAhead - 5x3 - ranked 247'
+//         return 'HandProgrammed - LookAhead - 5x3'
 //     }
 
 //     /**

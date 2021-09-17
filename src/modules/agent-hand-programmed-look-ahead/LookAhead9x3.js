@@ -7,7 +7,7 @@ export default class LookAhead9x3 {
     }
 
     static getName() {
-        return 'HandProgrammed - LookAhead - 9x3 - ranked 0.956';
+        return 'HandProgrammed - LookAhead - 9x3';
     }
 
     getAction(lastAction, lastReward, observationMatrix) {

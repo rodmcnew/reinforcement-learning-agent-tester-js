@@ -29,7 +29,7 @@
 /*background-color: black;*/
 /*}*/
 
-.InfectionGameHtmlTableRender .renderer-table-canvas-god td {
+.InfectionGameHtmlTableRender .renderer-table-canvas-global td {
   height: 5px;
   width: 5px;
 }
