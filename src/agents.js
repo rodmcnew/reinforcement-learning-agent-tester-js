@@ -1,7 +1,7 @@
 import LookAhead9x3 from './modules/agent-hand-programmed-look-ahead/LookAhead9x3'
 // import DeepQNetwork from './modules/agent-deep-q-scratch-built/DeepQNetwork'
 import TabularSARSA from './modules/agent-tabular-sarsa/TabularSARSA'
-import DeepQNetworkTensorFlow from './modules/agent-deep-q-network-tensor-flow'
+// import DeepQNetworkTensorFlow from './modules/agent-deep-q-network-tensor-flow'
 import DeepQNetwork from './modules/agent-deep-q-scratch-built/DeepQNetwork'
 export const agents = [
     // {
@@ -11,7 +11,8 @@ export const agents = [
     {
         name: DeepQNetwork.getName(),
         instance: new DeepQNetwork(),
-        class: DeepQNetwork
+        class: DeepQNetwork,
+        description: DeepQNetwork.getDescription()
     },
     {
         name: TabularSARSA.getName(),
@@ -22,6 +23,7 @@ export const agents = [
     {
         name: LookAhead9x3.getName(),
         instance: new LookAhead9x3(),
-        class: LookAhead9x3
+        class: LookAhead9x3,
+        description: LookAhead9x3.getDescription()
     },
 ];

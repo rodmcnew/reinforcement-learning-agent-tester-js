@@ -4,6 +4,7 @@
   "private": true,
   "dependencies": {
     "@tensorflow/tfjs": "^1.2.11",
+    "bootstrap": "^5.1.1",
     "react": "^16.11.0",
     "react-dom": "^16.11.0",
     "typescript": "^4.4.3"

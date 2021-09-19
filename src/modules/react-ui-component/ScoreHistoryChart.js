@@ -1,14 +1,16 @@
-import React, { Component } from 'react';
-import PropTypes from 'prop-types'
+import React, { useRef, useEffect } from 'react';
 import Chart from 'chart.js'
 
 const chartGameCount = 200;
 
-export default class ScoreHistoryChart extends Component {
-    componentDidMount() {
-        let chartCanvas = this.refs.chart;
-
-        let myChart = new Chart(chartCanvas, {
+const ScoreHistoryChart = ({ stats }) => {
+    const chartCanvasRef = useRef(null);
+    const chartRef = useRef(null);
+    useEffect(() => {
+        if (!chartCanvasRef.current) {
+            return;
+        }
+        chartRef.current = new Chart(chartCanvasRef.current, {
             type: 'line',
             data: {
                 labels: [],
@@ -50,11 +52,15 @@ export default class ScoreHistoryChart extends Component {
             }
         });
 
-        this.setState({ chart: myChart });
-    }
+        return () => {
+            console.log('clean');
+            chartRef.current.destroy();
+            chartRef.current = null; // This was proven to be needed while profiling for memory leaks
+        }
+    }, [chartCanvasRef.current])
 
-    mapStatsToChartData(stats) {
-        return {
+    if (chartRef.current) {
+        const data = {
             datasets: [
                 {
                     data: stats.gameCountToAverageScore.slice(-chartGameCount),
@@ -64,28 +70,14 @@ export default class ScoreHistoryChart extends Component {
                 },
             ],
             labels: Object.keys(stats.gameCountToScore).slice(-chartGameCount)
-        }
-    }
-
-    componentDidUpdate() {
-        const chart = this.state.chart;
-        const data = this.mapStatsToChartData(this.props.stats);
-
-        data.datasets.forEach((dataset, i) => chart.data.datasets[i].data = dataset.data);
-
-        chart.data.labels = data.labels;
-        chart.update();
+        };
+        data.datasets.forEach((dataset, i) => chartRef.current.data.datasets[i].data = dataset.data);
+        chartRef.current.data.labels = data.labels;
+        chartRef.current.update();
     }
 
 
-    render() {
-        return (
-            <canvas ref={'chart'} height={'300'} width={'700'}></canvas>
-        );
-    }
+    return <canvas ref={chartCanvasRef} height={'300'} width={'700'}></canvas>
 }
 
-ScoreHistoryChart.propTypes = {
-    stats: PropTypes.object.isRequired
-};
-
+export default ScoreHistoryChart;

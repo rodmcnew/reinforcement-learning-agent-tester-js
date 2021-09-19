@@ -49,6 +49,9 @@ export function renderActionResponse(actionResponse) {//@TODO move out
     // const multiplier = 150;
 
     const canvas = document.getElementById('agentRendererCanvas');
+    if (!canvas) {
+        return;
+    }
     const ctx = canvas.getContext('2d');
 
     if (canvas.height !== canvasHeight) {
@@ -96,6 +99,9 @@ export function renderActionResponse(actionResponse) {//@TODO move out
 
 export function renderReward(reward) {//@TODO move out
     const canvas = document.getElementById('agentRendererCanvas');
+    if (!canvas) {
+        return;
+    }
     const ctx = canvas.getContext('2d');
 
     ctx.clearRect(0, lineHeight * 7, canvas.width, canvas.height);

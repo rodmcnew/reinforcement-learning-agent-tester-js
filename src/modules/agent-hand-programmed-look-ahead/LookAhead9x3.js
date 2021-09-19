@@ -7,7 +7,11 @@ export default class LookAhead9x3 {
     }
 
     static getName() {
-        return 'HandProgrammed - LookAhead - 9x3';
+        return 'Hand Programmed - Look Ahead - 9x3 Viewport';
+    }
+
+    static getDescription() {
+        return 'This agent was programmed by hand. It looks ahead in time by several actions.';
     }
 
     getAction(lastAction, lastReward, observationMatrix) {

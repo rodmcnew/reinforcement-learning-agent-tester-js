@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import useInterval from 'use-interval';
+import { agents } from './agents';
 import './App.css';
 import GameRunner from './GameRunner';
 import { actions, config as environmentConfig } from './modules/environment';
@@ -8,12 +8,15 @@ import GameRulesDisplay from './modules/react-ui-component/GameRulesDisplay';
 import ObservationRenderer from './modules/react-ui-component/ObservationRenderer';
 import ScoreHistoryChart from './modules/react-ui-component/ScoreHistoryChart';
 import StatsDisplay from './modules/react-ui-component/StatsDisplay';
-import { agents } from './agents';
 import TopControls from './modules/react-ui-component/TopControls';
 export const settings = {//@TODO move out of global?
     renderingEnabled: true,
-    ticksPerIntervalWhenNotRendering: 10,
-    initialSpeed: 100
+    initialSpeed: 100,
+    ludicrousSpeed: {
+        initialGameTicksPerRender: 1,
+        maxGameTickBatchDurationMs: 100,
+        batchSizeAdjustmentMultiplier: 2
+    }
 };
 
 const clearStatsAndNewGame = (gameRunner, agent, renderingEnabled) => {
@@ -23,32 +26,21 @@ const clearStatsAndNewGame = (gameRunner, agent, renderingEnabled) => {
 }
 
 export const App = () => {
-    // constructor() {
-
-    //     _agents = agents;//@TODO take as construct arg?
-    //     agentInstances = [];
-
-    //     _settings = settings;//@TODO take as construct arg?
-
-    //     state = {
-    //         statsToDisplay: {},
-    //         agentObservation: null,
-    //         globalObservation: null,
-    //         universalGameNumber: 0,
-    //         currentAgentIndex: 0,
-    //         speed: _settings.speed,
-    //         lastStatusRenderTime: 0,
-    //         lastStatusChartRenderTime: 0,
-    //         scoreHistoryChartData: null
-    //     };
-    // }
     const [gameRunner, setGameRunner] = useState(null);
     const [gameState, setGameState] = useState({});
-    const [speed, setSpeed] = useState(settings.initialSpeed);
     const [currentAgentIndex, setCurrentAgentIndex] = useState(0);
 
-    const renderingEnabled = speed !== 0;
-    const paused = speed === -1;
+    const [speed, setSpeed] = useState(settings.initialSpeed);
+    const speedRef = useRef();
+    speedRef.current = speed;
+
+    const [ticksPerIntervalWhenNotRendering, setTicksPerIntervalWhenNotRendering] = useState(settings.ludicrousSpeed.initialGameTicksPerRender);
+    const ticksPerIntervalWhenNotRenderingRef = useRef();
+    ticksPerIntervalWhenNotRenderingRef.current = ticksPerIntervalWhenNotRendering;
+
+    const [isTicking, setIsTicking] = useState(0);
+
+    const renderingEnabled = speed !== -1;
 
     const renderingEnabledRef = useRef();
     renderingEnabledRef.current = renderingEnabled;
@@ -59,6 +51,51 @@ export const App = () => {
         clearStatsAndNewGame(gameRunner, agents[currentAgentIndex], renderingEnabled);
     }, [])
 
+    const runGameTickBatch = () => {
+        const batchStartTimeMs = Date.now();
+        for (let i = 0; i < ticksPerIntervalWhenNotRenderingRef.current; i++) {
+            gameRunner.tick();
+        }
+        const batchDurationMs = Date.now() - batchStartTimeMs;
+        if (batchDurationMs > settings.ludicrousSpeed.maxGameTickBatchDurationMs) {
+            setTicksPerIntervalWhenNotRendering(ticksPerIntervalWhenNotRenderingRef.current / settings.ludicrousSpeed.batchSizeAdjustmentMultiplier);
+        } else if (batchDurationMs < settings.ludicrousSpeed.maxGameTickBatchDurationMs / settings.ludicrousSpeed.batchSizeAdjustmentMultiplier) {
+            const newValue = ticksPerIntervalWhenNotRenderingRef.current * settings.ludicrousSpeed.batchSizeAdjustmentMultiplier;
+            if (newValue > 1) {
+                setTicksPerIntervalWhenNotRendering(newValue);
+            }
+        }
+    }
+
+    const tick = () => {
+        const tickStartTimeMs = Date.now();
+        if (speedRef.current === null) {
+            setIsTicking(false);
+            return
+        }
+        setIsTicking(true);
+        if (speedRef.current !== -1) {
+            gameRunner.tick();
+        } else {
+            runGameTickBatch();
+        }
+
+        if (speedRef.current === 0 || speedRef.current === -1) {
+            window.requestAnimationFrame(tick);
+        } else {
+            const tickDurationMs = Date.now() - tickStartTimeMs;
+            setTimeout(() => {
+                window.requestAnimationFrame(tick);
+            }, speedRef.current - tickDurationMs);
+        }
+    }
+
+    useEffect(() => {
+        if (gameRunner && speed !== null && !isTicking) {
+            tick();
+        }
+    }, [gameRunner, isTicking, speed]);
+
     useEffect(() => {
         if (gameRunner) {
             gameRunner.setRenderingEnabled(renderingEnabled);
@@ -68,8 +105,8 @@ export const App = () => {
 
     const handleGameRendererRender = (agentObservation, globalObservation, universalGameNumber, stats) => {
         setGameState({
-            agentObservation: agentObservation,
-            globalObservation: globalObservation,
+            agentObservation: { ...agentObservation },
+            globalObservation: { ...globalObservation },
             universalGameNumber: universalGameNumber,
             stats: stats
         })
@@ -81,54 +118,9 @@ export const App = () => {
         })
     }
 
-    const tick = () => { //@TODO tick many times per tick if luda speed?
-        if (!paused && gameRunner) {
-            if (renderingEnabled) {
-                gameRunner.tick();
-            } else {
-                for (let i = 0; i < settings.ticksPerIntervalWhenNotRendering; i++) {
-                    gameRunner.tick();
-                }
-            }
-        }
-    }
-    useInterval(tick, paused ? 1000 : speed);
-
-    // const setupInterval = () => { //@TODO consider not using intervals? Maybe use 50ms background rule or web workers to auto adjust to agent speed?
-    //     var self = this;
-    //     clearInterval(_intervalReference);
-    //     if (_settings.autoPlay) {
-    //         var ticksPerInterval = renderingEnabled ? 1 : ticksPerIntervalWhenNotRendering;
-    //         // if (_agents[currentAgentIndex].ticksPerInterval) {
-    //         //     //Allow very fast or very slow agents to have their own setting
-    //         //     ticksPerInterval = _agents[currentAgentIndex].ticksPerInterval;
-    //         // }
-    //         // if (_settings.renderingEnabled) {
-    //         //     ticksPerInterval = 1
-    //         // }
-    //         //Normal ticking takes 3ms between ticks which is not fast enough, so tick 100 times
-    //         _intervalReference = setInterval(function () {
-    //             for (let i = 0; i < ticksPerInterval; i++) {
-    //                 self.gameRunner.tick();
-    //             }
-    //         }, _settings.speed);
-    //     }
-    // }
-
-    const handleSpeedSelectorChange = useCallback((event) => {
-        setSpeed(parseInt(event.target.value));
-    }, [])
-
-    // const componentDidUpdate = (prevProps, prevState) => {
-    //     if (prevcurrentAgentIndex !== currentAgentIndex) {
-    //         //Is the agent was changed, clear stats and start a new game
-    //         clearStatsAndNewGame();
-    //         setupInterval();//Some agents have their own speed interval so re setup the interval
-    //     }
-    // }
-
     const handleAgentSelectorChange = useCallback((event) => {
         const agentIndex = event.target.value;
+        setTicksPerIntervalWhenNotRendering(settings.ludicrousSpeed.initialGameTicksPerRender);
         setCurrentAgentIndex(agentIndex);
         clearStatsAndNewGame(gameRunner, agents[agentIndex], renderingEnabled);
     }, [gameRunner, currentAgentIndex, renderingEnabled])
@@ -145,51 +137,56 @@ export const App = () => {
         }
     }, [gameRunner])
 
-    const handleManualControlClick = useCallback(() => {
-        setSpeed(-1); // -1 means paused
-    }, [])
-
-    return <div>
-        <div id="info">
-            <TopControls agents={agents}
-                speed={speed}
-                handleAgentSelectorChange={handleAgentSelectorChange}
-                handleClearBrainClick={handleClearBrainClick}
-                handleSpeedSelectorChange={handleSpeedSelectorChange}
-                handleManualControlKeyDown={handleManualControlKeyDown}
-                handleManualControlClick={handleManualControlClick}
-            />
-            {gameState.stats &&
-                <StatsDisplay stats={gameState.stats} />
-            }
-            <br />
-        </div>
-        {!renderingEnabled && gameState.stats &&
-            <div style={{ width: '30em' }}>
-                <ScoreHistoryChart stats={gameState.stats} />
+    return <div className="container" onKeyDown={handleManualControlKeyDown}>
+        <div className="card">
+            <div className="card-header">
+                Machine Learning Agent Tester
             </div>
-        }
-        {renderingEnabled && gameState.agentObservation &&
-            <div>
-                <ObservationRenderer
-                    agentObservation={gameState.agentObservation}
-                    globalObservation={gameState.globalObservation}
-                    gameNumber={gameState.universalGameNumber}
+            <div className="card-body">
+                {/* {ticksPerIntervalWhenNotRendering} */}
+                <TopControls agents={agents}
+                    speed={speed}
+                    handleAgentSelectorChange={handleAgentSelectorChange}
+                    handleClearBrainClick={handleClearBrainClick}
+                    handleSpeedChange={setSpeed}
+                    handleManualControlKeyDown={handleManualControlKeyDown}
                 />
-                <br />
-                <div>Agent Data:</div>
-                <canvas id="agentRendererCanvas" />
-                {agents[currentAgentIndex].description &&
-                    <div>
-                        <br />
-                        {agents[currentAgentIndex].description}
+                <hr />
+                <div id="info">
+                    {gameState.stats &&
+                        <StatsDisplay stats={gameState.stats} />
+                    }
+                </div>
+                <hr />
+                {!renderingEnabled && gameState.stats &&
+                    <div style={{ width: '30em' }}>
+                        <ScoreHistoryChart stats={gameState.stats} />
                     </div>
                 }
+                {renderingEnabled && gameState.agentObservation &&
+                    <div>
+                        <ObservationRenderer
+                            agentObservation={gameState.agentObservation}
+                            globalObservation={gameState.globalObservation}
+                            gameNumber={gameState.universalGameNumber}
+                        />
+                        <hr />
+                        <div>Agent Data:</div>
+                        <canvas id="agentRendererCanvas" />
+                    </div>
+                }
+                <hr />
+                <GameRulesDisplay environmentConfig={environmentConfig} />
+                {agents[currentAgentIndex].description &&
+                    <>
+                        <hr />
+                        <div>Agent Description:</div>
+                        <div>{agents[currentAgentIndex].description}</div>
+                    </>
+                }
+                <hr />
+                <BrainExportButton gameRunner={gameRunner} />
             </div>
-        }
-        <br />
-        <GameRulesDisplay environmentConfig={environmentConfig} />
-        <br />
-        <BrainExportButton gameRunner={gameRunner} />
+        </div>
     </div>
 }

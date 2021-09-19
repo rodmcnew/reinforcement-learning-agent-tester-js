@@ -65,7 +65,7 @@ export default class TabularSARSA {
     }
 
     static getName() {
-        return 'ReinforcementLearning - TabularSARSA - Untrained - 5x3';
+        return 'Reinforcement Learning - Tabular SARSA - 5x3 Viewport - Not Pre-trained';
     }
 
     static getDescription() {

@@ -21,7 +21,11 @@ export default class MatrixDeepQNetwork {
     }
 
     static getName() {
-        return 'ReinforcementLearning - DeepQNetworkScratchBuilt - 9x9'
+        return 'Reinforcement Learning - SARSA Deep Q Network with Layerganza - 9x9 Viewport'
+    }
+
+    static getDescription() {
+        return 'This agent uses the Expected-SARSA algorithm with a deep neural network as the Q function. The neural network is was built from scratch and is called Layerganza.';
     }
 
     /**
