@@ -3,14 +3,12 @@
 - Publish latest layerganza
 - Consider making rewards not fractions? (could make long-term goals harder? or not?)
 - Consider red is -1 and bottom is +100? or +1000?
-- Consider making bottom never red
 - Consider rendering reward as chart like ludicrous speed chart?
 - Consider better bar charts with obvious min and max? maybe cap to max incase it goes over? maybe drive from rules config?
 - Get rid of ancient .propTypes and class components
 
 # Performance:
 Must
-- On very fast mode, its roughly 60fps but sometimes there are actions that don't get rendered. maybe sync better with 60fps or use requestAnimationFrame?
 - on very fast, consider that getAction is 1ms while rendering is 8ms
 - Look more for memory leaks during long runs
 - Consider React.memo, useCallback, and maybe more components inside game renderer
