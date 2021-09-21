@@ -6,7 +6,7 @@
 - Consider rendering reward as chart like ludicrous speed chart?
 - Consider better bar charts with obvious min and max? maybe cap to max incase it goes over? maybe drive from rules config?
 - Get rid of ancient .propTypes and class components
-
+- Consider redux or similar and also making agent data display use react
 # Performance:
 Must
 - on very fast, consider that getAction is 1ms while rendering is 8ms
