@@ -14,7 +14,7 @@ export const settings = {//@TODO move out of global?
     initialSpeed: 100,
     ludicrousSpeed: {
         initialGameTicksPerRender: 1,
-        maxGameTickBatchDurationMs: 100,
+        maxGameTickBatchDurationMs: 50,
         batchSizeAdjustmentMultiplier: 2
     }
 };
@@ -109,7 +109,7 @@ export const App = () => {
             globalObservation: { ...globalObservation },
             universalGameNumber: universalGameNumber,
             stats: stats
-        })
+        });
     }
 
     const handleGameRunnerStatusChange = (stats) => {

@@ -12,14 +12,15 @@
   "devDependencies": {
     "chart.js": "^2.5.0",
     "layerganza": "^2.4.1",
-    "react-scripts": "^4.0.3",
+    "react-app-rewired": "^2.1.8",
+    "react-app-rewired": "^4.0.3",
     "tabular-sarsa": "^1.0.6"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test --env=jsdom",
-    "eject": "react-scripts eject"
+    "start": "react-app-rewired start",
+    "build": "react-app-rewired build",
+    "test": "react-app-rewired test --env=jsdom",
+    "eject": "react-app-rewired eject"
   },
   "homepage": "./",
   "browserslist": {

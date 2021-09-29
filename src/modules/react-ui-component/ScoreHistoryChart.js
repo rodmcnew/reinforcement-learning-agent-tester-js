@@ -53,7 +53,6 @@ const ScoreHistoryChart = ({ stats }) => {
         });
 
         return () => {
-            console.log('clean');
             chartRef.current.destroy();
             chartRef.current = null; // This was proven to be needed while profiling for memory leaks
         }

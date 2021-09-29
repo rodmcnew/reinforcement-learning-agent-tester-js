@@ -1,3 +1,6 @@
+
+
+
 - IMPORTANT: Fix agent bars vanish/freeze-last-scene on hand-programed
 - Learn more about cleaning up react refs
 - Publish latest layerganza
@@ -16,6 +19,7 @@ Must
 - Debounce (or something) the rendering during ludicrous speed
 - Profile more on the production build
 - Look for subtile memory leaks like in ludicrous chart
+- Consider that ludicrous speed updates stats per game instead of per some interval. seems odd.
 
 Should
 - Consider large amount of dom eles
@@ -36,14 +40,35 @@ Should
 - Got rid of 784 concated strings by sending pre-created color strings to pixel canvas (saved about 2mb of memory?)
 - Took observation renderer from 
 - Consider agent.exp cap?
-
+- 2021-09-28
+  - Prevented double rendering during new games by removing the onRender() call in newGame()
+  - Discovered that stats display alone is causing "layout" and "paint"
+  - Told it to do production build but not minify code to make things easier to profile
+    - Also named some useEffect functions so can see them in profiler
+  - converted drawEnvironmentView to useEffect (draw after canvas rendered)
+  - found drawEnvironmentView is being called twice because of position updates. used ref instead of useState to prevent this.
+    - On very fast mode on 4x slowdown on mac i9:
+      - 4ms vs 2ms for drawEnvironment
+      - 40 APM vs 55 APM
+  - saved a little time by calling "ctx.fillStyle =" less often
+  - At end of night github version runs 40 APM while local prod build runs at 55 APM. Not sure what all helped tho. This is for 4x slowdown i9 mac on "very fast" app setting.
+  - Found out chrome slowdowns cannot be trusted to stay on
+  - possible improvements:
+    - figure out why animation frame fires so long after useEffect in the frame
+      - could it be replaced by the react scheduler?
+      - UPDATE:
+        - switching to drawing on canvases inside useLayoutEffect instead of useEffect seems to have solved this
+          - looks cleaner in flame chart but doesn't give more APM?
+    - webGl
+    - run agent or game+agent in a web worker 
 #Notes:
 - Observatoin render before messing with it: 1.43, 2.24, 2.24, 1.86, 1.65.   And takeAction: 9.55, 9.42, 17.9 (for status change too), 11.9, 9.54
 - When setting state twice per tick, ticks were take 22ms, had dropped frames
 - Had 615 to 14627 listeners
 - Found react dev tools "why did it render" setting - used this, React.memo, useCallback to stop top control from rendering
 - Make observation loops directly draw
-
+- Ui->drawEnvView 2.31, 1.2, 2.29
+- learned that chrome can forget slowdown
 # Questions and notes:
 - How would you fix low frame rate?
     - Profile it, look at flame chart

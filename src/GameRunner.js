@@ -52,16 +52,19 @@ export default class GameRunner {
         // this._renderingEnabled = renderingEnabled;
         this._environment = new Environment();
         this._stats.currentScore = 0;//@TODO get from environment?
-        if (this._renderingEnabled) {
-            //@TODO have this render make the table its self inside a given div
-            // this._onRender.clear();
-            this._onRender(
-                this._environment.getAgentObservation(),
-                this._environment.getGlobalObservation(),
-                this._universalGameNumber,
-                this._stats
-            );
-        } else {
+        // if (this._renderingEnabled) { // Removed to prevent calling onRender twice for new games
+        //     //@TODO have this render make the table its self inside a given div
+        //     // this._onRender.clear();
+        //     this._onRender(
+        //         this._environment.getAgentObservation(),
+        //         this._environment.getGlobalObservation(),
+        //         this._universalGameNumber,
+        //         this._stats
+        //     );
+        // } else {
+        //     this._onStatusChange(this._stats);
+        // }
+        if (!this.renderingEnabled) {
             this._onStatusChange(this._stats);
         }
         this._updateObservations();

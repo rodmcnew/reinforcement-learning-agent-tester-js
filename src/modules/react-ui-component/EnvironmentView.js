@@ -1,60 +1,71 @@
-import React, { useRef, memo, useEffect, useState } from 'react';
-import { config } from '../environment';
-import createDrawPixel from '../pixel-canvas/createDrawPixel';
+import React, { memo, useLayoutEffect, useRef } from 'react';
 
 const EnvironmentView = ({ globalObservation, gameNumber }) => {
     const canvasRef = useRef();
+    const canvasCtxRef = useRef();
 
-    const [lastGameNumber, setLastGameNumber] = useState(null); //Stores the "trail" of where we have been on the environment view
-    const [previousPositions, setPreviousPositions] = useState(new Set()); //Stores the "trail" of where we have been on the environment view
+    /**
+     * This uses a ref rather than useState to prevent double rendering.
+     */
+    const previousPositionInfoRef = useRef();
 
-    useEffect(() => {
-        if (gameNumber !== lastGameNumber) {
+    useLayoutEffect(() => {
+        previousPositionInfoRef.current = { lastGameNumber: null, previousPositions: new Set() };
+    }, []);
+
+    useLayoutEffect(() => {
+        if (canvasRef.current && !canvasCtxRef.current) {
+            canvasCtxRef.current = canvasRef.current.getContext("2d");
+        }
+    }, [canvasRef.current]);
+
+    const drawEnvironmentView = () => {
+        // console.log(globalObservation.position);
+        if (gameNumber !== previousPositionInfoRef.current.lastGameNumber) {
             // If we are starting a new game, clear the position trail
-            setPreviousPositions(new Set());
-            setLastGameNumber(gameNumber);
+            previousPositionInfoRef.current.previousPositions.clear();
+            previousPositionInfoRef.current.lastGameNumber = gameNumber;
         } else {
             // If we are not starting a new game, add the current position to the position trail
             const scalarPosition = globalObservation.position[0] * globalObservation.tileTypes.length
                 + globalObservation.position[1];
-            if (!previousPositions.has(scalarPosition)) {
-                const newPreviousPositions = new Set(previousPositions);
-                newPreviousPositions.add(scalarPosition);
-                setPreviousPositions(newPreviousPositions);
-            }
+            previousPositionInfoRef.current.previousPositions.add(scalarPosition);
         }
-    }, [gameNumber, lastGameNumber, previousPositions, globalObservation]);
 
-    if (canvasRef.current && globalObservation) {
-        const tileTypes = globalObservation.tileTypes;
-        const xLength = tileTypes.length;
-        const yLength = tileTypes[0].length;
-        const drawPixel = createDrawPixel(canvasRef.current, xLength, yLength)
-
-        for (let x = 0; x < xLength; x++) {
-            for (let y = 0; y < yLength; y++) {
-                const position = globalObservation.position;
-                let scalarPosition = x * xLength + y;
-                let inPreviousPosition = previousPositions.has(scalarPosition);
-                let color
-                if (x === position[0] && y === position[1] && tileTypes[x][y] !== 0) {
-                    color = 'rgb(255,255,0)';
-                } else if (x === position[0] && y === position[1]) {
-                    color = 'rgb(0,255,0)';
-                } else if (inPreviousPosition && tileTypes[x][y] !== 0) {
-                    color = 'rgb(255,255,128)';
-                } else if (inPreviousPosition) {
-                    color = 'rgb(0,128,0)';
-                } else if (tileTypes[x][y] !== 0) {
-                    color = 'rgb(230,0,0)';
-                } else {
-                    color = 'rgb(50,50,50)';
+        if (canvasCtxRef.current && globalObservation) {
+            const tileTypes = globalObservation.tileTypes;
+            const xLength = tileTypes.length;
+            const yLength = tileTypes[0].length;
+            const ctx = canvasCtxRef.current;
+            const pixelHeight = canvasRef.current.height / xLength;
+            const pixelWidth = canvasRef.current.width / yLength;
+            const position = globalObservation.position;
+            const previousPositions = previousPositionInfoRef.current.previousPositions;
+            let fillStyle;
+            let lastFillStyle;
+            // console.time('loop');
+            for (let x = 0; x < xLength; x++) {
+                for (let y = 0; y < yLength; y++) {
+                    fillStyle = (x === position[0] && y === position[1] && tileTypes[x][y] !== 0) ? 'rgb(255,255,0)'
+                        : (x === position[0] && y === position[1]) ? 'rgb(0,255,0)'
+                            : (previousPositions.has(x * xLength + y)) ? (tileTypes[x][y] !== 0 ? 'rgb(255,255,128)' : 'rgb(0,128,0)')
+                                : (tileTypes[x][y] !== 0) ? 'rgb(230,0,0)'
+                                    : 'rgb(50,50,50)';
+                    /**
+                     * Avoiding "crx.fillStyle = " unless needed saves 0.5 to 1 ms on chrome i9 mac at 4x slowdown
+                     */
+                    if (fillStyle !== lastFillStyle) {
+                        ctx.fillStyle = fillStyle;
+                        lastFillStyle = fillStyle;
+                    }
+                    ctx.fillRect(x * pixelWidth, y * pixelHeight, pixelWidth, pixelHeight);
                 }
-                drawPixel(x, y, color);
-
             }
+            // console.timeEnd('loop');
         }
     }
+
+    useLayoutEffect(drawEnvironmentView, [canvasCtxRef.current, gameNumber, previousPositionInfoRef, globalObservation]);
 
     return <canvas ref={canvasRef} height="200" width="200" />
 };
