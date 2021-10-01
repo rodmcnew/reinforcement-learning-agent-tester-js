@@ -2,7 +2,7 @@
 
 MUST:
 // stats display: !!!!! @TODO !!!!! consider animation frames for 60hz !!!!! (maybe the app should request animation frame then ask the gamerunner for the stats, maybe tick() changes to be this) (20 is 50hz but what if machine can't handle that?)
-
+- Fix and re-enable "export agent brain"
 - remove time waster from hand programed agent (or make it configurable?)
 - fix all features after multi threading
 - IMPORTANT: Fix agent bars vanish/freeze-last-scene on hand-programed
