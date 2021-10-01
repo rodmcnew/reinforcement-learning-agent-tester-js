@@ -45,6 +45,40 @@ function _createClass(Constructor, protoProps, staticProps) {
 
 /***/ }),
 /* 3 */
+/***/ (function(module, exports) {
+
+function _classCallCheck(instance, Constructor) {
+  if (!(instance instanceof Constructor)) {
+    throw new TypeError("Cannot call a class as a function");
+  }
+}
+
+module.exports = _classCallCheck;
+
+/***/ }),
+/* 4 */
+/***/ (function(module, exports) {
+
+function _defineProperties(target, props) {
+  for (var i = 0; i < props.length; i++) {
+    var descriptor = props[i];
+    descriptor.enumerable = descriptor.enumerable || false;
+    descriptor.configurable = true;
+    if ("value" in descriptor) descriptor.writable = true;
+    Object.defineProperty(target, descriptor.key, descriptor);
+  }
+}
+
+function _createClass(Constructor, protoProps, staticProps) {
+  if (protoProps) _defineProperties(Constructor.prototype, protoProps);
+  if (staticProps) _defineProperties(Constructor, staticProps);
+  return Constructor;
+}
+
+module.exports = _createClass;
+
+/***/ }),
+/* 5 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -98,40 +132,6 @@ function _nonIterableRest() {
 function _slicedToArray(arr, i) {
   return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || Object(unsupportedIterableToArray["a" /* default */])(arr, i) || _nonIterableRest();
 }
-
-/***/ }),
-/* 4 */
-/***/ (function(module, exports) {
-
-function _classCallCheck(instance, Constructor) {
-  if (!(instance instanceof Constructor)) {
-    throw new TypeError("Cannot call a class as a function");
-  }
-}
-
-module.exports = _classCallCheck;
-
-/***/ }),
-/* 5 */
-/***/ (function(module, exports) {
-
-function _defineProperties(target, props) {
-  for (var i = 0; i < props.length; i++) {
-    var descriptor = props[i];
-    descriptor.enumerable = descriptor.enumerable || false;
-    descriptor.configurable = true;
-    if ("value" in descriptor) descriptor.writable = true;
-    Object.defineProperty(target, descriptor.key, descriptor);
-  }
-}
-
-function _createClass(Constructor, protoProps, staticProps) {
-  if (protoProps) _defineProperties(Constructor.prototype, protoProps);
-  if (staticProps) _defineProperties(Constructor, staticProps);
-  return Constructor;
-}
-
-module.exports = _createClass;
 
 /***/ }),
 /* 6 */
@@ -656,9 +656,9 @@ module.exports = shouldUseNative() ? Object.assign : function (target, source) {
 "use strict";
 
 
-var _classCallCheck = __webpack_require__(4);
+var _classCallCheck = __webpack_require__(3);
 
-var _createClass = __webpack_require__(5);
+var _createClass = __webpack_require__(4);
 
 Object.defineProperty(exports, "__esModule", {
   value: true
@@ -24668,9 +24668,9 @@ exports.unstable_Profiling = null;
 "use strict";
 
 
-var _classCallCheck = __webpack_require__(4);
+var _classCallCheck = __webpack_require__(3);
 
-var _createClass = __webpack_require__(5);
+var _createClass = __webpack_require__(4);
 
 Object.defineProperty(exports, "__esModule", {
   value: true
@@ -24766,9 +24766,9 @@ exports.default = Network;
 "use strict";
 
 
-var _classCallCheck = __webpack_require__(4);
+var _classCallCheck = __webpack_require__(3);
 
-var _createClass = __webpack_require__(5);
+var _createClass = __webpack_require__(4);
 
 var _inherits = __webpack_require__(23);
 
@@ -25008,9 +25008,9 @@ module.exports = _assertThisInitialized;
 "use strict";
 
 
-var _classCallCheck = __webpack_require__(4);
+var _classCallCheck = __webpack_require__(3);
 
-var _createClass = __webpack_require__(5);
+var _createClass = __webpack_require__(4);
 
 Object.defineProperty(exports, "__esModule", {
   value: true
@@ -25043,9 +25043,9 @@ exports.default = InputLayer;
 "use strict";
 
 
-var _classCallCheck = __webpack_require__(4);
+var _classCallCheck = __webpack_require__(3);
 
-var _createClass = __webpack_require__(5);
+var _createClass = __webpack_require__(4);
 
 Object.defineProperty(exports, "__esModule", {
   value: true
@@ -25089,9 +25089,9 @@ exports.default = LeakyRelu;
 "use strict";
 
 
-var _classCallCheck = __webpack_require__(4);
+var _classCallCheck = __webpack_require__(3);
 
-var _createClass = __webpack_require__(5);
+var _createClass = __webpack_require__(4);
 
 Object.defineProperty(exports, "__esModule", {
   value: true
@@ -25126,9 +25126,9 @@ exports.default = Linear;
 "use strict";
 
 
-var _classCallCheck = __webpack_require__(4);
+var _classCallCheck = __webpack_require__(3);
 
-var _createClass = __webpack_require__(5);
+var _createClass = __webpack_require__(4);
 
 Object.defineProperty(exports, "__esModule", {
   value: true
@@ -25163,9 +25163,9 @@ exports.default = LogisticSigmoid;
 "use strict";
 
 
-var _classCallCheck = __webpack_require__(4);
+var _classCallCheck = __webpack_require__(3);
 
-var _createClass = __webpack_require__(5);
+var _createClass = __webpack_require__(4);
 
 Object.defineProperty(exports, "__esModule", {
   value: true
@@ -25200,9 +25200,9 @@ exports.default = Tanh;
 "use strict";
 
 
-var _classCallCheck = __webpack_require__(4);
+var _classCallCheck = __webpack_require__(3);
 
-var _createClass = __webpack_require__(5);
+var _createClass = __webpack_require__(4);
 
 Object.defineProperty(exports, "__esModule", {
   value: true
@@ -25262,9 +25262,9 @@ exports.default = AdamOptimizer;
 "use strict";
 
 
-var _classCallCheck = __webpack_require__(4);
+var _classCallCheck = __webpack_require__(3);
 
-var _createClass = __webpack_require__(5);
+var _createClass = __webpack_require__(4);
 
 Object.defineProperty(exports, "__esModule", {
   value: true
@@ -29986,4 +29986,4 @@ function usePrevious(currentValue) {
 
 /***/ })
 ]]);
-//# sourceMappingURL=2.f07c8819.chunk.js.map
+//# sourceMappingURL=2.8c51b2dd.chunk.js.map
