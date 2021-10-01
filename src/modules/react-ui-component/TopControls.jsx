@@ -4,9 +4,8 @@ import './TopControls.css';
 const speedOptions = [
     ['paused', 'Paused (manual control with WASD keys)'],
     ['500', 'Slow'],
-    ['250', 'Medium'],
-    ['100', 'Fast'],
-    ['0', 'Very Fast'],
+    ['100', 'Medium'],
+    ['0', 'Fast'],
     ['-1', 'Ludicrous Speed (no rendering)']
 ]
 

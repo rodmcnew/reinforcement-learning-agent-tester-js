@@ -1,4 +1,4 @@
-import React, { memo, useLayoutEffect, useRef } from 'react';
+import React, { useRef, memo, useLayoutEffect } from 'react';
 import { config } from '../environment';
 
 const AgentObservation = ({ agentObservation }) => {

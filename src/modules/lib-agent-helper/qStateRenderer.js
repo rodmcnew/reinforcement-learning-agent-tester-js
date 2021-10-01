@@ -42,13 +42,25 @@ const lengthMultiplier = 100
 const lineCount = 10;
 const canvasHeight = lineHeight * lineCount;
 
+/**
+ * Note: This function assumes it was called from inside a window.requestAnimationFrame
+ */
+export function renderAgentData(data) {
+    if (data.actionResponse) {
+        renderActionResponse(data.actionResponse);
+    }
+    if (data.reward) {
+        renderReward(data.reward);
+    }
+}
+
 export function renderActionResponse(actionResponse) {//@TODO move out
     // ensureElementsExist();
     const maxActionValue = 1;//actionResponse.weights[maxAction];
     // const barFrontPadding = 100;
     // const multiplier = 150;
 
-    const canvas = document.getElementById('agentRendererCanvas');
+    const canvas = document.getElementById('agentRendererCanvas'); //@TODO
     if (!canvas) {
         return;
     }
@@ -98,7 +110,7 @@ export function renderActionResponse(actionResponse) {//@TODO move out
 }
 
 export function renderReward(reward) {//@TODO move out
-    const canvas = document.getElementById('agentRendererCanvas');
+    const canvas = document.getElementById('agentRendererCanvas'); //@TODO
     if (!canvas) {
         return;
     }
@@ -127,11 +139,11 @@ export function renderReward(reward) {//@TODO move out
         good = reward;
     }
 
-    renderBar(8, good * multiplier, 'greenyellow', `good: ${good}`)
+    renderBar(8, good * multiplier, 'greenyellow', `good: ${good.toFixed(3)}`)
     // rewardElements[0].style.width = (good * multiplier + barFrontPadding) + 'px';
     // rewardElements[0].innerHTML = good.toFixed(3);
 
-    renderBar(9, bad * multiplier, 'orangered', `bad: ${bad}`)
+    renderBar(9, bad * multiplier, 'orangered', `bad: ${bad.toFixed(3)}`)
     // rewardElements[1].style.width = (bad * multiplier + barFrontPadding) + 'px';
     // rewardElements[1].innerHTML = bad.toFixed(3);
 }

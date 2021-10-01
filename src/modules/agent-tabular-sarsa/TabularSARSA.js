@@ -3,7 +3,7 @@ import { matrixToFlatArray } from '../environment/nestedFloatMatrixMath'
 // import { data as savedBrain } from '../../data/saves/tabular-sarsa'
 import { Agent } from 'tabular-sarsa'
 import { renderActionResponse, renderReward } from '../lib-agent-helper/qStateRenderer'
-import { settings } from '../../App'
+// import { settings } from '../../App'
 import { actions } from '../environment'
 
 /**
@@ -80,22 +80,25 @@ export default class TabularSARSA {
      * @TODO clear last actions when is new game
      * @return {string} action code
      */
-    getAction(lastAction, lastReward, observationMatrix) {
+    getAction(lastAction, lastReward, observationMatrix, { renderingEnabled }) {
         // let reward = rewardCalculator.calcLastReward(observation);
         var state = observationToInt(observationMatrix, this._lastAction);
         var actionIndex = agent.decide(lastReward, state);
         var lastActionStats = agent.getLastActionStats();
-        if (settings.renderingEnabled) {
-            renderActionResponse(
-                {
-                    weights: lastActionStats.weights,
-                    wasRandom: lastActionStats.wasRandomlyChosen
-                }
-            );
-            renderReward(lastReward);
+
+        const renderData = {};
+        if (renderingEnabled) {
+            renderData.actionResponse = {
+                weights: lastActionStats.weights,
+                wasRandom: lastActionStats.wasRandomlyChosen
+            };
+            if (lastReward !== null) {
+                renderData.reward = lastReward
+            }
         }
+
         this._lastAction = actionIndex;
-        return actionIndex;
+        return [actionIndex, renderData];
     }
 
     newGame() { }

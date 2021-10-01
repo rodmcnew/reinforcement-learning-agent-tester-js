@@ -1,7 +1,9 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { usePrevious } from 'rooks';
+import Worker from 'worker-loader!./worker';
 import { agents } from './agents';
 import './App.css';
-import GameRunner from './GameRunner';
+import config from './config';
 import { actions, config as environmentConfig } from './modules/environment';
 import BrainExportButton from './modules/react-ui-component/BrainExportButton';
 import GameRulesDisplay from './modules/react-ui-component/GameRulesDisplay';
@@ -9,133 +11,109 @@ import ObservationRenderer from './modules/react-ui-component/ObservationRendere
 import ScoreHistoryChart from './modules/react-ui-component/ScoreHistoryChart';
 import StatsDisplay from './modules/react-ui-component/StatsDisplay';
 import TopControls from './modules/react-ui-component/TopControls';
-export const settings = {//@TODO move out of global?
-    renderingEnabled: true,
-    initialSpeed: 100,
-    ludicrousSpeed: {
-        initialGameTicksPerRender: 1,
-        maxGameTickBatchDurationMs: 50,
-        batchSizeAdjustmentMultiplier: 2
-    }
-};
-
-const clearStatsAndNewGame = (gameRunner, agent, renderingEnabled) => {
-    gameRunner.setRenderingEnabled(renderingEnabled);
-    gameRunner.clearStats();
-    gameRunner.newGame(agent.instance);
-}
+import { WorkerInputActions, WorkerOutputActions } from './worker';
 
 export const App = () => {
-    const [gameRunner, setGameRunner] = useState(null);
     const [gameState, setGameState] = useState({});
-    const [currentAgentIndex, setCurrentAgentIndex] = useState(0);
 
-    const [speed, setSpeed] = useState(settings.initialSpeed);
+    const [currentAgentIndex, setCurrentAgentIndex] = useState(0);
+    const [worker, setWorker] = useState(null);
+    const workerRef = useRef();
+
+    const [speed, setSpeed] = useState(config.app.initialSpeed);
     const speedRef = useRef();
     speedRef.current = speed;
 
-    const [ticksPerIntervalWhenNotRendering, setTicksPerIntervalWhenNotRendering] = useState(settings.ludicrousSpeed.initialGameTicksPerRender);
-    const ticksPerIntervalWhenNotRenderingRef = useRef();
-    ticksPerIntervalWhenNotRenderingRef.current = ticksPerIntervalWhenNotRendering;
-
-    const [isTicking, setIsTicking] = useState(0);
+    const previousSpeed = usePrevious(speed);
 
     const renderingEnabled = speed !== -1;
 
     const renderingEnabledRef = useRef();
     renderingEnabledRef.current = renderingEnabled;
 
+    const handleWorkerMessage = (event) => {
+        const action = event.data;
+        // console.log('message from worker', action);
+        switch (action.type) {
+            case WorkerOutputActions.UpdateState:
+                window.requestAnimationFrame(() => {
+                    setGameState(action.payload);
+                    if (action.payload.agentRenderData && agents[currentAgentIndex].render) {
+                        agents[currentAgentIndex].render(action.payload.agentRenderData);
+                    }
+                    tick();
+                })
+                break;
+        }
+    }
+
     useEffect(() => {
-        const gameRunner = new GameRunner(handleGameRendererRender, handleGameRunnerStatusChange);
-        setGameRunner(gameRunner);
-        clearStatsAndNewGame(gameRunner, agents[currentAgentIndex], renderingEnabled);
+        const newWorker = new Worker();
+        newWorker.postMessage({ type: WorkerInputActions.ClearStatsAndNewGame, payload: { renderingEnabled: true, agentIndex: 0 } });
+        newWorker.addEventListener('message', handleWorkerMessage);
+        setWorker(newWorker);
+        workerRef.current = newWorker;
     }, [])
 
-    const runGameTickBatch = () => {
-        const batchStartTimeMs = Date.now();
-        for (let i = 0; i < ticksPerIntervalWhenNotRenderingRef.current; i++) {
-            gameRunner.tick();
-        }
-        const batchDurationMs = Date.now() - batchStartTimeMs;
-        if (batchDurationMs > settings.ludicrousSpeed.maxGameTickBatchDurationMs) {
-            setTicksPerIntervalWhenNotRendering(ticksPerIntervalWhenNotRenderingRef.current / settings.ludicrousSpeed.batchSizeAdjustmentMultiplier);
-        } else if (batchDurationMs < settings.ludicrousSpeed.maxGameTickBatchDurationMs / settings.ludicrousSpeed.batchSizeAdjustmentMultiplier) {
-            const newValue = ticksPerIntervalWhenNotRenderingRef.current * settings.ludicrousSpeed.batchSizeAdjustmentMultiplier;
-            if (newValue > 1) {
-                setTicksPerIntervalWhenNotRendering(newValue);
+    useEffect(() => {
+        if (speed !== previousSpeed) {
+            const isLudicrousSpeed = speed === -1;
+
+            /**
+             * If the speed changes in or out of ludicrous speed, inform the web worker
+             */
+            if (worker) {
+                worker.postMessage({ type: WorkerInputActions.SetLudicrousSpeedEnabled, payload: isLudicrousSpeed })
             }
+
+            /**
+             * Start ticking if the speed just changed to a speed that requires render-controlled ticking
+             */
+            if (previousSpeed === null) {
+                tick();
+            }
+        }
+    }, [speed, previousSpeed, worker])
+
+    const postTickToWorker = () => {
+        switch (speedRef.current) {
+            case -1: // Ludicrous speed
+                workerRef.current.postMessage({ type: WorkerInputActions.RequestStats });
+            case null: // Paused
+                return;
+            default: // Slow, Medium, Fast, Very Fast
+                workerRef.current.postMessage({ type: WorkerInputActions.Tick });
         }
     }
 
     const tick = () => {
-        const tickStartTimeMs = Date.now();
-        if (speedRef.current === null) {
-            setIsTicking(false);
-            return
-        }
-        setIsTicking(true);
-        if (speedRef.current !== -1) {
-            gameRunner.tick();
-        } else {
-            runGameTickBatch();
-        }
-
         if (speedRef.current === 0 || speedRef.current === -1) {
-            window.requestAnimationFrame(tick);
+            postTickToWorker();
         } else {
-            const tickDurationMs = Date.now() - tickStartTimeMs;
-            setTimeout(() => {
-                window.requestAnimationFrame(tick);
-            }, speedRef.current - tickDurationMs);
+            setTimeout(postTickToWorker, speedRef.current);
         }
-    }
-
-    useEffect(() => {
-        if (gameRunner && speed !== null && !isTicking) {
-            tick();
-        }
-    }, [gameRunner, isTicking, speed]);
-
-    useEffect(() => {
-        if (gameRunner) {
-            gameRunner.setRenderingEnabled(renderingEnabled);
-        }
-        settings.renderingEnabled = renderingEnabled;
-    }, [renderingEnabled])
-
-    const handleGameRendererRender = (agentObservation, globalObservation, universalGameNumber, stats) => {
-        setGameState({
-            agentObservation: { ...agentObservation },
-            globalObservation: { ...globalObservation },
-            universalGameNumber: universalGameNumber,
-            stats: stats
-        });
-    }
-
-    const handleGameRunnerStatusChange = (stats) => {
-        setGameState({
-            stats: stats
-        })
     }
 
     const handleAgentSelectorChange = useCallback((event) => {
         const agentIndex = event.target.value;
-        setTicksPerIntervalWhenNotRendering(settings.ludicrousSpeed.initialGameTicksPerRender);
-        setCurrentAgentIndex(agentIndex);
-        clearStatsAndNewGame(gameRunner, agents[agentIndex], renderingEnabled);
-    }, [gameRunner, currentAgentIndex, renderingEnabled])
+        worker.postMessage({ type: WorkerInputActions.SetAgentIndex, payload: agentIndex });
+        setCurrentAgentIndex(agentIndex)
+    }, [worker, currentAgentIndex])
 
     const handleClearBrainClick = useCallback(() => {
-        gameRunner.clearCurrentAgentBrain();
-        clearStatsAndNewGame(gameRunner, agents[currentAgentIndex], renderingEnabled);
-    }, [gameRunner, currentAgentIndex, renderingEnabled])
+        worker.postMessage({ type: WorkerInputActions.ClearAgentBrain });
+    }, [worker, currentAgentIndex])
 
     const handleManualControlKeyDown = useCallback((event) => {
+        if (speed !== null) {
+            // Prevents too many tick loops if user presses a WASD key while not paused
+            return;
+        }
         const action = actions.indexOf(event.key);
         if (action !== -1) {
-            gameRunner.takeAction(action);
+            worker.postMessage({ type: WorkerInputActions.UserMove, payload: action });
         }
-    }, [gameRunner])
+    }, [worker, speed])
 
     return <div className="container" onKeyDown={handleManualControlKeyDown}>
         <div className="card">
@@ -170,9 +148,13 @@ export const App = () => {
                             globalObservation={gameState.globalObservation}
                             gameNumber={gameState.universalGameNumber}
                         />
-                        <hr />
-                        <div>Agent Data:</div>
-                        <canvas id="agentRendererCanvas" />
+                        {agents[currentAgentIndex].render &&
+                            <>
+                                <hr />
+                                <div>Agent Data:</div>
+                                <canvas id="agentRendererCanvas" />
+                            </>
+                        }
                     </div>
                 }
                 <hr />
@@ -184,8 +166,8 @@ export const App = () => {
                         <div>{agents[currentAgentIndex].description}</div>
                     </>
                 }
-                <hr />
-                <BrainExportButton gameRunner={gameRunner} />
+                {/* <hr /> */}
+                {/* <BrainExportButton gameRunner={gameRunner} /> */}
             </div>
         </div>
     </div>

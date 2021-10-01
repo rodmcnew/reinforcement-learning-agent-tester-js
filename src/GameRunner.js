@@ -18,12 +18,10 @@ const defaultStats = {
 };
 
 export default class GameRunner {
-    constructor(onRender, onStatusChange) {
+    constructor() {
         this._universalGameNumber = 0;
         this._renderingEnabled = false;
-        this._onRender = onRender;
         this._stats = Object.assign({}, defaultStats);
-        this._onStatusChange = onStatusChange;
         this._agentObservation = null;
         this._globalObservation = null;
         // this._agentClass = null;
@@ -38,7 +36,7 @@ export default class GameRunner {
 
         this.last = { action: null, reward: null };
 
-        setInterval(() => {//@TODO accomplish this without an interval
+        setInterval(() => {//@TODO accomplish this without an interval?
             this._stats.actionsPerSecond = this._stats.actionCount - this._stats.lastSecondsActionCount;
             this._stats.lastSecondsActionCount = this._stats.actionCount;
         }, 1000);
@@ -46,27 +44,9 @@ export default class GameRunner {
 
     newGame(agentInstance) {
         this._universalGameNumber++;
-        // this._agentClass = agentClass;
         this._agent = agentInstance;
-        // this._agent = new this._agentClass();
-        // this._renderingEnabled = renderingEnabled;
         this._environment = new Environment();
         this._stats.currentScore = 0;//@TODO get from environment?
-        // if (this._renderingEnabled) { // Removed to prevent calling onRender twice for new games
-        //     //@TODO have this render make the table its self inside a given div
-        //     // this._onRender.clear();
-        //     this._onRender(
-        //         this._environment.getAgentObservation(),
-        //         this._environment.getGlobalObservation(),
-        //         this._universalGameNumber,
-        //         this._stats
-        //     );
-        // } else {
-        //     this._onStatusChange(this._stats);
-        // }
-        if (!this.renderingEnabled) {
-            this._onStatusChange(this._stats);
-        }
         this._updateObservations();
     }
 
@@ -74,6 +54,10 @@ export default class GameRunner {
         if (this._agent.clearBrain) {
             this._agent.clearBrain();
         }
+    }
+
+    getStats() {
+        return this._stats;
     }
 
     /**
@@ -90,7 +74,12 @@ export default class GameRunner {
         this._updateObservations();
 
         if (this._globalObservation.isComplete) {//@Find better way to communicate "isComplete"
-            this._agent.getAction(this.last.action, this.last.reward, this._agentObservation.tileTypes);//Ask for one more action so the agent can see the observation after its last action
+            this._agent.getAction(
+                this.last.action,
+                this.last.reward,
+                this._agentObservation.tileTypes,
+                { renderingEnabled: this._renderingEnabled }
+            );//Ask for one more action so the agent can see the observation after its last action
             this._agent.newGame();
             stats.lastGameScore = stats.currentScore;
             stats.lastFinalScores.push(stats.currentScore);
@@ -113,8 +102,11 @@ export default class GameRunner {
             this.newGame(this._agent);
         }
 
+        let renderData = null;
         if (this._renderingEnabled) {
-            this._onRender(this._agentObservation, this._globalObservation, this._universalGameNumber, stats);
+            renderData = {
+                agentObservation: this._agentObservation, globalObservation: this._globalObservation, universalGameNumber: this._universalGameNumber, stats
+            };
         }
 
         stats.actionCount++;
@@ -126,7 +118,15 @@ export default class GameRunner {
         this.last.reward = reward;
         this.last.action = action;
 
-        this._nextAction = this._agent.getAction(this.last.action, this.last.reward, this._agentObservation.tileTypes);
+        const [nextAction, agentRenderData] = this._agent.getAction(
+            this.last.action,
+            this.last.reward,
+            this._agentObservation.tileTypes,
+            { renderingEnabled: this._renderingEnabled }
+        );
+        this._nextAction = nextAction;
+
+        return { ...renderData, agentRenderData };
     }
 
     setRenderingEnabled(renderingEnabled) {
@@ -138,7 +138,7 @@ export default class GameRunner {
     }
 
     tick() {
-        this.takeAction(this._nextAction);
+        return this.takeAction(this._nextAction);
     }
 
     clearStats() {

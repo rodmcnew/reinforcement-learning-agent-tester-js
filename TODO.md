@@ -1,6 +1,10 @@
 
 
+MUST:
+// stats display: !!!!! @TODO !!!!! consider animation frames for 60hz !!!!! (maybe the app should request animation frame then ask the gamerunner for the stats, maybe tick() changes to be this) (20 is 50hz but what if machine can't handle that?)
 
+- remove time waster from hand programed agent (or make it configurable?)
+- fix all features after multi threading
 - IMPORTANT: Fix agent bars vanish/freeze-last-scene on hand-programed
 - Learn more about cleaning up react refs
 - Publish latest layerganza
@@ -10,6 +14,15 @@
 - Consider better bar charts with obvious min and max? maybe cap to max incase it goes over? maybe drive from rules config?
 - Get rid of ancient .propTypes and class components
 - Consider redux or similar and also making agent data display use react
+- use react for agent bar chart view
+- rm console.logs
+- fix all @TODOs
+- [UX defect] going from ludicrous to paused hides the game
+SHOULD:
+- add to notes: php -S localhost:8000
+- consider worker.js file name and where it is in folders
+- consider consts for many things like service worker action names
+- consider using redux and sagas for main state and to start tickers and things
 # Performance:
 Must
 - on very fast, consider that getAction is 1ms while rendering is 8ms
@@ -20,6 +33,7 @@ Must
 - Profile more on the production build
 - Look for subtile memory leaks like in ludicrous chart
 - Consider that ludicrous speed updates stats per game instead of per some interval. seems odd.
+- could cross thread communication objects be made smaller?
 
 Should
 - Consider large amount of dom eles
@@ -61,6 +75,10 @@ Should
           - looks cleaner in flame chart but doesn't give more APM?
     - webGl
     - run agent or game+agent in a web worker 
+- 2021-09-29
+  - Got rudimentary webworker going. seems to solve 60hz at 4x slowdown
+  - In one test, drawing on canvas with useLayoutEffect seemed to get 45APM while useEffect got 40APM (6x slowdown mode). 
+
 #Notes:
 - Observatoin render before messing with it: 1.43, 2.24, 2.24, 1.86, 1.65.   And takeAction: 9.55, 9.42, 17.9 (for status change too), 11.9, 9.54
 - When setting state twice per tick, ticks were take 22ms, had dropped frames
