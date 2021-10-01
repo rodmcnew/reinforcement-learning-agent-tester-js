@@ -1,28 +1,22 @@
 
 
 MUST:
-// stats display: !!!!! @TODO !!!!! consider animation frames for 60hz !!!!! (maybe the app should request animation frame then ask the gamerunner for the stats, maybe tick() changes to be this) (20 is 50hz but what if machine can't handle that?)
-- Fix and re-enable "export agent brain"
-- remove time waster from hand programed agent (or make it configurable?)
-- fix all features after multi threading
-- IMPORTANT: Fix agent bars vanish/freeze-last-scene on hand-programed
+- consider using redux and sagas for main state and to start tickers and things. or maybe useReducer
 - Learn more about cleaning up react refs
-- Publish latest layerganza
+- fix all @TODOs
+SHOULD:
 - Consider making rewards not fractions? (could make long-term goals harder? or not?)
 - Consider red is -1 and bottom is +100? or +1000?
 - Consider rendering reward as chart like ludicrous speed chart?
 - Consider better bar charts with obvious min and max? maybe cap to max incase it goes over? maybe drive from rules config?
-- Get rid of ancient .propTypes and class components
-- Consider redux or similar and also making agent data display use react
 - use react for agent bar chart view
 - rm console.logs
-- fix all @TODOs
 - [UX defect] going from ludicrous to paused hides the game
-SHOULD:
 - add to notes: php -S localhost:8000
 - consider worker.js file name and where it is in folders
-- consider consts for many things like service worker action names
-- consider using redux and sagas for main state and to start tickers and things
+- consider enums/consts for speeds
+- consider https://webpack.js.org/guides/web-workers/ "As of webpack 5, you can use Web Workers without worker-loader."
+- rendering trail seems to start on the 2nd position of a game rather than the first
 # Performance:
 Must
 - on very fast, consider that getAction is 1ms while rendering is 8ms

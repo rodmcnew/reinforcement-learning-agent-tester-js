@@ -31,6 +31,8 @@ export const App = () => {
     const renderingEnabledRef = useRef();
     renderingEnabledRef.current = renderingEnabled;
 
+    const [exportedAgentBrainData, setExportedAgentBrainData] = useState();
+
     const handleWorkerMessage = (event) => {
         const action = event.data;
         // console.log('message from worker', action);
@@ -43,6 +45,9 @@ export const App = () => {
                     }
                     tick();
                 })
+                break;
+            case WorkerOutputActions.ExportAgentBrainFulfilled:
+                setExportedAgentBrainData(action.payload);
                 break;
         }
     }
@@ -115,13 +120,16 @@ export const App = () => {
         }
     }, [worker, speed])
 
+    const handleExportAgentBrainRequest = useCallback(() => {
+        worker.postMessage({ type: WorkerInputActions.RequestAgentBrainExport });
+    }, [worker]);
+
     return <div className="container" onKeyDown={handleManualControlKeyDown}>
         <div className="card">
             <div className="card-header">
                 Machine Learning Agent Tester
             </div>
             <div className="card-body">
-                {/* {ticksPerIntervalWhenNotRendering} */}
                 <TopControls agents={agents}
                     speed={speed}
                     handleAgentSelectorChange={handleAgentSelectorChange}
@@ -166,8 +174,9 @@ export const App = () => {
                         <div>{agents[currentAgentIndex].description}</div>
                     </>
                 }
-                {/* <hr /> */}
-                {/* <BrainExportButton gameRunner={gameRunner} /> */}
+                <hr />
+                <BrainExportButton onExportRequest={handleExportAgentBrainRequest}
+                    exportedData={exportedAgentBrainData} />
             </div>
         </div>
     </div>

@@ -1,24 +1,18 @@
-import React, { useState, memo } from 'react';
+import React, { useCallback, memo, useMemo } from 'react';
 
-const BrainExportButton = ({ gameRunner }) => {
-    const [exportData, setExportData] = useState(null);
+const BrainExportButton = ({ onExportRequest, exportedData }) => {
+    const onExportButtonClick = useCallback(() => {
+        onExportRequest();
+    }, [onExportRequest])
 
-    const onExportButtonClick = () => {
-        if (!gameRunner.getCurrentAgentInstance().exportBrain) {
-            alert('Current agent has no exportBrain() function.');
-            return;
-        }
-
-        setExportData(
-            'export const data = JSON.parse(\'' +
-            JSON.stringify(gameRunner.getCurrentAgentInstance().exportBrain()) +
-            '\');'
-        );
-    }
+    const wrappedExportData = useMemo(() => ('export const data = JSON.parse(\'' +
+        JSON.stringify(exportedData) +
+        '\');')
+        , [exportedData]);
 
     return <div>
         <button className="btn btn-secondary" onClick={onExportButtonClick}>Export Agent Brain</button>
-        {exportData &&
+        {exportedData &&
             <div>
                 <br />
                 <div>Exported Agent Brain Data:</div>
@@ -26,7 +20,7 @@ const BrainExportButton = ({ gameRunner }) => {
                     autoFocus
                     readOnly
                     style={{ width: '100%', height: '10em' }}
-                    value={exportData} />
+                    value={wrappedExportData} />
             </div>
         }
     </div>

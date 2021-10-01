@@ -11,11 +11,13 @@ export const WorkerInputActions = {
     RequestStats: 'REQUEST_STATS',
     UserMove: 'USER_MOVE',
     SetAgentIndex: 'SET_AGENT_INDEX',
-    ClearAgentBrain: 'CLEAR_AGENT_BRAIN'
+    ClearAgentBrain: 'CLEAR_AGENT_BRAIN',
+    RequestAgentBrainExport: 'REQUEST_AGENT_BRAIN_EXPORT'
 }
 
 export const WorkerOutputActions = {
     UpdateState: 'UPDATE_STATE',
+    ExportAgentBrainFulfilled: 'EXPORT_AGENT_BRAIN_FULFILLED'
 }
 
 const gameRunner = new GameRunner();
@@ -81,6 +83,15 @@ ctx.addEventListener("message", (event) => {
         case WorkerInputActions.ClearAgentBrain:
             gameRunner.clearCurrentAgentBrain();
             clearStatsAndNewGame();
+            break;
+        case WorkerInputActions.RequestAgentBrainExport:
+            const agent = gameRunner.getCurrentAgentInstance();
+            if (agent.exportBrain) {
+                ctx.postMessage({
+                    type: WorkerOutputActions.ExportAgentBrainFulfilled,
+                    payload: agent.exportBrain()
+                });
+            }
             break;
     }
 });
