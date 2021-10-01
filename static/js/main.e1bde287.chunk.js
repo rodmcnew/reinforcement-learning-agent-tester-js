@@ -475,13 +475,7 @@ switch(action.type){case WorkerInputActions.Tick:ctx.postMessage({type:WorkerOut
 }});break;case WorkerInputActions.UserMove:ctx.postMessage({type:WorkerOutputActions.UpdateState,payload:worker_gameRunner.takeAction(action.payload)});break;case WorkerInputActions.SetAgentIndex:worker_agentIndex=action.payload;worker_clearStatsAndNewGame();break;case WorkerInputActions.ClearAgentBrain:worker_gameRunner.clearCurrentAgentBrain();worker_clearStatsAndNewGame();break;}});
 // CONCATENATED MODULE: ./src/App.js
 var App_App=function App(){var _useState=Object(react["useState"])({}),_useState2=Object(slicedToArray["a" /* default */])(_useState,2),gameState=_useState2[0],setGameState=_useState2[1];var _useState3=Object(react["useState"])(0),_useState4=Object(slicedToArray["a" /* default */])(_useState3,2),currentAgentIndex=_useState4[0],setCurrentAgentIndex=_useState4[1];var _useState5=Object(react["useState"])(null),_useState6=Object(slicedToArray["a" /* default */])(_useState5,2),worker=_useState6[0],setWorker=_useState6[1];var workerRef=Object(react["useRef"])();var _useState7=Object(react["useState"])(src_config.app.initialSpeed),_useState8=Object(slicedToArray["a" /* default */])(_useState7,2),speed=_useState8[0],setSpeed=_useState8[1];var speedRef=Object(react["useRef"])();speedRef.current=speed;var previousSpeed=Object(usePrevious["a" /* usePrevious */])(speed);var renderingEnabled=speed!==-1;var renderingEnabledRef=Object(react["useRef"])();renderingEnabledRef.current=renderingEnabled;var handleWorkerMessage=function handleWorkerMessage(event){var action=event.data;// console.log('message from worker', action);
-switch(action.type){case WorkerOutputActions.UpdateState:window.requestAnimationFrame(function(){setGameState(action.payload);if(action.payload.agentRenderData&&agents_agents[currentAgentIndex].render){agents_agents[currentAgentIndex].render(action.payload.agentRenderData);}tick();});break;// case 'RENDER_AGENT_DATA': //@TODO see if we can make this come in through WorkerOutputActions.UpdateState above so its just one animation frame
-//     const agentRenderFunction = agents[currentAgentIndex].render;
-//     if (agentRenderFunction) {
-//         agentRenderFunction(action.payload);
-//     }
-//     break;
-}};Object(react["useEffect"])(function(){var newWorker=new Worker_fn();newWorker.postMessage({type:WorkerInputActions.ClearStatsAndNewGame,payload:{renderingEnabled:true,agentIndex:0}});newWorker.addEventListener('message',handleWorkerMessage);setWorker(newWorker);workerRef.current=newWorker;},[]);Object(react["useEffect"])(function(){if(speed!==previousSpeed){var isLudicrousSpeed=speed===-1;/**
+switch(action.type){case WorkerOutputActions.UpdateState:window.requestAnimationFrame(function(){setGameState(action.payload);if(action.payload.agentRenderData&&agents_agents[currentAgentIndex].render){agents_agents[currentAgentIndex].render(action.payload.agentRenderData);}tick();});break;}};Object(react["useEffect"])(function(){var newWorker=new Worker_fn();newWorker.postMessage({type:WorkerInputActions.ClearStatsAndNewGame,payload:{renderingEnabled:true,agentIndex:0}});newWorker.addEventListener('message',handleWorkerMessage);setWorker(newWorker);workerRef.current=newWorker;},[]);Object(react["useEffect"])(function(){if(speed!==previousSpeed){var isLudicrousSpeed=speed===-1;/**
              * If the speed changes in or out of ludicrous speed, inform the web worker
              */if(worker){worker.postMessage({type:WorkerInputActions.SetLudicrousSpeedEnabled,payload:isLudicrousSpeed});}/**
              * Start ticking if the speed just changed to a speed that requires render-controlled ticking
@@ -502,4 +496,4 @@ react_dom_default.a.render(/*#__PURE__*/react_default.a.createElement(App_App,nu
 /***/ })
 
 },[[45,1,2]]]);
-//# sourceMappingURL=main.8e8e96c7.chunk.js.map
+//# sourceMappingURL=main.e1bde287.chunk.js.map
