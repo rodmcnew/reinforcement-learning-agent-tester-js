@@ -21,7 +21,7 @@ export function getFeelerValue(observation, feelerSteps) {
     feelerSteps.forEach((step) => {
         const vector = actionVectors[step];
         position = [position[0] + vector[0], position[1] + vector[1]];
-        let cost;
+        let cost; //@TODO this is missing per-move cost
         if (typeof observation[position[0]] === 'undefined' || typeof observation[position[0]][position[1]] === 'undefined') {
             cost = config.tileTypeToDeltaScore[1]; //If going off map, make look very expensive
         } else {
