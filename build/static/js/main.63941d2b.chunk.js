@@ -474,7 +474,7 @@ switch(action.type){case WorkerInputActions.Tick:ctx.postMessage({type:WorkerOut
 switch(action.type){case WorkerOutputActions.UpdateState:window.requestAnimationFrame(function(){_this.onUpdateGameState(action.payload);_this.tick();});break;case WorkerOutputActions.ExportAgentBrainFulfilled:_this.onExportAgentBrainFulfilled(action.payload);break;}};this.postTickToWorker=function(){switch(_this.speed){case-1:// Ludicrous speed
 _this.worker.postMessage({type:WorkerInputActions.RequestStats});case null:// Paused
 return;default:// Slow, Medium, Fast, Very Fast
-_this.worker.postMessage({type:WorkerInputActions.Tick});}};this.tick=function(){if(_this.speed===0||_this.speed===-1){_this.postTickToWorker();}else{setTimeout(_this.postTickToWorker,_this.speed);}};this.handleWorkerMessage=this.handleWorkerMessage.bind(this);this.postTickToWorker=this.postTickToWorker.bind(this);this.tick=this.tick.bind(this);this.setSpeed=this.setSpeed.bind(this);this.worker=new Worker_fn();this.worker.postMessage({type:WorkerInputActions.ClearStatsAndNewGame,payload:{renderingEnabled:true,agentIndex:0}});this.worker.addEventListener('message',this.handleWorkerMessage);this.setSpeed=this.setSpeed.bind(this);this.onUpdateGameState=onUpdateGameState;this.onExportAgentBrainFulfilled=onExportAgentBrainFulfilled;}/**
+_this.worker.postMessage({type:WorkerInputActions.Tick});}};this.tick=function(){if(_this.speed===0||_this.speed===-1){_this.postTickToWorker();}else{setTimeout(_this.postTickToWorker,_this.speed);}};this.handleWorkerMessage=this.handleWorkerMessage.bind(this);this.postTickToWorker=this.postTickToWorker.bind(this);this.tick=this.tick.bind(this);this.setSpeed=this.setSpeed.bind(this);this.worker=new Worker_fn();this.worker.postMessage({type:WorkerInputActions.ClearStatsAndNewGame,payload:{renderingEnabled:true,agentIndex:0}});this.worker.addEventListener('message',this.handleWorkerMessage);this.onUpdateGameState=onUpdateGameState;this.onExportAgentBrainFulfilled=onExportAgentBrainFulfilled;}/**
      * @private
      */Object(createClass["a" /* default */])(SimulationManager,[{key:"setSpeed",value:function setSpeed(speed){var previousSpeed=this.speed;this.speed=speed;if(speed!==previousSpeed){var isLudicrousSpeed=speed===-1;/**
              * If the speed changes in or out of ludicrous speed, inform the web worker
@@ -504,4 +504,4 @@ react_dom_default.a.render(/*#__PURE__*/react_default.a.createElement(App_App,nu
 /***/ })
 
 },[[45,1,2]]]);
-//# sourceMappingURL=main.c0ddcfc0.chunk.js.map
+//# sourceMappingURL=main.63941d2b.chunk.js.map
