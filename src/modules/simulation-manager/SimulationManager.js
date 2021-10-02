@@ -18,9 +18,8 @@ class SimulationManager {
             type: WorkerInputActions.ClearStatsAndNewGame,
             payload: { renderingEnabled: true, agentIndex: 0 }
         });
+        
         this.worker.addEventListener('message', this.handleWorkerMessage);
-
-        this.setSpeed = this.setSpeed.bind(this);
         this.onUpdateGameState = onUpdateGameState;
         this.onExportAgentBrainFulfilled = onExportAgentBrainFulfilled;
     }
