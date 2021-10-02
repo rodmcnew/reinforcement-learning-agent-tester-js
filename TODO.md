@@ -1,8 +1,9 @@
 # MUST:
-- consider using redux and sagas for main state and to start tickers and things. or maybe useReducer
-- [UX defect] going from ludicrous to paused hides the game
-- fix all @TODOs
 # SHOULD:
+- [UX defect] going from ludicrous to paused hides the game
+- [UX defect] WASD doesn't work in Safari
+- [UX defect] Agent brain export doesn't work in Safari
+- fix all @TODOs
 - Consider making rewards not fractions? (could make long-term goals harder? or not?)
 - Consider red is -1 and bottom is +100? or +1000?
 - Consider rendering reward as chart like ludicrous speed chart?
