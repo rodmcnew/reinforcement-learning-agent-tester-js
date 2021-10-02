@@ -1,4 +1,4 @@
-import { default as Environment, actions, config } from './modules/environment'
+import { default as Environment, actions, config } from '../environment'
 const historyLength = 1000;
 
 const defaultStats = {

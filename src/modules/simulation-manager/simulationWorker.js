@@ -1,5 +1,5 @@
 import { agents } from "../../agents";
-import GameRunner from "../../GameRunner";
+import GameRunner from "./GameRunner";
 import config from '../../config';
 import LudicrousSpeedTicker from "./LudicrousSpeedTicker";
 const ctx = self;
