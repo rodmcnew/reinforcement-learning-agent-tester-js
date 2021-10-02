@@ -9,7 +9,6 @@
 - Consider better bar charts with obvious min and max? maybe cap to max incase it goes over? maybe drive from rules config?
 - use react for agent bar chart view
 - rm console.logs
-- add to notes: php -S localhost:8000
 - consider worker.js file name and where it is in folders
 - consider enums/consts for speeds
 - consider https://webpack.js.org/guides/web-workers/ "As of webpack 5, you can use Web Workers without worker-loader."
