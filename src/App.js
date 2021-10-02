@@ -5,7 +5,6 @@ import { agents } from './agents';
 import './App.css';
 import config from './config';
 import { actions, config as environmentConfig } from './modules/environment';
-import BrainExportButton from './modules/react-ui-component/BrainExportButton';
 import GameRulesDisplay from './modules/react-ui-component/GameRulesDisplay';
 import ObservationRenderer from './modules/react-ui-component/ObservationRenderer';
 import ScoreHistoryChart from './modules/react-ui-component/ScoreHistoryChart';
@@ -31,8 +30,6 @@ export const App = () => {
     const renderingEnabledRef = useRef();
     renderingEnabledRef.current = renderingEnabled;
 
-    const [exportedAgentBrainData, setExportedAgentBrainData] = useState();
-
     const handleWorkerMessage = (event) => {
         const action = event.data;
         // console.log('message from worker', action);
@@ -47,7 +44,9 @@ export const App = () => {
                 })
                 break;
             case WorkerOutputActions.ExportAgentBrainFulfilled:
-                setExportedAgentBrainData(action.payload);
+                navigator.clipboard.writeText(
+                    'export const data = JSON.parse(\'' + JSON.stringify(action.payload) + '\');'
+                );
                 break;
         }
     }
@@ -177,8 +176,9 @@ export const App = () => {
                 {agents[currentAgentIndex].class.prototype.exportBrain &&
                     <>
                         <hr />
-                        <BrainExportButton onExportRequest={handleExportAgentBrainRequest}
-                            exportedData={exportedAgentBrainData} />
+                        <button className="btn btn-secondary" onClick={handleExportAgentBrainRequest}>
+                            Export Agent Brain to Clipboard
+                        </button>
                     </>
                 }
                 <hr />
