@@ -177,6 +177,8 @@ export const App = () => {
                 <hr />
                 <BrainExportButton onExportRequest={handleExportAgentBrainRequest}
                     exportedData={exportedAgentBrainData} />
+                <hr />
+                <a href="https://github.com/rodmcnew/reinforcement-learning-agent-tester-js">Documentation and Source Code</a>
             </div>
         </div>
     </div>
