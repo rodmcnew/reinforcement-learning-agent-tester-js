@@ -174,11 +174,16 @@ export const App = () => {
                         <div>{agents[currentAgentIndex].description}</div>
                     </>
                 }
-                <hr />
-                <BrainExportButton onExportRequest={handleExportAgentBrainRequest}
-                    exportedData={exportedAgentBrainData} />
+                {agents[currentAgentIndex].class.prototype.exportBrain &&
+                    <>
+                        <hr />
+                        <BrainExportButton onExportRequest={handleExportAgentBrainRequest}
+                            exportedData={exportedAgentBrainData} />
+                    </>
+                }
                 <hr />
                 <a href="https://github.com/rodmcnew/reinforcement-learning-agent-tester-js">Documentation and Source Code</a>
+
             </div>
         </div>
     </div>
