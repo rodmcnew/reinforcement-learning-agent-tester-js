@@ -1,6 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { usePrevious } from 'rooks';
-import Worker from 'worker-loader!./worker';
+import React, { useCallback, useEffect, useState } from 'react';
 import { agents } from './agents';
 import './App.css';
 import config from './config';
@@ -10,103 +8,61 @@ import ObservationRenderer from './modules/react-ui-component/ObservationRendere
 import ScoreHistoryChart from './modules/react-ui-component/ScoreHistoryChart';
 import StatsDisplay from './modules/react-ui-component/StatsDisplay';
 import TopControls from './modules/react-ui-component/TopControls';
-import { WorkerInputActions, WorkerOutputActions } from './worker';
+import { SimulationManager } from './modules/simulation-manager';
 
 export const App = () => {
     const [gameState, setGameState] = useState({});
-
     const [currentAgentIndex, setCurrentAgentIndex] = useState(0);
-    const [worker, setWorker] = useState(null);
-    const workerRef = useRef();
-
+    const [simulationManager, setSimulationManager] = useState(null);
     const [speed, setSpeed] = useState(config.app.initialSpeed);
-    const speedRef = useRef();
-    speedRef.current = speed;
-
-    const previousSpeed = usePrevious(speed);
 
     const renderingEnabled = speed !== -1;
 
-    const renderingEnabledRef = useRef();
-    renderingEnabledRef.current = renderingEnabled;
-
-    const handleWorkerMessage = (event) => {
-        const action = event.data;
-        // console.log('message from worker', action);
-        switch (action.type) {
-            case WorkerOutputActions.UpdateState:
-                window.requestAnimationFrame(() => {
-                    setGameState(action.payload);
-                    if (action.payload.agentRenderData && agents[currentAgentIndex].render) {
-                        agents[currentAgentIndex].render(action.payload.agentRenderData);
-                    }
-                    tick();
-                })
-                break;
-            case WorkerOutputActions.ExportAgentBrainFulfilled:
-                navigator.clipboard.writeText(
-                    'export const data = JSON.parse(\'' + JSON.stringify(action.payload) + '\');'
-                );
-                break;
+    const handleUpdateGameState = (payload) => {
+        setGameState(payload);
+        if (payload.agentRenderData && agents[currentAgentIndex].render) {
+            agents[currentAgentIndex].render(payload.agentRenderData);
         }
     }
 
+    const handleExportAgentBrainFulfilled = (agentBrainData) => {
+        navigator.clipboard.writeText(
+            'export const data = JSON.parse(\'' + JSON.stringify(agentBrainData) + '\');'
+        );
+    }
+
+    /**
+     * On mount, create a new simulation manager
+     */
     useEffect(() => {
-        const newWorker = new Worker();
-        newWorker.postMessage({ type: WorkerInputActions.ClearStatsAndNewGame, payload: { renderingEnabled: true, agentIndex: 0 } });
-        newWorker.addEventListener('message', handleWorkerMessage);
-        setWorker(newWorker);
-        workerRef.current = newWorker;
+        setSimulationManager(new SimulationManager(handleUpdateGameState, handleExportAgentBrainFulfilled));
     }, [])
 
+    /**
+     * If the speed changes, let the simulation manager know
+     */
     useEffect(() => {
-        if (speed !== previousSpeed) {
-            const isLudicrousSpeed = speed === -1;
-
-            /**
-             * If the speed changes in or out of ludicrous speed, inform the web worker
-             */
-            if (worker) {
-                worker.postMessage({ type: WorkerInputActions.SetLudicrousSpeedEnabled, payload: isLudicrousSpeed })
-            }
-
-            /**
-             * Start ticking if the speed just changed to a speed that requires render-controlled ticking
-             */
-            if (previousSpeed === null) {
-                tick();
-            }
+        if (simulationManager) {
+            simulationManager.setSpeed(speed);
         }
-    }, [speed, previousSpeed, worker])
+    }, [speed, simulationManager]);
 
-    const postTickToWorker = () => {
-        switch (speedRef.current) {
-            case -1: // Ludicrous speed
-                workerRef.current.postMessage({ type: WorkerInputActions.RequestStats });
-            case null: // Paused
-                return;
-            default: // Slow, Medium, Fast, Very Fast
-                workerRef.current.postMessage({ type: WorkerInputActions.Tick });
+    /**
+     * If the currentAgentIndex changes, let the simulation manager know
+     */
+    useEffect(() => {
+        if (simulationManager) {
+            simulationManager.setAgentIndex(currentAgentIndex);
         }
-    }
-
-    const tick = () => {
-        if (speedRef.current === 0 || speedRef.current === -1) {
-            postTickToWorker();
-        } else {
-            setTimeout(postTickToWorker, speedRef.current);
-        }
-    }
+    }, [currentAgentIndex, simulationManager])
 
     const handleAgentSelectorChange = useCallback((event) => {
-        const agentIndex = event.target.value;
-        worker.postMessage({ type: WorkerInputActions.SetAgentIndex, payload: agentIndex });
-        setCurrentAgentIndex(agentIndex)
-    }, [worker, currentAgentIndex])
+        setCurrentAgentIndex(event.target.value);
+    }, [simulationManager])
 
     const handleClearBrainClick = useCallback(() => {
-        worker.postMessage({ type: WorkerInputActions.ClearAgentBrain });
-    }, [worker, currentAgentIndex])
+        simulationManager.clearAgentBrain();
+    }, [simulationManager])
 
     const handleManualControlKeyDown = useCallback((event) => {
         if (speed !== null) {
@@ -115,13 +71,13 @@ export const App = () => {
         }
         const action = actions.indexOf(event.key);
         if (action !== -1) {
-            worker.postMessage({ type: WorkerInputActions.UserMove, payload: action });
+            simulationManager.userMove(action);
         }
-    }, [worker, speed])
+    }, [simulationManager, speed])
 
     const handleExportAgentBrainRequest = useCallback(() => {
-        worker.postMessage({ type: WorkerInputActions.RequestAgentBrainExport });
-    }, [worker]);
+        simulationManager.requestAgentBrainExport()
+    }, [simulationManager]);
 
     return <div className="container" onKeyDown={handleManualControlKeyDown}>
         <div className="card">
