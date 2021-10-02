@@ -1376,7 +1376,8 @@ var limit=environment_config.size[1]-trimVector[1]-shiftVector[1];if(limit<envir
 // CONCATENATED MODULE: ./src/modules/agent-hand-programmed-look-ahead/helper/feeler.js
 var oppositeActions={w:'s',a:'d',s:'w',d:'a'};var actionVectors={//[dX, dY, dScore]
 w:[0,-1,environment_config.actionCodeToDeltaScore['w']],a:[-1,0,environment_config.actionCodeToDeltaScore['a']],s:[0,1,environment_config.actionCodeToDeltaScore['s']],d:[1,0,environment_config.actionCodeToDeltaScore['d']]};function getFeelerValue(observation,feelerSteps){// let position = [observation.position[0], observation.position[1]];
-var position=environment_config.viewPortPosition;var value=0;feelerSteps.forEach(function(step){var vector=actionVectors[step];position=[position[0]+vector[0],position[1]+vector[1]];var cost;if(typeof observation[position[0]]==='undefined'||typeof observation[position[0]][position[1]]==='undefined'){cost=environment_config.tileTypeToDeltaScore[1];//If going off map, make look very expensive
+var position=environment_config.viewPortPosition;var value=0;feelerSteps.forEach(function(step){var vector=actionVectors[step];position=[position[0]+vector[0],position[1]+vector[1]];var cost;//@TODO this is missing per-move cost
+if(typeof observation[position[0]]==='undefined'||typeof observation[position[0]][position[1]]==='undefined'){cost=environment_config.tileTypeToDeltaScore[1];//If going off map, make look very expensive
 }else{cost=environment_config.tileTypeToDeltaScore[observation[position[0]][position[1]]];}value=value+vector[2]+cost;});return value;}function getFeelerValues(observation,feelerPaths){return feelerPaths.map(function(feelerPath){return{path:feelerPath,value:getFeelerValue(observation,feelerPath)};});}function filterPathsWithFirstAction(paths,blacklistedFirstAction){return paths.filter(function(path){return path[0]!==blacklistedFirstAction;});}function getBestFeeler(feelersWithValues){return feelersWithValues.reduce(function(bestFeelerSoFar,feeler){if(bestFeelerSoFar===null||feeler.value>bestFeelerSoFar.value){return feeler;}else{return bestFeelerSoFar;}},null);}function getActionViaFeelers(observation,feelerPaths,lastAction){//This filter prevents infinite back-and-forth movement
 var safeFeelerPaths=filterPathsWithFirstAction(feelerPaths,oppositeActions[lastAction]);var feelersWithValues=getFeelerValues(observation,safeFeelerPaths);var bestFeeler=getBestFeeler(feelersWithValues);return actions.indexOf(bestFeeler.path[0]);}
 // CONCATENATED MODULE: ./node_modules/@babel/runtime/helpers/esm/arrayLikeToArray.js
@@ -1625,12 +1626,7 @@ convert9x9to5x3(observation)));if(rememberLastAction){return viewportState*(last
      */function getAction(lastAction,lastReward,observationMatrix,_ref){var renderingEnabled=_ref.renderingEnabled;// let reward = rewardCalculator.calcLastReward(observation);
 var state=observationToInt(observationMatrix,this._lastAction);var actionIndex=TabularSARSA_agent.decide(lastReward,state);var lastActionStats=TabularSARSA_agent.getLastActionStats();var renderData={};if(renderingEnabled){renderData.actionResponse={weights:lastActionStats.weights,wasRandom:lastActionStats.wasRandomlyChosen};if(lastReward!==null){renderData.reward=lastReward;}}this._lastAction=actionIndex;return[actionIndex,renderData];}},{key:"newGame",value:function newGame(){}},{key:"clearBrain",value:function clearBrain(){TabularSARSA_agent=new src["Agent"](stateCount,actions.length);}},{key:"exportBrain",value:function exportBrain(){return TabularSARSA_agent.saveToJson();}}],[{key:"getName",value:function getName(){return'Reinforcement Learning - Tabular SARSA - 5x3 Viewport - Not Pre-trained';}},{key:"getDescription",value:function getDescription(){return'This agent uses the Expected-SARSA algorithm with a table-based Q function.'+' The table stores the expected reward for '+stateCount+' possible states.'+' This agent views a 5x3 section of the viewport. '+(rememberLastAction?' It also remembers the last action it took to help avoid loops.':'');}}]);return TabularSARSA;}();
 // CONCATENATED MODULE: ./src/agents.js
-// import DeepQNetworkTensorFlow from './modules/agent-deep-q-network-tensor-flow'
-var agents=[// {
-//     name: DeepQNetworkTensorFlow.getName(),
-//     class: DeepQNetworkTensorFlow
-// },
-{name:DeepQNetwork_MatrixDeepQNetwork.getName(),class:DeepQNetwork_MatrixDeepQNetwork,description:DeepQNetwork_MatrixDeepQNetwork.getDescription(),render:renderAgentData},{name:TabularSARSA_TabularSARSA.getName(),class:TabularSARSA_TabularSARSA,description:TabularSARSA_TabularSARSA.getDescription(),render:renderAgentData},{name:LookAhead9x3_LookAhead9x3.getName(),class:LookAhead9x3_LookAhead9x3,description:LookAhead9x3_LookAhead9x3.getDescription()}];
+var agents=[{name:DeepQNetwork_MatrixDeepQNetwork.getName(),class:DeepQNetwork_MatrixDeepQNetwork,description:DeepQNetwork_MatrixDeepQNetwork.getDescription(),render:renderAgentData},{name:TabularSARSA_TabularSARSA.getName(),class:TabularSARSA_TabularSARSA,description:TabularSARSA_TabularSARSA.getDescription(),render:renderAgentData},{name:LookAhead9x3_LookAhead9x3.getName(),class:LookAhead9x3_LookAhead9x3,description:LookAhead9x3_LookAhead9x3.getDescription()}];
 // CONCATENATED MODULE: ./node_modules/@babel/runtime/helpers/esm/defineProperty.js
 function _defineProperty(obj, key, value) {
   if (key in obj) {
@@ -1774,4 +1770,4 @@ switch(action.type){case WorkerInputActions.Tick:ctx.postMessage({type:WorkerOut
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=simulationWorker.0b3d6d3b.worker.js.map
+//# sourceMappingURL=simulationWorker.443d4b68.worker.js.map
